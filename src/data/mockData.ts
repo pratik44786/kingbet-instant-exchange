@@ -8,98 +8,122 @@ export const mockUsers: User[] = [
   { id: '5', username: 'player3', role: 'user', balance: 800 },
 ];
 
-export const mockMarkets: Market[] = [
-  {
-    id: 'm1',
-    event: 'India vs Australia',
-    competition: 'ICC World Cup 2026',
-    sport: 'cricket',
-    status: 'open',
-    startTime: '2026-03-01T10:00:00Z',
-    runners: [
-      {
-        id: 'r1', name: 'India',
-        backOdds: [1.98, 1.97, 1.96], layOdds: [2.00, 2.02, 2.04],
-        backSizes: [15000, 8000, 22000], laySizes: [12000, 9500, 18000],
-      },
-      {
-        id: 'r2', name: 'Australia',
-        backOdds: [2.10, 2.08, 2.06], layOdds: [2.12, 2.14, 2.16],
-        backSizes: [10000, 7500, 14000], laySizes: [11000, 6000, 16000],
-      },
-    ],
-  },
-  {
-    id: 'm2',
-    event: 'England vs South Africa',
-    competition: 'ICC World Cup 2026',
-    sport: 'cricket',
-    status: 'open',
-    startTime: '2026-03-01T14:00:00Z',
-    runners: [
-      {
-        id: 'r3', name: 'England',
-        backOdds: [1.75, 1.74, 1.72], layOdds: [1.77, 1.79, 1.80],
-        backSizes: [20000, 12000, 30000], laySizes: [18000, 11000, 25000],
-      },
-      {
-        id: 'r4', name: 'South Africa',
-        backOdds: [2.30, 2.28, 2.26], layOdds: [2.32, 2.34, 2.38],
-        backSizes: [8000, 5000, 11000], laySizes: [7000, 4500, 9000],
-      },
-    ],
-  },
-  {
-    id: 'm3',
-    event: 'Manchester United vs Liverpool',
-    competition: 'Premier League',
-    sport: 'football',
-    status: 'open',
-    startTime: '2026-03-02T15:00:00Z',
-    runners: [
-      {
-        id: 'r5', name: 'Man United',
-        backOdds: [2.50, 2.48, 2.46], layOdds: [2.52, 2.54, 2.58],
-        backSizes: [25000, 18000, 35000], laySizes: [22000, 15000, 30000],
-      },
-      {
-        id: 'r6', name: 'Draw',
-        backOdds: [3.40, 3.38, 3.35], layOdds: [3.45, 3.48, 3.50],
-        backSizes: [6000, 4000, 8000], laySizes: [5500, 3500, 7000],
-      },
-      {
-        id: 'r7', name: 'Liverpool',
-        backOdds: [2.80, 2.78, 2.76], layOdds: [2.82, 2.86, 2.90],
-        backSizes: [14000, 10000, 20000], laySizes: [12000, 8500, 17000],
-      },
-    ],
-  },
-  {
-    id: 'm4',
-    event: 'Real Madrid vs Barcelona',
-    competition: 'La Liga',
-    sport: 'football',
-    status: 'open',
-    startTime: '2026-03-03T20:00:00Z',
-    runners: [
-      {
-        id: 'r8', name: 'Real Madrid',
-        backOdds: [2.20, 2.18, 2.16], layOdds: [2.22, 2.24, 2.26],
-        backSizes: [30000, 22000, 40000], laySizes: [28000, 20000, 35000],
-      },
-      {
-        id: 'r9', name: 'Draw',
-        backOdds: [3.60, 3.55, 3.50], layOdds: [3.65, 3.70, 3.75],
-        backSizes: [5000, 3000, 7000], laySizes: [4500, 2800, 6000],
-      },
-      {
-        id: 'r10', name: 'Barcelona',
-        backOdds: [3.10, 3.08, 3.05], layOdds: [3.15, 3.18, 3.20],
-        backSizes: [12000, 8000, 16000], laySizes: [10000, 7000, 14000],
-      },
-    ],
-  },
+const cricketTeams = [
+  'India', 'Australia', 'England', 'South Africa', 'New Zealand', 'Pakistan',
+  'Sri Lanka', 'Bangladesh', 'West Indies', 'Afghanistan', 'Zimbabwe', 'Ireland',
+  'Netherlands', 'Scotland', 'Nepal', 'UAE', 'Oman', 'Namibia',
 ];
+const cricketComps = ['ICC World Cup 2026', 'IPL 2026', 'Ashes 2026', 'Asia Cup 2026', 'T20 Blast', 'Big Bash League', 'CPL 2026', 'PSL 2026'];
+
+const footballTeams = [
+  'Manchester United', 'Liverpool', 'Arsenal', 'Chelsea', 'Manchester City', 'Tottenham',
+  'Real Madrid', 'Barcelona', 'Bayern Munich', 'PSG', 'Juventus', 'AC Milan',
+  'Inter Milan', 'Dortmund', 'Atletico Madrid', 'Napoli', 'Ajax', 'Benfica',
+  'Porto', 'Sevilla', 'Roma', 'Lazio', 'Leicester', 'Everton',
+];
+const footballComps = ['Premier League', 'La Liga', 'Serie A', 'Bundesliga', 'Ligue 1', 'Champions League', 'Europa League', 'FA Cup'];
+
+const tennisPlayers = [
+  'Djokovic', 'Alcaraz', 'Sinner', 'Medvedev', 'Rublev', 'Zverev',
+  'Ruud', 'Tsitsipas', 'Fritz', 'Tiafoe', 'Rune', 'Shelton',
+];
+const tennisComps = ['Australian Open', 'French Open', 'Wimbledon', 'US Open', 'ATP Finals', 'Indian Wells'];
+
+function randomOdds(base: number): number {
+  return parseFloat((base + (Math.random() - 0.5) * 0.5).toFixed(2));
+}
+
+function randomSize(): number {
+  return Math.floor(5000 + Math.random() * 40000);
+}
+
+function makeRunner(id: string, name: string, baseOdds: number) {
+  const bo = randomOdds(baseOdds);
+  const lo = parseFloat((bo + 0.02 + Math.random() * 0.06).toFixed(2));
+  return {
+    id,
+    name,
+    backOdds: [bo, parseFloat((bo - 0.01).toFixed(2)), parseFloat((bo - 0.02).toFixed(2))] as [number, number, number],
+    layOdds: [lo, parseFloat((lo + 0.02).toFixed(2)), parseFloat((lo + 0.04).toFixed(2))] as [number, number, number],
+    backSizes: [randomSize(), randomSize(), randomSize()] as [number, number, number],
+    laySizes: [randomSize(), randomSize(), randomSize()] as [number, number, number],
+  };
+}
+
+function generateMarkets(): Market[] {
+  const markets: Market[] = [];
+  let id = 1;
+  let rId = 1;
+
+  // Cricket markets (~300)
+  for (let i = 0; i < cricketTeams.length; i++) {
+    for (let j = i + 1; j < cricketTeams.length; j++) {
+      if (markets.filter(m => m.sport === 'cricket').length >= 300) break;
+      const comp = cricketComps[Math.floor(Math.random() * cricketComps.length)];
+      const hours = Math.floor(Math.random() * 72);
+      markets.push({
+        id: `m${id++}`,
+        event: `${cricketTeams[i]} vs ${cricketTeams[j]}`,
+        competition: comp,
+        sport: 'cricket',
+        status: 'open',
+        startTime: new Date(Date.now() + hours * 3600000).toISOString(),
+        runners: [
+          makeRunner(`r${rId++}`, cricketTeams[i], 1.8 + Math.random() * 0.6),
+          makeRunner(`r${rId++}`, cricketTeams[j], 1.8 + Math.random() * 0.6),
+        ],
+      });
+    }
+  }
+
+  // Football markets (~400) with Draw
+  for (let i = 0; i < footballTeams.length; i++) {
+    for (let j = i + 1; j < footballTeams.length; j++) {
+      if (markets.filter(m => m.sport === 'football').length >= 400) break;
+      const comp = footballComps[Math.floor(Math.random() * footballComps.length)];
+      const hours = Math.floor(Math.random() * 72);
+      markets.push({
+        id: `m${id++}`,
+        event: `${footballTeams[i]} vs ${footballTeams[j]}`,
+        competition: comp,
+        sport: 'football',
+        status: 'open',
+        startTime: new Date(Date.now() + hours * 3600000).toISOString(),
+        runners: [
+          makeRunner(`r${rId++}`, footballTeams[i], 2.0 + Math.random() * 1.0),
+          makeRunner(`r${rId++}`, 'Draw', 3.0 + Math.random() * 0.8),
+          makeRunner(`r${rId++}`, footballTeams[j], 2.0 + Math.random() * 1.0),
+        ],
+      });
+    }
+  }
+
+  // Tennis markets (~300)
+  for (let i = 0; i < tennisPlayers.length; i++) {
+    for (let j = i + 1; j < tennisPlayers.length; j++) {
+      for (let k = 0; k < 5 && markets.filter(m => m.sport === 'tennis').length < 300; k++) {
+        const comp = tennisComps[Math.floor(Math.random() * tennisComps.length)];
+        const hours = Math.floor(Math.random() * 72);
+        markets.push({
+          id: `m${id++}`,
+          event: `${tennisPlayers[i]} vs ${tennisPlayers[j]}`,
+          competition: comp,
+          sport: 'tennis',
+          status: 'open',
+          startTime: new Date(Date.now() + hours * 3600000).toISOString(),
+          runners: [
+            makeRunner(`r${rId++}`, tennisPlayers[i], 1.5 + Math.random() * 1.0),
+            makeRunner(`r${rId++}`, tennisPlayers[j], 1.5 + Math.random() * 1.0),
+          ],
+        });
+      }
+    }
+  }
+
+  return markets;
+}
+
+export const mockMarkets: Market[] = generateMarkets();
 
 export const mockBets: Bet[] = [
   {
