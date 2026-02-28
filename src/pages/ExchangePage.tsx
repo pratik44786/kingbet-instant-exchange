@@ -1,29 +1,55 @@
+import { useState, useMemo } from 'react';
 import OddsGrid from '@/components/OddsGrid';
-import BetSlip from '@/components/BetSlip';
 import { useApp } from '@/context/AppContext';
+import { Search } from 'lucide-react';
 
 const ExchangePage = ({ sportFilter }: { sportFilter?: string }) => {
   const { markets, bets } = useApp();
-  const filtered = sportFilter ? markets.filter(m => m.sport === sportFilter) : markets;
+  const [search, setSearch] = useState('');
+  const [page, setPage] = useState(0);
+  const PAGE_SIZE = 20;
+
+  const filtered = useMemo(() => {
+    let result = sportFilter ? markets.filter(m => m.sport === sportFilter) : markets;
+    if (search) result = result.filter(m => m.event.toLowerCase().includes(search.toLowerCase()) || m.competition.toLowerCase().includes(search.toLowerCase()));
+    return result;
+  }, [markets, sportFilter, search]);
+
+  const paged = filtered.slice(0, (page + 1) * PAGE_SIZE);
 
   return (
-    <div className="flex-1 flex gap-4 p-4 overflow-auto">
-      <div className="flex-1 space-y-4 min-w-0">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-bold text-foreground">
-            {sportFilter ? sportFilter.charAt(0).toUpperCase() + sportFilter.slice(1) + ' Markets' : 'All Markets'}
-          </h2>
-          <span className="text-xs text-muted-foreground">{filtered.length} markets • Live odds</span>
+    <div className="flex-1 p-4 overflow-auto">
+      <div className="max-w-4xl mx-auto space-y-4">
+        <div className="flex items-center justify-between gap-4 flex-wrap">
+          <div>
+            <h2 className="text-lg font-bold text-foreground">
+              {sportFilter ? sportFilter.charAt(0).toUpperCase() + sportFilter.slice(1) + ' Markets' : 'All Markets'}
+            </h2>
+            <span className="text-xs text-muted-foreground">{filtered.length} markets • Live odds</span>
+          </div>
+          <div className="relative">
+            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+            <input type="text" value={search} onChange={e => { setSearch(e.target.value); setPage(0); }}
+              placeholder="Search markets..."
+              className="bg-surface-2 text-foreground text-sm rounded-lg pl-9 pr-3 py-2 border border-border outline-none focus:ring-1 focus:ring-primary w-56" />
+          </div>
         </div>
-        {filtered.length === 0 ? (
+
+        {paged.length === 0 ? (
           <div className="surface-card rounded-lg p-12 text-center">
-            <p className="text-muted-foreground">No markets available</p>
+            <p className="text-muted-foreground">No markets found</p>
           </div>
         ) : (
-          filtered.map(market => <OddsGrid key={market.id} market={market} />)
+          paged.map(market => <OddsGrid key={market.id} market={market} />)
         )}
 
-        {/* Recent bets */}
+        {paged.length < filtered.length && (
+          <button onClick={() => setPage(p => p + 1)}
+            className="w-full bg-secondary text-secondary-foreground py-2.5 rounded-lg text-sm font-semibold hover:bg-surface-3 transition-colors">
+            Load More ({filtered.length - paged.length} remaining)
+          </button>
+        )}
+
         {bets.length > 0 && (
           <div className="surface-card rounded-lg overflow-hidden">
             <div className="px-4 py-2.5 bg-surface-2 border-b border-border">
@@ -50,11 +76,6 @@ const ExchangePage = ({ sportFilter }: { sportFilter?: string }) => {
             </div>
           </div>
         )}
-      </div>
-
-      {/* Bet Slip Sidebar */}
-      <div className="w-72 flex-shrink-0 hidden md:block space-y-4">
-        <BetSlip />
       </div>
     </div>
   );
