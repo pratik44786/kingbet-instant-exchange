@@ -13,6 +13,10 @@ export default {
       },
     },
     extend: {
+      fontFamily: {
+        sans: ['Inter', 'system-ui', 'sans-serif'],
+        mono: ['JetBrains Mono', 'monospace'],
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -46,6 +50,28 @@ export default {
         card: {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
+        },
+        back: {
+          DEFAULT: "hsl(var(--back))",
+          light: "hsl(var(--back-light))",
+          lighter: "hsl(var(--back-lighter))",
+          foreground: "hsl(var(--back-foreground))",
+        },
+        lay: {
+          DEFAULT: "hsl(var(--lay))",
+          light: "hsl(var(--lay-light))",
+          lighter: "hsl(var(--lay-lighter))",
+          foreground: "hsl(var(--lay-foreground))",
+        },
+        positive: {
+          DEFAULT: "hsl(var(--positive))",
+          foreground: "hsl(var(--positive-foreground))",
+        },
+        negative: "hsl(var(--negative))",
+        surface: {
+          1: "hsl(var(--surface-1))",
+          2: "hsl(var(--surface-2))",
+          3: "hsl(var(--surface-3))",
         },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
