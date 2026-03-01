@@ -1,19 +1,12 @@
+/* 1️⃣ Google Fonts must be first */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 
-/* ...Your @layer base, components, utilities below... */
+/* 2️⃣ Tailwind directives NEXT, before any @layer */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-
-
-/* ============================================
-   1. Tailwind Directives FIRST (before any @layer)
-   ============================================ */
-@import 'tailwindcss/base';
-@import 'tailwindcss/components';
-@import 'tailwindcss/utilities';
-
-/* ============================================
-   2. shadcn/ui Base Styles
-   ============================================ */
+/* 3️⃣ shadcn/ui base styles */
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -67,9 +60,7 @@
   }
 }
 
-/* ============================================
-   3. Custom Animations & Utilities
-   ============================================ */
+/* 4️⃣ Utilities & Animations */
 @layer utilities {
   .gold-text {
     @apply text-yellow-500;
@@ -96,20 +87,18 @@
   }
 }
 
-/* ============================================
-   4. Global Styles
-   ============================================ */
+/* 5️⃣ Global styles */
 html {
   scroll-behavior: smooth;
 }
 
 body {
-  font-family: Inter, system-ui, sans-serif;
+  font-family: 'Inter', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Scrollbar styling */
+/* Scrollbar */
 ::-webkit-scrollbar {
   @apply w-2 h-2;
 }
