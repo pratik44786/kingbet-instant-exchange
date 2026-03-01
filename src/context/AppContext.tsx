@@ -81,7 +81,9 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     navigate('/login', { replace: true });
   }, [authLogout, navigate]);
 
-  const getDownlineUsers = useCallback((parentId: string) => users.filter((u) => u.parentId === parentId), [users]);
+  const getDownlineUsers = useCallback((parentId: string) => {
+    return users.filter((u) => u.parentId === parentId);
+  }, [users]);
 
   const addPoints = useCallback((userId: string, amount: number) => {
     setUsers((prev) => prev.map((u) => (u.id === userId ? { ...u, balance: u.balance + amount } : u)));
@@ -122,9 +124,11 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
     setUsers((prev) => prev.map((u) => (u.id === currentUser.id ? { ...u, balance: u.balance - totalStake } : u)));
     setBetSlip([]);
-  }, [betSlip, currentUser]);
+  }, [betSlip, currentUser.balance, currentUser.id]);
 
-  const clearBetSlip = useCallback(() => setBetSlip([]), []);
+  const clearBetSlip = useCallback(() => {
+    setBetSlip([]);
+  }, []);
 
   const value: AppContextType = {
     currentUser, users, getDownlineUsers, addPoints, removePoints, createUser, changeRole,
