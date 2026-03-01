@@ -1,6 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider } from './context/AuthContext'; // Correct path
+import { AuthProvider } from './contexts/AuthContext'; // <-- Correct folder name
 import { Layout } from './components/Layout';
 import { ProtectedRoute } from './components/ProtectedRoute';
 
@@ -140,54 +140,7 @@ function App() {
             }
           />
 
-          {/* Fallback */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </AuthProvider>
-    </Router>
-  );
-}
-
-export default App;                <Layout>
-                  <AdminPage />
-                </Layout>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/superadmin"
-            element={
-              <ProtectedRoute>
-                <Layout>
-                  <SuperAdminPage />
-                </Layout>
-              </ProtectedRoute>
-            }
-          />
-
           {/* Fallback - 404 */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </AuthProvider>
-    </Router>
-  );
-}
-
-export default App;              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/superadmin"
-            element={
-              <ProtectedRoute>
-                <Layout>
-                  <SuperAdminPage />
-                </Layout>
-              </ProtectedRoute>
-            }
-          />
-
-          {/* Fallback */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </AuthProvider>
