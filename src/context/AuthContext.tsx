@@ -1,19 +1,25 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
-interface User {
+export type UserRole = 'user' | 'admin' | 'superadmin';
+
+export interface AuthUser {
   id: string;
-  name: string;
+  username: string;
   email?: string;
   phone?: string;
+  role: UserRole;
+  userId?: string; // For Admin/SuperAdmin User ID
 }
 
 interface AuthContextType {
-  user: User | null;
+  user: AuthUser | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (user: User, token: string) => void;
+  login: (user: AuthUser, token: string) => void;
+  loginWithUserId: (userId: string, user: AuthUser, token: string) => void;
   logout: () => void;
   checkAuth: () => void;
+  getUserRole: () => UserRole | null;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -23,7 +29,7 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<AuthUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   // Check if user is already logged in (from localStorage)
@@ -34,38 +40,57 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const checkAuth = () => {
     try {
       const storedToken = localStorage.getItem('authToken');
-      const storedUser = localStorage.getItem('user');
+      const storedUser = localStorage.getItem('authUser');
 
       if (storedToken && storedUser) {
-        setUser(JSON.parse(storedUser));
+        const parsedUser = JSON.parse(storedUser);
+        setUser(parsedUser);
       }
     } catch (error) {
       console.error('Error checking auth:', error);
       localStorage.removeItem('authToken');
-      localStorage.removeItem('user');
+      localStorage.removeItem('authUser');
+      localStorage.removeItem('userIdLogin');
     } finally {
       setIsLoading(false);
     }
   };
 
-  const login = (newUser: User, token: string) => {
+  const login = (newUser: AuthUser, token: string) => {
     try {
       localStorage.setItem('authToken', token);
-      localStorage.setItem('user', JSON.stringify(newUser));
+      localStorage.setItem('authUser', JSON.stringify(newUser));
+      localStorage.removeItem('userIdLogin'); // Clear if previous login was User ID based
       setUser(newUser);
     } catch (error) {
       console.error('Error logging in:', error);
     }
   };
 
+  const loginWithUserId = (userId: string, newUser: AuthUser, token: string) => {
+    try {
+      localStorage.setItem('authToken', token);
+      localStorage.setItem('authUser', JSON.stringify(newUser));
+      localStorage.setItem('userIdLogin', userId); // Store User ID for reference
+      setUser(newUser);
+    } catch (error) {
+      console.error('Error logging in with User ID:', error);
+    }
+  };
+
   const logout = () => {
     try {
       localStorage.removeItem('authToken');
-      localStorage.removeItem('user');
+      localStorage.removeItem('authUser');
+      localStorage.removeItem('userIdLogin');
       setUser(null);
     } catch (error) {
       console.error('Error logging out:', error);
     }
+  };
+
+  const getUserRole = (): UserRole | null => {
+    return user?.role || null;
   };
 
   const value: AuthContextType = {
@@ -73,8 +98,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     isAuthenticated: !!user,
     isLoading,
     login,
+    loginWithUserId,
     logout,
     checkAuth,
+    getUserRole,
   };
 
   return (
