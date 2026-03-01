@@ -1,3 +1,4 @@
+import { AuthProvider } from './contexts/AuthContext'
 import React, {
   createContext,
   useContext,
