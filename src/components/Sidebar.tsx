@@ -1,4 +1,4 @@
-import { BarChart3, CircleDot, Dribbble, Gamepad2, Wallet, Shield, Trophy, History } from 'lucide-react';
+import { BarChart3, CircleDot, Dribbble, Gamepad2, Wallet, Shield, Trophy, History, Globe } from 'lucide-react';
 import { useLocation, Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { useApp } from '@/context/AppContext';
@@ -7,6 +7,7 @@ const navItems = [
   { icon: BarChart3, label: 'Exchange', path: '/exchange' },
   { icon: CircleDot, label: 'Cricket', path: '/cricket' },
   { icon: Dribbble, label: 'Football', path: '/football' },
+  { icon: Globe, label: 'Tennis', path: '/tennis' },
   { icon: Gamepad2, label: 'Casino', path: '/casino' },
   { icon: Wallet, label: 'Wallet', path: '/wallet' },
   { icon: History, label: 'History', path: '/history' },
@@ -15,7 +16,6 @@ const navItems = [
 const Sidebar = () => {
   const location = useLocation();
   const { currentUser } = useApp();
-  const isAdmin = ['admin', 'masteradmin', 'superadmin'].includes(currentUser.role);
 
   return (
     <aside className="w-56 bg-sidebar border-r border-sidebar-border flex-shrink-0 hidden lg:flex flex-col">
@@ -33,7 +33,7 @@ const Sidebar = () => {
             </Link>
           );
         })}
-        {isAdmin && (
+        {currentUser.role === 'admin' && (
           <Link to="/admin"
             className={cn(
               "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all",
@@ -42,11 +42,20 @@ const Sidebar = () => {
             <Shield className="w-4 h-4" /> Admin Panel
           </Link>
         )}
+        {currentUser.role === 'superadmin' && (
+          <Link to="/superadmin"
+            className={cn(
+              "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all",
+              location.pathname === '/superadmin' ? "bg-sidebar-accent text-sidebar-primary glow-gold" : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+            )}>
+            <Shield className="w-4 h-4" /> Super Admin
+          </Link>
+        )}
       </nav>
       <div className="p-4 border-t border-sidebar-border">
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
           <Trophy className="w-3 h-3" />
-          <span>KingBet Exchange v2.0</span>
+          <span>KingBet Exchange v3.0</span>
         </div>
       </div>
     </aside>

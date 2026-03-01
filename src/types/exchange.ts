@@ -1,19 +1,40 @@
-export type Role = 'user' | 'admin' | 'masteradmin' | 'superadmin';
+export type Role = 'user' | 'admin' | 'superadmin';
 
 export interface User {
   id: string;
   username: string;
+  password: string;
   role: Role;
   balance: number;
+  parentId: string | null;
+  createdAt: string;
 }
 
 export interface Runner {
   id: string;
   name: string;
-  backOdds: [number, number, number]; // best, 2nd, 3rd
+  backOdds: [number, number, number];
   layOdds: [number, number, number];
   backSizes: [number, number, number];
   laySizes: [number, number, number];
+}
+
+export interface FancyOdd {
+  id: string;
+  label: string;
+  yesValue: number;
+  noValue: number;
+  yesOdds: number;
+  noOdds: number;
+}
+
+export interface SessionOdd {
+  id: string;
+  label: string;
+  overValue: number;
+  underValue: number;
+  overOdds: number;
+  underOdds: number;
 }
 
 export interface Market {
@@ -24,6 +45,8 @@ export interface Market {
   status: 'open' | 'suspended' | 'closed';
   startTime: string;
   runners: Runner[];
+  fancyOdds?: FancyOdd[];
+  sessionOdds?: SessionOdd[];
 }
 
 export interface Bet {
@@ -31,7 +54,7 @@ export interface Bet {
   marketId: string;
   runnerId: string;
   runnerName: string;
-  type: 'back' | 'lay';
+  type: 'back' | 'lay' | 'fancy_yes' | 'fancy_no' | 'session_over' | 'session_under';
   odds: number;
   stake: number;
   potentialProfit: number;
@@ -53,7 +76,7 @@ export interface BetSlipItem {
   runnerId: string;
   runnerName: string;
   eventName: string;
-  type: 'back' | 'lay';
+  type: 'back' | 'lay' | 'fancy_yes' | 'fancy_no' | 'session_over' | 'session_under';
   odds: number;
   stake: number;
 }
