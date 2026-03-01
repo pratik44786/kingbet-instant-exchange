@@ -6,110 +6,79 @@
 @tailwind components;
 @tailwind utilities;
 
-/* 3️⃣ Base Styles & Variables */
+/* 3️⃣ Base Styles */
 @layer base {
   :root {
-    --background: 222 47% 4%;
+    --background: 222 47% 6%;
     --foreground: 210 40% 98%;
     
-    --card: 222 47% 6%;
+    --card: 222 47% 8%;
     --card-foreground: 210 40% 98%;
+
+    /* Diamond Colors */
+    --back-color: 204 82% 69%; /* Blue #72bbef */
+    --lay-color: 348 83% 82%;  /* Pink #faa9ba */
     
-    --popover: 222 47% 4%;
-    --popover-foreground: 210 40% 98%;
-
-    /* --- COLORS --- */
-    /* Primary Gold */
-    --primary: 45 93% 47%;
-    --primary-foreground: 0 0% 100%;
-
-    /* Neon Blue */
-    --secondary: 217 91% 60%;
-    --secondary-foreground: 0 0% 100%;
-
-    /* Vibrant Pink/Magenta */
-    --accent: 322 81% 54%;
-    --accent-foreground: 0 0% 100%;
-
-    --muted: 217 32% 17%;
-    --muted-foreground: 215 20% 65%;
-    
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 210 40% 98%;
+    --primary: 45 93% 47%;     /* Gold */
+    --secondary: 204 82% 69%;  /* Back-Blue */
+    --accent: 348 83% 82%;     /* Lay-Pink */
     
     --border: 217 32% 17%;
-    --input: 217 32% 17%;
-    --ring: 217 91% 60%;
-    --radius: 0.75rem;
-  }
-
-  .dark {
-    --background: 222 47% 2%;
-    --foreground: 210 40% 98%;
-  }
-
-  * {
-    @apply border-border;
+    --radius: 0.5rem;
   }
 
   body {
-    @apply bg-background text-foreground antialiased font-sans;
-    background-image: 
-      radial-gradient(at 0% 0%, hsla(217, 91%, 60%, 0.05) 0px, transparent 50%),
-      radial-gradient(at 100% 0%, hsla(322, 81%, 54%, 0.05) 0px, transparent 50%);
+    @apply bg-[#0b1221] text-white antialiased font-sans;
   }
 }
 
-/* 4️⃣ Custom Utilities for Pink & Blue */
+/* 4️⃣ Betting Specific Components */
+@layer components {
+  /* Back Button - Blue Gradient */
+  .btn-back {
+    @apply bg-[#72bbef] hover:bg-[#5da6d8] text-black font-bold transition-all duration-200 
+    flex flex-col items-center justify-center rounded-sm min-w-[60px] min-h-[40px] shadow-inner;
+    background: linear-gradient(180deg, #a5d9ff 0%, #72bbef 100%);
+  }
+
+  /* Lay Button - Pink Gradient */
+  .btn-lay {
+    @apply bg-[#faa9ba] hover:bg-[#e894a5] text-black font-bold transition-all duration-200 
+    flex flex-col items-center justify-center rounded-sm min-w-[60px] min-h-[40px] shadow-inner;
+    background: linear-gradient(180deg, #ffcbd6 0%, #faa9ba 100%);
+  }
+
+  /* Betting Slip Overlay */
+  .bet-slip-back {
+    @apply bg-[#e2f2ff] border-l-4 border-l-[#72bbef] text-black rounded-r-md;
+  }
+  
+  .bet-slip-lay {
+    @apply bg-[#fff0f3] border-l-4 border-l-[#faa9ba] text-black rounded-r-md;
+  }
+}
+
+/* 5️⃣ Utilities */
 @layer utilities {
-  /* Pink Styles */
-  .text-pink { color: hsl(322, 81%, 54%); }
-  .bg-pink { background-color: hsl(322, 81%, 54%); }
-  .border-pink { border-color: hsl(322, 81%, 54%); }
-  .glow-pink { box-shadow: 0 0 15px hsla(322, 81%, 54%, 0.3); }
-
-  /* Blue Styles */
-  .text-blue { color: hsl(217, 91%, 60%); }
-  .bg-blue { background-color: hsl(217, 91%, 60%); }
-  .border-blue { border-color: hsl(217, 91%, 60%); }
-  .glow-blue { box-shadow: 0 0 15px hsla(217, 91%, 60%, 0.3); }
-
-  /* Dashboard Cards */
-  .surface-card {
-    @apply bg-gray-900/50 backdrop-blur-md border border-white/5 rounded-xl;
-  }
-  
-  .surface-2 { @apply bg-gray-800/80; }
-  
   .gold-text { @apply text-yellow-500; }
-  .glow-gold { @apply shadow-lg shadow-yellow-500/20; }
+  
+  .surface-card {
+    @apply bg-[#161d2f] border border-white/5 rounded-lg overflow-hidden shadow-xl;
+  }
+
+  /* Market Row Styling */
+  .market-row {
+    @apply flex items-center justify-between p-2 border-b border-white/5 hover:bg-white/5 transition-colors;
+  }
 }
 
-/* 5️⃣ Global Overrides */
-html {
-  scroll-behavior: smooth;
-  font-family: 'Inter', system-ui, sans-serif;
-}
-
-/* Custom Scrollbar (Yellow-Gold Theme) */
+/* Scrollbar */
 ::-webkit-scrollbar {
-  @apply w-1.5 h-1.5;
+  @apply w-1.5;
 }
-
 ::-webkit-scrollbar-track {
-  @apply bg-transparent;
+  @apply bg-gray-900;
 }
-
 ::-webkit-scrollbar-thumb {
-  @apply bg-yellow-600/50 rounded-full hover:bg-yellow-500;
-}
-
-/* Animations */
-.animate-float {
-  animation: float 3s ease-in-out infinite;
-}
-
-@keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-5px); }
+  @apply bg-yellow-500/50 rounded-full hover:bg-yellow-500;
 }
