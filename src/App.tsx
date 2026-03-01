@@ -1,60 +1,107 @@
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { AppProvider } from "@/context/AppContext";
-import Layout from "@/components/Layout";
-import LandingPage from "@/pages/LandingPage";
-import LoginPage from "@/pages/LoginPage";
-import RegisterPage from "@/pages/RegisterPage";
-import ExchangePage from "@/pages/ExchangePage";
-import WalletPage from "@/pages/WalletPage";
-import AdminPage from "@/pages/AdminPage";
-import SuperAdminPage from "@/pages/SuperAdminPage";
-import CasinoPage from "@/pages/CasinoPage";
-import AviatorPage from "@/pages/AviatorPage";
-import PlinkoPage from "@/pages/PlinkoPage";
-import CrashPage from "@/pages/CrashPage";
-import DicePage from "@/pages/DicePage";
-import MinesPage from "@/pages/MinesPage";
-import HistoryPage from "@/pages/HistoryPage";
-import NotFound from "./pages/NotFound";
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider } from './contexts/AuthContext';
+import { Layout } from './components/Layout';
+import { ProtectedRoute } from './components/ProtectedRoute';
 
-const queryClient = new QueryClient();
+// Pages
+import LandingPage from './pages/LandingPage';
+import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
+import ExchangePage from './pages/ExchangePage';
+import CasinoPage from './pages/CasinoPage';
+import AviatorPage from './pages/AviatorPage';
+import PlinkoPage from './pages/PlinkoPage';
+import ProfilePage from './pages/ProfilePage';
+import SettingsPage from './pages/SettingsPage';
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <AppProvider>
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<LandingPage />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
+function App() {
+  return (
+    <Router>
+      <AuthProvider>
+        <Routes>
+          {/* Public Routes */}
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
 
-            <Route path="/exchange" element={<Layout><ExchangePage /></Layout>} />
-            <Route path="/cricket" element={<Layout><ExchangePage sportFilter="cricket" /></Layout>} />
-            <Route path="/football" element={<Layout><ExchangePage sportFilter="football" /></Layout>} />
-            <Route path="/tennis" element={<Layout><ExchangePage sportFilter="tennis" /></Layout>} />
-            <Route path="/casino" element={<Layout><CasinoPage /></Layout>} />
-            <Route path="/casino/aviator" element={<Layout><AviatorPage /></Layout>} />
-            <Route path="/casino/plinko" element={<Layout><PlinkoPage /></Layout>} />
-            <Route path="/casino/crash" element={<Layout><CrashPage /></Layout>} />
-            <Route path="/casino/dice" element={<Layout><DicePage /></Layout>} />
-            <Route path="/casino/mines" element={<Layout><MinesPage /></Layout>} />
-            <Route path="/wallet" element={<Layout><WalletPage /></Layout>} />
-            <Route path="/history" element={<Layout><HistoryPage /></Layout>} />
-            <Route path="/admin" element={<Layout><AdminPage /></Layout>} />
-            <Route path="/superadmin" element={<Layout><SuperAdminPage /></Layout>} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </AppProvider>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+          {/* Protected Routes with Layout */}
+          <Route
+            path="/"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <LandingPage />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/exchange"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <ExchangePage />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/casino"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <CasinoPage />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/aviator"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <AviatorPage />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/plinko"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <PlinkoPage />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <ProfilePage />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/settings"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <SettingsPage />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Fallback */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </AuthProvider>
+    </Router>
+  );
+}
 
 export default App;
