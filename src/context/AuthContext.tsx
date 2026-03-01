@@ -115,8 +115,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       localStorage.removeItem('userIdLogin');
       setUser(null);
       setError(null);
+      // Redirect to login page
+      window.location.href = '/login';
     } catch (err) {
       console.error('Error logging out:', err);
+      // Force redirect even on error
+      window.location.href = '/login';
     }
   }, []);
 
