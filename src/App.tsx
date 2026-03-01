@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider } from './context/AuthContext'; 
+import { AuthProvider } from './context/AuthContext';
+import { AppProvider } from './context/AppContext';
 import { Layout } from './components/Layout';
 import { ProtectedRoute } from './components/ProtectedRoute';
 
@@ -12,8 +13,9 @@ import ExchangePage from './pages/ExchangePage';
 import CasinoPage from './pages/CasinoPage';
 import AviatorPage from './pages/AviatorPage';
 import PlinkoPage from './pages/PlinkoPage';
-import ProfilePage from './pages/ProfilePage';
-import SettingsPage from './pages/SettingsPage';
+import CrashPage from './pages/CrashPage';
+import DicePage from './pages/DicePage';
+import MinesPage from './pages/MinesPage';
 import AdminPage from './pages/AdminPage';
 import SuperAdminPage from './pages/SuperAdminPage';
 import WalletPage from './pages/WalletPage';
@@ -23,6 +25,7 @@ function App() {
   return (
     <Router>
       <AuthProvider>
+        <AppProvider>
         <Routes>
           {/* Public Routes */}
           <Route path="/login" element={<LoginPage />} />
@@ -70,11 +73,61 @@ function App() {
             }
           />
           <Route
+            path="/casino/aviator"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <AviatorPage />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/plinko"
             element={
               <ProtectedRoute>
                 <Layout>
                   <PlinkoPage />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/casino/plinko"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <PlinkoPage />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/casino/crash"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <CrashPage />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/casino/dice"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <DicePage />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/casino/mines"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <MinesPage />
                 </Layout>
               </ProtectedRoute>
             }
@@ -95,26 +148,6 @@ function App() {
               <ProtectedRoute>
                 <Layout>
                   <HistoryPage />
-                </Layout>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/profile"
-            element={
-              <ProtectedRoute>
-                <Layout>
-                  <ProfilePage />
-                </Layout>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/settings"
-            element={
-              <ProtectedRoute>
-                <Layout>
-                  <SettingsPage />
                 </Layout>
               </ProtectedRoute>
             }
@@ -143,6 +176,7 @@ function App() {
           {/* Fallback */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
+        </AppProvider>
       </AuthProvider>
     </Router>
   );
