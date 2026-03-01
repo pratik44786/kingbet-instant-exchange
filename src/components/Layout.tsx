@@ -1,6 +1,6 @@
 import React from 'react';
 import { Header } from './Header';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface LayoutProps {
   children: React.ReactNode;
