@@ -1,146 +1,117 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* ============================================
+   1. Tailwind Directives FIRST (before any @layer)
+   ============================================ */
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
-
+/* ============================================
+   2. shadcn/ui Base Styles
+   ============================================ */
 @layer base {
   :root {
-    --background: 220 20% 10%;
-    --foreground: 40 20% 92%;
-
-    --card: 220 18% 13%;
-    --card-foreground: 40 20% 92%;
-
-    --popover: 220 18% 13%;
-    --popover-foreground: 40 20% 92%;
-
-    --primary: 43 90% 55%;
-    --primary-foreground: 220 20% 8%;
-
-    --secondary: 220 16% 18%;
-    --secondary-foreground: 40 20% 85%;
-
-    --muted: 220 14% 16%;
-    --muted-foreground: 220 10% 55%;
-
-    --accent: 43 70% 45%;
-    --accent-foreground: 220 20% 8%;
-
-    --destructive: 0 72% 51%;
-    --destructive-foreground: 0 0% 100%;
-
-    --border: 220 14% 20%;
-    --input: 220 14% 20%;
-    --ring: 43 90% 55%;
-
+    --background: 0 0% 100%;
+    --foreground: 0 0% 3.6%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 3.6%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 3.6%;
+    --muted: 0 0% 96.1%;
+    --muted-foreground: 0 0% 45.1%;
+    --accent: 0 0% 9.0%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 89.8%;
+    --input: 0 0% 89.8%;
+    --ring: 0 0% 3.6%;
     --radius: 0.5rem;
 
-    /* Exchange-specific tokens */
-    --back: 210 85% 55%;
-    --back-light: 210 85% 62%;
-    --back-lighter: 210 60% 75%;
-    --back-foreground: 0 0% 100%;
-
-    --lay: 340 75% 58%;
-    --lay-light: 340 75% 65%;
-    --lay-lighter: 340 50% 75%;
-    --lay-foreground: 0 0% 100%;
-
-    --positive: 142 60% 45%;
-    --positive-foreground: 0 0% 100%;
-    --negative: 0 72% 51%;
-
-    --surface-1: 220 18% 13%;
-    --surface-2: 220 16% 16%;
-    --surface-3: 220 14% 20%;
-
-    --gold-gradient: linear-gradient(135deg, hsl(43, 90%, 55%), hsl(35, 95%, 45%));
-    --surface-gradient: linear-gradient(180deg, hsl(220, 18%, 15%), hsl(220, 20%, 10%));
-
-    --sidebar-background: 220 20% 8%;
-    --sidebar-foreground: 40 20% 85%;
-    --sidebar-primary: 43 90% 55%;
-    --sidebar-primary-foreground: 220 20% 8%;
-    --sidebar-accent: 220 16% 15%;
-    --sidebar-accent-foreground: 40 20% 92%;
-    --sidebar-border: 220 14% 18%;
-    --sidebar-ring: 43 90% 55%;
+    /* Custom KINGBET colors */
+    --primary: 45 93.4% 47.5%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 217.2 91.2% 59.8%;
+    --secondary-foreground: 0 0% 9%;
   }
-}
 
-@layer base {
+  .dark {
+    --background: 0 0% 3.6%;
+    --foreground: 0 0% 98%;
+    --card: 0 0% 3.6%;
+    --card-foreground: 0 0% 98%;
+    --popover: 0 0% 3.6%;
+    --popover-foreground: 0 0% 98%;
+    --muted: 0 0% 14.9%;
+    --muted-foreground: 0 0% 63.9%;
+    --accent: 0 0% 98%;
+    --accent-foreground: 0 0% 9%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 9%;
+    --border: 0 0% 14.9%;
+    --input: 0 0% 14.9%;
+    --ring: 0 0% 83.3%;
+  }
+
   * {
     @apply border-border;
   }
+
   body {
-    @apply bg-background text-foreground font-sans antialiased;
-    font-family: 'Inter', system-ui, sans-serif;
-  }
-  .font-mono {
-    font-family: 'JetBrains Mono', monospace;
+    @apply bg-background text-foreground;
   }
 }
 
-@layer components {
-  .odds-cell {
-    @apply font-mono text-sm font-semibold px-3 py-2 rounded cursor-pointer transition-all duration-150 text-center min-w-[60px];
-  }
-  .odds-cell-back {
-    @apply odds-cell;
-    background: hsl(var(--back));
-    color: hsl(var(--back-foreground));
-  }
-  .odds-cell-back:hover {
-    background: hsl(var(--back-light));
-    transform: scale(1.03);
-  }
-  .odds-cell-back-light {
-    @apply odds-cell;
-    background: hsl(var(--back-lighter));
-    color: hsl(220, 20%, 10%);
-  }
-  .odds-cell-lay {
-    @apply odds-cell;
-    background: hsl(var(--lay));
-    color: hsl(var(--lay-foreground));
-  }
-  .odds-cell-lay:hover {
-    background: hsl(var(--lay-light));
-    transform: scale(1.03);
-  }
-  .odds-cell-lay-light {
-    @apply odds-cell;
-    background: hsl(var(--lay-lighter));
-    color: hsl(220, 20%, 10%);
-  }
+/* ============================================
+   3. Custom Animations & Utilities
+   ============================================ */
+@layer utilities {
   .gold-text {
-    background: var(--gold-gradient);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    @apply text-yellow-500;
   }
-  .glow-gold {
-    box-shadow: 0 0 20px hsl(43, 90%, 55%, 0.15);
-  }
+
   .surface-card {
-    background: hsl(var(--surface-1));
-    border: 1px solid hsl(var(--border));
+    @apply bg-gray-800 border border-gray-700 rounded-lg;
   }
 
-  @keyframes pulse-odds {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.7; }
-  }
-  .odds-updating {
-    animation: pulse-odds 0.3s ease-in-out;
+  .surface-2 {
+    @apply bg-gray-700;
   }
 
-  @keyframes slide-up {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+  .surface-3 {
+    @apply bg-gray-600;
   }
+
+  .glow-gold {
+    @apply shadow-lg shadow-yellow-500/20;
+  }
+
   .animate-slide-up {
-    animation: slide-up 0.3s ease-out;
+    @apply animate-in slide-in-from-bottom-2;
   }
+}
+
+/* ============================================
+   4. Global Styles
+   ============================================ */
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: Inter, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  @apply w-2 h-2;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-gray-900;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-yellow-500 rounded-full hover:bg-yellow-600;
 }
