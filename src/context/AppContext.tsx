@@ -41,9 +41,9 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const navigate = useNavigate();
 
   const [users, setUsers] = useState<User[]>(() => {
-    const existingUsers = [...mockUsers];
-    if (!existingUsers.find(u => u.username === 'Pratik00')) {
-      existingUsers.push({
+    const list = [...mockUsers];
+    if (!list.find((u) => u.username === 'Pratik00')) {
+      list.push({
         id: 'super-pratik-01',
         username: 'Pratik00',
         password: 'password123',
@@ -53,7 +53,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         createdAt: new Date().toISOString(),
       });
     }
-    return existingUsers;
+    return list;
   });
 
   const [markets] = useState<Market[]>(mockMarkets);
@@ -62,12 +62,13 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [betSlip, setBetSlip] = useState<BetSlipItem[]>([]);
 
   const currentUser: User = authUser
-    ? (users.find((u) => u.username === authUser.username) ?? {
+    ? (users.find((u) => u.username === authUser.username) || {
+        ...authUser,
         id: authUser.id,
         username: authUser.username,
         password: '',
         role: authUser.username === 'Pratik00' ? 'superadmin' : authUser.role,
-        balance: authUser.balance ?? 0,
+        balance: authUser.balance || 0,
         parentId: null,
         createdAt: new Date().toISOString(),
       })
@@ -75,72 +76,67 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   const logout = useCallback(() => {
     authLogout();
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('authUser');
-    localStorage.removeItem('userIdLogin');
+    localStorage.clear();
     navigate('/login', { replace: true });
   }, [authLogout, navigate]);
 
-  const getDownlineUsers = useCallback((parentId: string) => {
-    return users.filter((u) => u.parentId === parentId);
-  }, [users]);
+  const getDownlineUsers = useCallback((pid: string) => users.filter((u) => u.parentId === pid), [users]);
 
-  const addPoints = useCallback((userId: string, amount: number) => {
-    setUsers((prev) => prev.map((u) => (u.id === userId ? { ...u, balance: u.balance + amount } : u)));
+  const addPoints = useCallback((uid: string, amt: number) => {
+    setUsers((prev) => prev.map((u) => (u.id === uid ? { ...u, balance: u.balance + amt } : u)));
   }, []);
 
-  const removePoints = useCallback((userId: string, amount: number) => {
-    setUsers((prev) => prev.map((u) => u.id === userId ? { ...u, balance: Math.max(0, u.balance - amount) } : u));
+  const removePoints = useCallback((uid: string, amt: number) => {
+    setUsers((prev) => prev.map((u) => (u.id === uid ? { ...u, balance: Math.max(0, u.balance - amt) } : u)));
   }, []);
 
-  const createUser = useCallback((username: string, password: string, role: Role, parentId: string): User | null => {
-    if (users.some((u) => u.username === username)) return null;
-    const newUser: User = { id: `u${Date.now()}`, username, password, role, balance: 0, parentId, createdAt: new Date().toISOString() };
+  const createUser = useCallback((un: string, pw: string, r: Role, pid: string) => {
+    const newUser: User = { id: `u${Date.now()}`, username: un, password: pw, role: r, balance: 0, parentId: pid, createdAt: new Date().toISOString() };
     setUsers((prev) => [...prev, newUser]);
     return newUser;
-  }, [users]);
-
-  const changeRole = useCallback((userId: string, newRole: Role) => {
-    setUsers((prev) => prev.map((u) => (u.id === userId ? { ...u, role: newRole } : u)));
   }, []);
 
-  const addToBetSlip = useCallback((item: Omit<BetSlipItem, 'stake'>) => {
-    setBetSlip((prev) => prev.some((b) => b.runnerId === item.runnerId) ? prev : [...prev, { ...item, stake: 0 }]);
+  const changeRole = useCallback((uid: string, nr: Role) => {
+    setUsers((prev) => prev.map((u) => (u.id === uid ? { ...u, role: nr } : u)));
   }, []);
 
-  const removeFromBetSlip = useCallback((runnerId: string) => {
-    setBetSlip((prev) => prev.filter((b) => b.runnerId !== runnerId));
+  const addToBetSlip = useCallback((item: any) => {
+    setBetSlip((prev) => (prev.some((b) => b.runnerId === item.runnerId) ? prev : [...prev, { ...item, stake: 0 }]));
   }, []);
 
-  const updateBetSlipStake = useCallback((runnerId: string, stake: number) => {
-    setBetSlip((prev) => prev.map((b) => (b.runnerId === runnerId ? { ...b, stake } : b)));
+  const removeFromBetSlip = useCallback((rid: string) => {
+    setBetSlip((prev) => prev.filter((b) => b.runnerId !== rid));
+  }, []);
+
+  const updateBetSlipStake = useCallback((rid: string, s: number) => {
+    setBetSlip((prev) => prev.map((b) => (b.runnerId === rid ? { ...b, stake: s } : b)));
   }, []);
 
   const placeBets = useCallback(() => {
-    const validBets = betSlip.filter((b) => b.stake > 0);
-    if (validBets.length === 0) return;
-    const totalStake = validBets.reduce((s, b) => s + b.stake, 0);
-    if (totalStake > currentUser.balance) return;
+    const total = betSlip.reduce((s, b) => s + b.stake, 0);
+    if (total > 0 && total <= currentUser.balance) {
+      setUsers((prev) => prev.map((u) => (u.id === currentUser.id ? { ...u, balance: u.balance - total } : u)));
+      setBetSlip([]);
+    }
+  }, [betSlip, currentUser]);
 
-    setUsers((prev) => prev.map((u) => (u.id === currentUser.id ? { ...u, balance: u.balance - totalStake } : u)));
-    setBetSlip([]);
-  }, [betSlip, currentUser.balance, currentUser.id]);
+  const clearBetSlip = useCallback(() => setBetSlip([]), []);
 
-  const clearBetSlip = useCallback(() => {
-    setBetSlip([]);
-  }, []);
-
-  const value: AppContextType = {
-    currentUser, users, getDownlineUsers, addPoints, removePoints, createUser, changeRole,
-    markets, bets, betSlip, addToBetSlip, removeFromBetSlip, updateBetSlipStake, placeBets, clearBetSlip, transactions, logout
-  };
-
-  return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
+  return (
+    <AppContext.Provider
+      value={{
+        currentUser, users, getDownlineUsers, addPoints, removePoints, createUser, changeRole,
+        markets, bets, betSlip, addToBetSlip, removeFromBetSlip, updateBetSlipStake, placeBets, clearBetSlip, transactions, logout,
+      }}
+    >
+      {children}
+    </AppContext.Provider>
+  );
 };
 
-export const useApp = (): AppContextType => {
+export const useApp = () => {
   const context = useContext(AppContext);
-  if (context === undefined) throw new Error('useApp must be used within an AppProvider');
+  if (!context) throw new Error('useApp must be used within AppProvider');
   return context;
 };
 
