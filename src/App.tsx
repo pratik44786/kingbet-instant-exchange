@@ -1,35 +1,34 @@
-// Relative import! Not '@contexts/AuthContext'
-import { AuthProvider } from './context/AuthContext';
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { Layout } from '@/components/Layout';
-import { ProtectedRoute } from '@/components/ProtectedRoute';
+import { AuthProvider } from './context/AuthContext'; // Correct path
+import { Layout } from './components/Layout';
+import { ProtectedRoute } from './components/ProtectedRoute';
 
 // Pages
-import LandingPage from '@/pages/LandingPage';
-import LoginPage from '@/pages/LoginPage';
-import RegisterPage from '@/pages/RegisterPage';
-import ExchangePage from '@/pages/ExchangePage';
-import CasinoPage from '@/pages/CasinoPage';
-import AviatorPage from '@/pages/AviatorPage';
-import PlinkoPage from '@/pages/PlinkoPage';
-import ProfilePage from '@/pages/ProfilePage';
-import SettingsPage from '@/pages/SettingsPage';
-import AdminPage from '@/pages/AdminPage';
-import SuperAdminPage from '@/pages/SuperAdminPage';
-import WalletPage from '@/pages/WalletPage';
-import HistoryPage from '@/pages/HistoryPage';
+import LandingPage from './pages/LandingPage';
+import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
+import ExchangePage from './pages/ExchangePage';
+import CasinoPage from './pages/CasinoPage';
+import AviatorPage from './pages/AviatorPage';
+import PlinkoPage from './pages/PlinkoPage';
+import ProfilePage from './pages/ProfilePage';
+import SettingsPage from './pages/SettingsPage';
+import AdminPage from './pages/AdminPage';
+import SuperAdminPage from './pages/SuperAdminPage';
+import WalletPage from './pages/WalletPage';
+import HistoryPage from './pages/HistoryPage';
 
 function App() {
   return (
     <Router>
       <AuthProvider>
         <Routes>
-          {/* Public Routes - No Layout */}
+          {/* Public Routes */}
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
 
-          {/* Protected Routes with Layout */}
+          {/* Protected Routes */}
           <Route
             path="/"
             element={
@@ -125,6 +124,31 @@ function App() {
             element={
               <ProtectedRoute>
                 <Layout>
+                  <AdminPage />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/superadmin"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <SuperAdminPage />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Fallback */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </AuthProvider>
+    </Router>
+  );
+}
+
+export default App;                <Layout>
                   <AdminPage />
                 </Layout>
               </ProtectedRoute>
