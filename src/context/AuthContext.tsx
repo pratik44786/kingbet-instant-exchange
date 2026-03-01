@@ -51,11 +51,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Check if user is already logged in (from localStorage) on mount
-  useEffect(() => {
-    checkAuth();
-  }, []);
-
   const checkAuth = useCallback(() => {
     try {
       const storedToken = localStorage.getItem('authToken');
@@ -78,6 +73,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setIsLoading(false);
     }
   }, []);
+
+  useEffect(() => {
+    checkAuth();
+  }, [checkAuth]);
 
   const login = useCallback((newUser: AuthUser, token: string) => {
     try {

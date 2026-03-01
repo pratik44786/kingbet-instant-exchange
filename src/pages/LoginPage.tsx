@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
+import { authService } from '@/services/authService';
 import { Crown, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -36,18 +37,7 @@ const LoginPage: React.FC = () => {
         throw new Error('Username and password are required');
       }
 
-      // Mock API call - replace with your actual login endpoint
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Invalid credentials');
-      }
-
-      const data = await response.json();
+      const data = await authService.login(username, password);
 
       login(
         {
@@ -79,23 +69,7 @@ const LoginPage: React.FC = () => {
         throw new Error('User ID is required');
       }
 
-      // Mock API call for Admin/SuperAdmin User ID login
-      const response = await fetch('/api/auth/admin-login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: userId.trim() }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Invalid User ID');
-      }
-
-      const data = await response.json();
-
-      // Verify response has required role field
-      if (!data.user.role || !['admin', 'superadmin'].includes(data.user.role)) {
-        throw new Error('User ID does not have admin privileges');
-      }
+      const data = await authService.adminLogin(userId.trim());
 
       loginWithUserId(
         userId.trim(),

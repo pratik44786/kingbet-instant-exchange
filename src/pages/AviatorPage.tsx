@@ -56,17 +56,25 @@ const AviatorPage = () => {
   }, [state, startRound]);
 
   const placeBet = () => {
-    if (stake <= 0 || stake > currentUser.balance || state !== 'flying' || hasBet) return;
-    removePoints(currentUser.id, stake);
-    setHasBet(true);
+    try {
+      if (stake <= 0 || stake > currentUser.balance || state !== 'flying' || hasBet) return;
+      removePoints(currentUser.id, stake);
+      setHasBet(true);
+    } catch (error) {
+      console.error('Error placing bet:', error);
+    }
   };
 
   const cashOut = () => {
-    if (!hasBet || cashedOut || state !== 'flying') return;
-    const winnings = Math.floor(stake * multiplier);
-    addPoints(currentUser.id, winnings);
-    setCashedOut(true);
-    setCashoutMultiplier(multiplier);
+    try {
+      if (!hasBet || cashedOut || state !== 'flying') return;
+      const winnings = Math.floor(stake * multiplier);
+      addPoints(currentUser.id, winnings);
+      setCashedOut(true);
+      setCashoutMultiplier(multiplier);
+    } catch (error) {
+      console.error('Error cashing out:', error);
+    }
   };
 
   return (

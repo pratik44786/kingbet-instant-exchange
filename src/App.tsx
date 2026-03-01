@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { AppProvider } from './context/AppContext';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import { Layout } from './components/Layout';
 import { ProtectedRoute } from './components/ProtectedRoute';
 
@@ -25,10 +26,11 @@ import HistoryPage from './pages/HistoryPage';
 
 function App() {
   return (
-    <Router>
-      <AuthProvider>
-        <AppProvider>
-          <Routes>
+    <ErrorBoundary>
+      <Router>
+        <AuthProvider>
+          <AppProvider>
+            <Routes>
             {/* Public Routes */}
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
@@ -197,10 +199,11 @@ function App() {
 
             {/* Fallback */}
             <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </AppProvider>
-      </AuthProvider>
-    </Router>
+            </Routes>
+          </AppProvider>
+        </AuthProvider>
+      </Router>
+    </ErrorBoundary>
   );
 }
 
