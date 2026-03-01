@@ -9,22 +9,30 @@ export const useLogout = () => {
   const handleLogout = useCallback(async () => {
     try {
       // Optional: Call API endpoint to invalidate token on backend
-      // const token = localStorage.getItem('authToken');
-      // if (token) {
-      //   await fetch('/api/auth/logout', {
-      //     method: 'POST',
-      //     headers: {
-      //       'Authorization': `Bearer ${token}`,
-      //       'Content-Type': 'application/json',
-      //     },
-      //   });
-      // }
+      const token = localStorage.getItem('authToken');
+      if (token) {
+        try {
+          await fetch('/api/auth/logout', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+          });
+        } catch (apiErr) {
+          // API failure - but continue with local logout
+          console.warn('API logout failed:', apiErr);
+        }
+      }
 
+      // Local logout
       logout();
+      
+      // Redirect to login
       navigate('/login', { replace: true });
     } catch (error) {
       console.error('Logout error:', error);
-      // Still logout locally even if API call fails
+      // Force logout even if there's an error
       logout();
       navigate('/login', { replace: true });
     }
