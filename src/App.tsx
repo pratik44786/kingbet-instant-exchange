@@ -11,6 +11,7 @@ import RegisterPage from "@/pages/RegisterPage";
 import ExchangePage from "@/pages/ExchangePage";
 import WalletPage from "@/pages/WalletPage";
 import AdminPage from "@/pages/AdminPage";
+import SuperAdminPage from "@/pages/SuperAdminPage";
 import CasinoPage from "@/pages/CasinoPage";
 import AviatorPage from "@/pages/AviatorPage";
 import PlinkoPage from "@/pages/PlinkoPage";
@@ -30,12 +31,10 @@ const App = () => (
       <AppProvider>
         <BrowserRouter>
           <Routes>
-            {/* Public pages without sidebar layout */}
             <Route path="/" element={<LandingPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
 
-            {/* App pages with sidebar layout */}
             <Route path="/exchange" element={<Layout><ExchangePage /></Layout>} />
             <Route path="/cricket" element={<Layout><ExchangePage sportFilter="cricket" /></Layout>} />
             <Route path="/football" element={<Layout><ExchangePage sportFilter="football" /></Layout>} />
@@ -49,6 +48,7 @@ const App = () => (
             <Route path="/wallet" element={<Layout><WalletPage /></Layout>} />
             <Route path="/history" element={<Layout><HistoryPage /></Layout>} />
             <Route path="/admin" element={<Layout><AdminPage /></Layout>} />
+            <Route path="/superadmin" element={<Layout><SuperAdminPage /></Layout>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

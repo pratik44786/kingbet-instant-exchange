@@ -8,19 +8,22 @@ const mobileNavItems = [
   { label: 'Exchange', path: '/exchange', icon: '📊' },
   { label: 'Cricket', path: '/cricket', icon: '🏏' },
   { label: 'Football', path: '/football', icon: '⚽' },
+  { label: 'Tennis', path: '/tennis', icon: '🎾' },
   { label: 'Casino', path: '/casino', icon: '🎰' },
   { label: 'Wallet', path: '/wallet', icon: '💰' },
   { label: 'History', path: '/history', icon: '📜' },
-  { label: 'Admin', path: '/admin', icon: '🛡️' },
 ];
 
 const MobileNav = () => {
   const [open, setOpen] = useState(false);
   const location = useLocation();
   const { currentUser } = useApp();
-  const isAdmin = ['admin', 'masteradmin', 'superadmin'].includes(currentUser.role);
 
-  const items = isAdmin ? mobileNavItems : mobileNavItems.filter(i => i.path !== '/admin');
+  const items = [
+    ...mobileNavItems,
+    ...(currentUser.role === 'admin' ? [{ label: 'Admin', path: '/admin', icon: '🛡️' }] : []),
+    ...(currentUser.role === 'superadmin' ? [{ label: 'Super Admin', path: '/superadmin', icon: '👑' }] : []),
+  ];
 
   return (
     <div className="lg:hidden">

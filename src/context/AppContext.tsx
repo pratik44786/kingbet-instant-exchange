@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
-import { User, Market, Bet, Transaction, BetSlipItem } from '@/types/exchange';
+import { User, Market, Bet, Transaction, BetSlipItem, Role } from '@/types/exchange';
 import { mockUsers, mockMarkets, mockBets, mockTransactions } from '@/data/mockData';
 
 interface AppState {
@@ -15,9 +15,13 @@ interface AppState {
   placeBets: () => void;
   clearBetSlip: () => void;
   switchUser: (userId: string) => void;
+  loginUser: (username: string, password: string) => boolean;
   addPoints: (userId: string, amount: number) => void;
   removePoints: (userId: string, amount: number) => void;
-  changeRole: (userId: string, role: User['role']) => void;
+  changeRole: (userId: string, role: Role) => void;
+  createUser: (username: string, password: string, role: Role, parentId: string) => User | null;
+  getDownlineUsers: (userId: string) => User[];
+  getDownlineAdmins: (userId: string) => User[];
 }
 
 const AppContext = createContext<AppState | null>(null);
@@ -28,7 +32,6 @@ export const useApp = () => {
   return ctx;
 };
 
-// Simulate odds fluctuation
 function fluctuateOdds(odds: [number, number, number]): [number, number, number] {
   return odds.map(o => {
     const change = (Math.random() - 0.5) * 0.04;
@@ -63,6 +66,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           layOdds: fluctuateOdds(r.layOdds),
           backSizes: fluctuateSizes(r.backSizes),
           laySizes: fluctuateSizes(r.laySizes),
+        })),
+        fancyOdds: m.fancyOdds?.map(f => ({
+          ...f,
+          yesValue: Math.max(1, f.yesValue + Math.floor((Math.random() - 0.5) * 3)),
+          noValue: Math.max(1, f.noValue + Math.floor((Math.random() - 0.5) * 3)),
+        })),
+        sessionOdds: m.sessionOdds?.map(s => ({
+          ...s,
+          overValue: Math.max(1, s.overValue + Math.floor((Math.random() - 0.5) * 4)),
+          underValue: Math.max(1, s.underValue + Math.floor((Math.random() - 0.5) * 4)),
         })),
       })));
     }, 2000);
@@ -106,7 +119,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       id: `t${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
       type: 'bet_debit' as const,
       amount: b.stake,
-      description: `${b.type === 'back' ? 'Back' : 'Lay'} bet: ${b.runnerName} @ ${b.odds}`,
+      description: `${b.type} bet: ${b.runnerName} @ ${b.odds}`,
       timestamp: b.timestamp,
       balanceAfter: 0,
     }));
@@ -128,6 +141,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (user) setCurrentUser(user);
   }, [users]);
 
+  const loginUser = useCallback((username: string, password: string): boolean => {
+    const user = users.find(u => u.username === username && u.password === password);
+    if (user) {
+      setCurrentUser(user);
+      return true;
+    }
+    return false;
+  }, [users]);
+
   const addPoints = useCallback((userId: string, amount: number) => {
     setUsers(prev => prev.map(u => u.id === userId ? { ...u, balance: u.balance + amount } : u));
     if (userId === currentUser.id) {
@@ -142,15 +164,40 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   }, [currentUser.id]);
 
-  const changeRole = useCallback((userId: string, role: User['role']) => {
+  const changeRole = useCallback((userId: string, role: Role) => {
     setUsers(prev => prev.map(u => u.id === userId ? { ...u, role } : u));
   }, []);
+
+  const createUser = useCallback((username: string, password: string, role: Role, parentId: string): User | null => {
+    if (users.find(u => u.username === username)) return null;
+    const newUser: User = {
+      id: `u${Date.now()}`,
+      username,
+      password,
+      role,
+      balance: 0,
+      parentId,
+      createdAt: new Date().toISOString(),
+    };
+    setUsers(prev => [...prev, newUser]);
+    return newUser;
+  }, [users]);
+
+  const getDownlineUsers = useCallback((userId: string): User[] => {
+    return users.filter(u => u.parentId === userId && u.role === 'user');
+  }, [users]);
+
+  const getDownlineAdmins = useCallback((userId: string): User[] => {
+    return users.filter(u => u.parentId === userId && u.role === 'admin');
+  }, [users]);
 
   return (
     <AppContext.Provider value={{
       currentUser, users, markets, bets, transactions, betSlip,
       addToBetSlip, removeFromBetSlip, updateBetSlipStake,
-      placeBets, clearBetSlip, switchUser, addPoints, removePoints, changeRole,
+      placeBets, clearBetSlip, switchUser, loginUser,
+      addPoints, removePoints, changeRole,
+      createUser, getDownlineUsers, getDownlineAdmins,
     }}>
       {children}
     </AppContext.Provider>
