@@ -1,81 +1,126 @@
-import { useState, useMemo } from 'react';
-import OddsGrid from '@/components/OddsGrid';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '@/context/AppContext';
-import { Search } from 'lucide-react';
+import { Search, Trophy, Timer, ChevronRight } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 
-const ExchangePage = ({ sportFilter }: { sportFilter?: string }) => {
-  const { markets, bets } = useApp();
-  const [search, setSearch] = useState('');
-  const [page, setPage] = useState(0);
-  const PAGE_SIZE = 20;
+const ExchangePage: React.FC = () => {
+  const { markets, addToBetSlip, betSlip, updateBetSlipStake, placeBets, currentUser } = useApp();
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedMarket, setSelectedMarket] = useState<string | null>(null);
 
-  const filtered = useMemo(() => {
-    let result = sportFilter ? markets.filter(m => m.sport === sportFilter) : markets;
-    if (search) result = result.filter(m => m.event.toLowerCase().includes(search.toLowerCase()) || m.competition.toLowerCase().includes(search.toLowerCase()));
-    return result;
-  }, [markets, sportFilter, search]);
-
-  const paged = filtered.slice(0, (page + 1) * PAGE_SIZE);
+  // Auto-select first market
+  useEffect(() => {
+    if (markets.length > 0 && !selectedMarket) {
+      setSelectedMarket(markets[0].id);
+    }
+  }, [markets, selectedMarket]);
 
   return (
-    <div className="flex-1 p-4 overflow-auto">
-      <div className="max-w-4xl mx-auto space-y-4">
-        <div className="flex items-center justify-between gap-4 flex-wrap">
-          <div>
-            <h2 className="text-lg font-bold text-foreground">
-              {sportFilter ? sportFilter.charAt(0).toUpperCase() + sportFilter.slice(1) + ' Markets' : 'All Markets'}
-            </h2>
-            <span className="text-xs text-muted-foreground">{filtered.length} markets • Live odds</span>
-          </div>
-          <div className="relative">
-            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-            <input type="text" value={search} onChange={e => { setSearch(e.target.value); setPage(0); }}
-              placeholder="Search markets..."
-              className="bg-surface-2 text-foreground text-sm rounded-lg pl-9 pr-3 py-2 border border-border outline-none focus:ring-1 focus:ring-primary w-56" />
-          </div>
+    <div className="flex flex-col pb-20 lg:pb-0">
+      {/* Search Header */}
+      <div className="p-4 bg-[#0b1221] border-b border-white/5 sticky top-0 z-10">
+        <div className="relative max-w-md mx-auto">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+          <Input
+            placeholder="Search markets..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-10 bg-gray-900 border-gray-800 focus:ring-yellow-500"
+          />
         </div>
+      </div>
 
-        {paged.length === 0 ? (
-          <div className="surface-card rounded-lg p-12 text-center">
-            <p className="text-muted-foreground">No markets found</p>
-          </div>
-        ) : (
-          paged.map(market => <OddsGrid key={market.id} market={market} />)
-        )}
-
-        {paged.length < filtered.length && (
-          <button onClick={() => setPage(p => p + 1)}
-            className="w-full bg-secondary text-secondary-foreground py-2.5 rounded-lg text-sm font-semibold hover:bg-surface-3 transition-colors">
-            Load More ({filtered.length - paged.length} remaining)
-          </button>
-        )}
-
-        {bets.length > 0 && (
-          <div className="surface-card rounded-lg overflow-hidden">
-            <div className="px-4 py-2.5 bg-surface-2 border-b border-border">
-              <h3 className="text-sm font-semibold text-foreground">Recent Bets</h3>
+      <div className="p-2 lg:p-4 space-y-4">
+        {markets.map((market) => (
+          <div key={market.id} className="surface-card shadow-2xl overflow-hidden border-none">
+            {/* Market Header */}
+            <div className="bg-[#1e273e] p-3 flex justify-between items-center border-b border-white/5">
+              <div className="flex items-center gap-2">
+                <Trophy className="w-4 h-4 text-yellow-500" />
+                <h3 className="font-bold text-sm tracking-wide uppercase italic">{market.name}</h3>
+              </div>
+              <div className="flex items-center gap-2 text-[10px] text-gray-400">
+                <Timer className="w-3 h-3" />
+                <span>{new Date(market.startTime).toLocaleTimeString()}</span>
+              </div>
             </div>
-            <div className="divide-y divide-border/50">
-              {bets.slice(0, 5).map(bet => (
-                <div key={bet.id} className="px-4 py-2.5 flex items-center justify-between text-sm">
-                  <div className="flex items-center gap-2">
-                    <span className={`text-[10px] uppercase font-bold px-1.5 py-0.5 rounded ${bet.type === 'back' ? 'bg-back text-back-foreground' : 'bg-lay text-lay-foreground'}`}>
-                      {bet.type}
-                    </span>
-                    <span className="text-foreground font-medium">{bet.runnerName}</span>
-                    <span className="text-muted-foreground">@ {bet.odds}</span>
+
+            {/* Odds Table Header */}
+            <div className="grid grid-cols-12 bg-[#121a2d] p-1 text-[10px] font-bold text-gray-500 uppercase">
+              <div className="col-span-6 pl-2">Runner</div>
+              <div className="col-span-3 text-center text-[#72bbef]">Back</div>
+              <div className="col-span-3 text-center text-[#faa9ba]">Lay</div>
+            </div>
+
+            {/* Runners */}
+            {market.runners.map((runner) => {
+              const isInSlip = betSlip.find(item => item.runnerId === runner.id);
+              
+              return (
+                <div key={runner.id} className="flex flex-col border-b border-white/5 last:border-0">
+                  <div className="grid grid-cols-12 items-center bg-[#161d2f] p-1 gap-1">
+                    {/* Runner Name */}
+                    <div className="col-span-6 pl-2">
+                      <div className="text-xs font-bold text-gray-200">{runner.name}</div>
+                    </div>
+
+                    {/* Back Button */}
+                    <div className="col-span-3">
+                      <button 
+                        onClick={() => addToBetSlip({ marketId: market.id, marketName: market.name, runnerId: runner.id, runnerName: runner.name, type: 'back', price: runner.back })}
+                        className="btn-back w-full py-1.5"
+                      >
+                        <span className="text-xs font-extrabold">{runner.back}</span>
+                        <span className="text-[8px] opacity-70">10k</span>
+                      </button>
+                    </div>
+
+                    {/* Lay Button */}
+                    <div className="col-span-3">
+                      <button 
+                        onClick={() => addToBetSlip({ marketId: market.id, marketName: market.name, runnerId: runner.id, runnerName: runner.name, type: 'lay', price: runner.lay })}
+                        className="btn-lay w-full py-1.5"
+                      >
+                        <span className="text-xs font-extrabold">{runner.lay}</span>
+                        <span className="text-[8px] opacity-70">5k</span>
+                      </button>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <span className="font-mono text-foreground">{bet.stake} PTS</span>
-                    <span className={`text-xs px-1.5 py-0.5 rounded ${bet.status === 'matched' ? 'bg-positive/20 text-positive' : 'bg-primary/20 text-primary'}`}>
-                      {bet.status}
-                    </span>
-                  </div>
+
+                  {/* Inline Bet Slip (Diamond Style) */}
+                  {isInSlip && (
+                    <div className={`m-1 p-3 rounded shadow-inner animate-in slide-in-from-top-1 ${isInSlip.type === 'back' ? 'bg-[#e2f2ff] border-l-4 border-[#2b92e4]' : 'bg-[#fff0f3] border-l-4 border-[#ef6e8b]'}`}>
+                      <div className="flex items-center gap-3">
+                        <div className="flex-1">
+                          <label className="text-[9px] font-bold text-gray-500 block uppercase">Stake</label>
+                          <input 
+                            type="number" 
+                            className="w-full bg-white border border-gray-300 p-2 rounded text-black font-bold text-sm outline-none"
+                            placeholder="Amount"
+                            value={isInSlip.stake || ''}
+                            onChange={(e) => updateBetSlipStake(runner.id, Number(e.target.value))}
+                            autoFocus
+                          />
+                        </div>
+                        <div className="flex-1">
+                          <label className="text-[9px] font-bold text-gray-500 block uppercase">Profit/Loss</label>
+                          <div className={`font-bold text-sm p-2 ${isInSlip.type === 'back' ? 'text-green-600' : 'text-red-600'}`}>
+                             {isInSlip.type === 'back' ? (isInSlip.stake * (isInSlip.price - 1)).toFixed(2) : isInSlip.stake}
+                          </div>
+                        </div>
+                        <div className="flex flex-col gap-1">
+                           <Button size="sm" onClick={placeBets} className="bg-yellow-600 hover:bg-yellow-700 text-white font-bold h-8 text-[10px]">PLACE</Button>
+                           <Button size="sm" variant="ghost" className="text-gray-500 h-6 text-[8px]" onClick={() => updateBetSlipStake(runner.id, 0)}>CANCEL</Button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
-              ))}
-            </div>
+              );
+            })}
           </div>
-        )}
+        ))}
       </div>
     </div>
   );
