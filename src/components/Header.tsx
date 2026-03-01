@@ -1,44 +1,62 @@
-import { Crown, Wallet, ChevronDown } from 'lucide-react';
-import { useApp } from '@/context/AppContext';
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Crown, LogOut } from 'lucide-react';
 
-const Header = () => {
-  const { currentUser, users, switchUser } = useApp();
+interface HeaderProps {
+  isAuthenticated?: boolean;
+  userName?: string;
+  onLogout?: () => void;
+}
+
+const Header: React.FC<HeaderProps> = ({
+  isAuthenticated = false,
+  userName = 'User',
+  onLogout,
+}) => {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    // Clear auth data from localStorage
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('user');
+
+    // Call custom logout handler if provided
+    if (onLogout) {
+      onLogout();
+    }
+
+    // Redirect to login or home
+    navigate('/login');
+  };
 
   return (
-    <header className="h-14 bg-card border-b border-border flex items-center justify-between px-4 lg:px-6">
-      <div className="flex items-center gap-2">
-        <Crown className="w-7 h-7 text-primary" />
-        <span className="text-lg font-bold tracking-tight gold-text">KINGBET EXCHANGE</span>
-      </div>
-
-      <div className="flex items-center gap-4">
-        <div className="flex items-center gap-2 bg-secondary rounded-lg px-3 py-1.5">
-          <Wallet className="w-4 h-4 text-primary" />
-          <span className="font-mono text-sm font-semibold text-foreground">
-            {currentUser.balance.toLocaleString()} PTS
-          </span>
-        </div>
-
-        <div className="relative group">
-          <button className="flex items-center gap-2 bg-secondary rounded-lg px-3 py-1.5 text-sm">
-            <span className="text-foreground font-medium">{currentUser.username}</span>
-            <span className="text-xs uppercase px-1.5 py-0.5 rounded bg-primary text-primary-foreground font-semibold">
-              {currentUser.role}
-            </span>
-            <ChevronDown className="w-3 h-3 text-muted-foreground" />
-          </button>
-          <div className="absolute right-0 top-full mt-1 w-48 bg-card border border-border rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
-            {users.map(u => (
-              <button
-                key={u.id}
-                onClick={() => switchUser(u.id)}
-                className="w-full text-left px-3 py-2 text-sm hover:bg-secondary transition-colors first:rounded-t-lg last:rounded-b-lg flex justify-between"
-              >
-                <span className="text-foreground">{u.username}</span>
-                <span className="text-xs text-muted-foreground">{u.role}</span>
-              </button>
-            ))}
+    <header className="bg-gray-900 border-b border-gray-700 shadow-lg">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="flex items-center justify-between">
+          {/* Logo Section */}
+          <div className="flex items-center gap-3">
+            <Crown className="w-8 h-8 text-yellow-500" />
+            <h1 className="text-3xl font-bold text-white tracking-wider">
+              KINGBET EXCHANGE
+            </h1>
+            <Crown className="w-8 h-8 text-yellow-500" />
           </div>
+
+          {/* Right Section - Logout Button */}
+          {isAuthenticated && (
+            <div className="flex items-center gap-4">
+              <div className="text-gray-300">
+                <p className="text-sm">Welcome, <span className="font-semibold text-yellow-500">{userName}</span></p>
+              </div>
+              <button
+                onClick={handleLogout}
+                className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-lg transition-all duration-200 shadow-lg"
+              >
+                <LogOut className="w-4 h-4" />
+                Logout
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </header>
