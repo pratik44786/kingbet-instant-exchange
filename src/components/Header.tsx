@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/context/AuthContext';
 import { useLogout } from '@/hooks/useLogout';
 import { useHasRole } from '@/hooks/useAuthUser';
 import { Crown, LogOut, Menu, X } from 'lucide-react';
