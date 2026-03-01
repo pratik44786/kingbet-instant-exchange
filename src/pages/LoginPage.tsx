@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/context/AuthContext';
 import { Crown, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -261,11 +261,6 @@ const LoginPage: React.FC = () => {
           </div>
         </div>
       </div>
-    </div>
-  );
-};
-
-export default LoginPage;      </div>
     </div>
   );
 };
