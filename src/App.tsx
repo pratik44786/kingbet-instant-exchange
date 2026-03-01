@@ -1,19 +1,21 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider } from './contexts/AuthContext';
-import { Layout } from './components/Layout';
-import { ProtectedRoute } from './components/ProtectedRoute';
+import { AuthProvider } from '@/contexts/AuthContext';
+import { Layout } from '@/components/Layout';
+import { ProtectedRoute } from '@/components/ProtectedRoute';
 
 // Pages
-import LandingPage from './pages/LandingPage';
-import LoginPage from './pages/LoginPage';
-import RegisterPage from './pages/RegisterPage';
-import ExchangePage from './pages/ExchangePage';
-import CasinoPage from './pages/CasinoPage';
-import AviatorPage from './pages/AviatorPage';
-import PlinkoPage from './pages/PlinkoPage';
-import ProfilePage from './pages/ProfilePage';
-import SettingsPage from './pages/SettingsPage';
+import LandingPage from '@/pages/LandingPage';
+import LoginPage from '@/pages/LoginPage';
+import RegisterPage from '@/pages/RegisterPage';
+import ExchangePage from '@/pages/ExchangePage';
+import CasinoPage from '@/pages/CasinoPage';
+import AviatorPage from '@/pages/AviatorPage';
+import PlinkoPage from '@/pages/PlinkoPage';
+import ProfilePage from '@/pages/ProfilePage';
+import SettingsPage from '@/pages/SettingsPage';
+import AdminPage from '@/pages/AdminPage';
+import SuperAdminPage from '@/pages/SuperAdminPage';
 
 function App() {
   return (
@@ -76,6 +78,26 @@ function App() {
             }
           />
           <Route
+            path="/wallet"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <div>Wallet Page</div>
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/history"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <div>History Page</div>
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/profile"
             element={
               <ProtectedRoute>
@@ -91,6 +113,26 @@ function App() {
               <ProtectedRoute>
                 <Layout>
                   <SettingsPage />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <AdminPage />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/superadmin"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <SuperAdminPage />
                 </Layout>
               </ProtectedRoute>
             }
