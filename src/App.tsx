@@ -24,18 +24,20 @@ import SuperAdminPage from './pages/SuperAdminPage';
 import WalletPage from './pages/WalletPage';
 import HistoryPage from './pages/HistoryPage';
 
-// Root level redirect logic to fix Landing Page issue
+// Root level redirect logic with TS Fix
 const RootRedirect = () => {
   const { isAuthenticated, user } = useAuth();
   
-  // Agar login hai toh decide karo kahan bhejna hai
   if (isAuthenticated && user) {
-    if (user.role === 'superadmin') return <Navigate to="/superadmin" replace />;
-    if (user.role === 'admin' || user.role === 'agent') return <Navigate to="/admin" replace />;
-    return <Navigate to="/exchange" replace />; // Regular users ke liye
+    // Cast to any to bypass strict Role overlap check in build
+    const role = (user.role as any);
+    
+    if (role === 'superadmin') return <Navigate to="/superadmin" replace />;
+    if (role === 'admin' || role === 'agent') return <Navigate to="/admin" replace />;
+    
+    return <Navigate to="/exchange" replace />;
   }
   
-  // Agar login nahi hai toh login page par
   return <Navigate to="/login" replace />;
 };
 
@@ -46,12 +48,12 @@ function App() {
         <AuthProvider>
           <AppProvider>
             <Routes>
-              {/* 1️⃣ Public Routes */}
+              {/* Public Routes */}
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
 
-              {/* 2️⃣ Auth Guarded Routes with Layout */}
-              <Route element={<ProtectedRoute><Layout><RootRedirect /></Layout></ProtectedRoute>} path="/" />
+              {/* Protected Routes Wrapper */}
+              <Route path="/" element={<ProtectedRoute><Layout><RootRedirect /></Layout></ProtectedRoute>} />
               
               <Route path="/exchange" element={<ProtectedRoute><Layout><ExchangePage /></Layout></ProtectedRoute>} />
               <Route path="/landing" element={<ProtectedRoute><Layout><LandingPage /></Layout></ProtectedRoute>} />
@@ -64,21 +66,21 @@ function App() {
               <Route path="/casino/dice" element={<ProtectedRoute><Layout><DicePage /></Layout></ProtectedRoute>} />
               <Route path="/casino/mines" element={<ProtectedRoute><Layout><MinesPage /></Layout></ProtectedRoute>} />
               
-              {/* Quick Game Routes */}
+              {/* Games */}
               <Route path="/aviator" element={<ProtectedRoute><Layout><AviatorPage /></Layout></ProtectedRoute>} />
               <Route path="/plinko" element={<ProtectedRoute><Layout><PlinkoPage /></Layout></ProtectedRoute>} />
               
-              {/* User Management */}
+              {/* User Routes */}
               <Route path="/wallet" element={<ProtectedRoute><Layout><WalletPage /></Layout></ProtectedRoute>} />
               <Route path="/history" element={<ProtectedRoute><Layout><HistoryPage /></Layout></ProtectedRoute>} />
               <Route path="/profile" element={<ProtectedRoute><Layout><ProfilePage /></Layout></ProtectedRoute>} />
               <Route path="/settings" element={<ProtectedRoute><Layout><SettingsPage /></Layout></ProtectedRoute>} />
               
-              {/* Admin Panels */}
+              {/* Panels */}
               <Route path="/admin" element={<ProtectedRoute><Layout><AdminPage /></Layout></ProtectedRoute>} />
               <Route path="/superadmin" element={<ProtectedRoute><Layout><SuperAdminPage /></Layout></ProtectedRoute>} />
 
-              {/* 3️⃣ Fallback */}
+              {/* Catch-all Fallback */}
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </AppProvider>
