@@ -16,13 +16,15 @@ import ProfilePage from '@/pages/ProfilePage';
 import SettingsPage from '@/pages/SettingsPage';
 import AdminPage from '@/pages/AdminPage';
 import SuperAdminPage from '@/pages/SuperAdminPage';
+import WalletPage from '@/pages/WalletPage';
+import HistoryPage from '@/pages/HistoryPage';
 
 function App() {
   return (
     <Router>
       <AuthProvider>
         <Routes>
-          {/* Public Routes */}
+          {/* Public Routes - No Layout */}
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
 
@@ -82,7 +84,7 @@ function App() {
             element={
               <ProtectedRoute>
                 <Layout>
-                  <div>Wallet Page</div>
+                  <WalletPage />
                 </Layout>
               </ProtectedRoute>
             }
@@ -92,7 +94,7 @@ function App() {
             element={
               <ProtectedRoute>
                 <Layout>
-                  <div>History Page</div>
+                  <HistoryPage />
                 </Layout>
               </ProtectedRoute>
             }
@@ -125,6 +127,28 @@ function App() {
                   <AdminPage />
                 </Layout>
               </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/superadmin"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <SuperAdminPage />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Fallback - 404 */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </AuthProvider>
+    </Router>
+  );
+}
+
+export default App;              </ProtectedRoute>
             }
           />
           <Route
