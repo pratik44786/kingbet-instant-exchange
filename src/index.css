@@ -6,79 +6,109 @@
 @tailwind components;
 @tailwind utilities;
 
-/* 3️⃣ Base Styles */
+/* 3️⃣ Base Styles & Variables */
 @layer base {
   :root {
-    --background: 222 47% 6%;
+    /* Core Layout */
+    --background: 222 47% 4%;
     --foreground: 210 40% 98%;
-    
-    --card: 222 47% 8%;
+    --card: 222 47% 7%;
     --card-foreground: 210 40% 98%;
+    
+    /* Diamond Exchange Authentic Specs */
+    --back-color: #72bbef;
+    --lay-color: #faa9ba;
+    --back-hover: #5da6d8;
+    --lay-hover: #e894a5;
 
-    /* Diamond Colors */
-    --back-color: 204 82% 69%; /* Blue #72bbef */
-    --lay-color: 348 83% 82%;  /* Pink #faa9ba */
-    
-    --primary: 45 93% 47%;     /* Gold */
-    --secondary: 204 82% 69%;  /* Back-Blue */
-    --accent: 348 83% 82%;     /* Lay-Pink */
-    
+    /* Kingbet Branding */
+    --primary: 45 93% 47%; /* Gold */
     --border: 217 32% 17%;
     --radius: 0.5rem;
   }
 
   body {
-    @apply bg-[#0b1221] text-white antialiased font-sans;
+    @apply bg-[#0b1221] text-white antialiased font-sans selection:bg-yellow-500/30;
+    /* Subtle background texture */
+    background-image: radial-gradient(circle at 50% 0%, #1e293b 0%, #0b1221 100%);
+    min-height: 100vh;
+  }
+
+  * {
+    @apply border-border;
   }
 }
 
-/* 4️⃣ Betting Specific Components */
+/* 4️⃣ Betting Specific Components (Diamond Logic) */
 @layer components {
-  /* Back Button - Blue Gradient */
+  /* Back Button (Blue) */
   .btn-back {
-    @apply bg-[#72bbef] hover:bg-[#5da6d8] text-black font-bold transition-all duration-200 
-    flex flex-col items-center justify-center rounded-sm min-w-[60px] min-h-[40px] shadow-inner;
+    @apply relative flex flex-col items-center justify-center rounded-[2px] min-w-[58px] min-h-[42px] 
+    transition-all duration-150 active:scale-95 shadow-sm overflow-hidden border-b-2 border-blue-400/30;
     background: linear-gradient(180deg, #a5d9ff 0%, #72bbef 100%);
+    color: #000 !important;
+  }
+  .btn-back:hover {
+    background: linear-gradient(180deg, #72bbef 0%, #5da6d8 100%);
   }
 
-  /* Lay Button - Pink Gradient */
+  /* Lay Button (Pink) */
   .btn-lay {
-    @apply bg-[#faa9ba] hover:bg-[#e894a5] text-black font-bold transition-all duration-200 
-    flex flex-col items-center justify-center rounded-sm min-w-[60px] min-h-[40px] shadow-inner;
+    @apply relative flex flex-col items-center justify-center rounded-[2px] min-w-[58px] min-h-[42px] 
+    transition-all duration-150 active:scale-95 shadow-sm overflow-hidden border-b-2 border-pink-400/30;
     background: linear-gradient(180deg, #ffcbd6 0%, #faa9ba 100%);
+    color: #000 !important;
+  }
+  .btn-lay:hover {
+    background: linear-gradient(180deg, #faa9ba 0%, #e894a5 100%);
   }
 
-  /* Betting Slip Overlay */
+  /* Shared Odds Styling */
+  .odds-text { @apply text-[13px] font-black leading-tight tracking-tight; }
+  .odds-size { @apply text-[9px] font-bold opacity-70 leading-none mt-0.5; }
+
+  /* Betting Slip UI (Diamond Style) */
   .bet-slip-back {
-    @apply bg-[#e2f2ff] border-l-4 border-l-[#72bbef] text-black rounded-r-md;
+    @apply bg-[#e2f2ff] border-l-[6px] border-[#2b92e4] text-[#1a202c] shadow-lg animate-in fade-in slide-in-from-top-2;
   }
   
   .bet-slip-lay {
-    @apply bg-[#fff0f3] border-l-4 border-l-[#faa9ba] text-black rounded-r-md;
+    @apply bg-[#fff0f3] border-l-[6px] border-[#ef6e8b] text-[#1a202c] shadow-lg animate-in fade-in slide-in-from-top-2;
   }
 }
 
-/* 5️⃣ Utilities */
+/* 5️⃣ Custom Kingbet Utilities */
 @layer utilities {
-  .gold-text { @apply text-yellow-500; }
-  
-  .surface-card {
-    @apply bg-[#161d2f] border border-white/5 rounded-lg overflow-hidden shadow-xl;
+  .gold-gradient {
+    background: linear-gradient(135deg, #eab308 0%, #ca8a04 100%);
   }
 
-  /* Market Row Styling */
+  .surface-card {
+    @apply bg-[#161d2f] border border-white/10 rounded-lg overflow-hidden shadow-2xl;
+  }
+
+  /* Market Row (Diamond Table Style) */
   .market-row {
-    @apply flex items-center justify-between p-2 border-b border-white/5 hover:bg-white/5 transition-colors;
+    @apply flex items-center justify-between px-3 py-2 border-b border-white/5 bg-[#161d2f] hover:bg-[#1e273e] transition-colors cursor-pointer;
+  }
+
+  .market-header {
+    @apply bg-[#1e273e] px-4 py-2.5 flex justify-between items-center border-b border-yellow-500/20;
   }
 }
 
-/* Scrollbar */
+/* 6️⃣ Global Elements */
 ::-webkit-scrollbar {
-  @apply w-1.5;
+  @apply w-1.5 h-1.5;
 }
 ::-webkit-scrollbar-track {
-  @apply bg-gray-900;
+  @apply bg-[#0b1221];
 }
 ::-webkit-scrollbar-thumb {
-  @apply bg-yellow-500/50 rounded-full hover:bg-yellow-500;
+  @apply bg-yellow-600/50 rounded-full hover:bg-yellow-500 transition-colors;
+}
+
+/* Chrome/Safari focus outline remove */
+input:focus {
+  outline: none;
 }
