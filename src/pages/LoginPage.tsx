@@ -140,12 +140,12 @@ const LoginPage: React.FC = () => {
 
           <div className="mt-8 pt-6 border-t border-white/5 text-center">
             <p className="text-gray-500 text-sm">
-              New to Kingbet?{' '}
+              Don't have an ID?{' '}
               <button
                 onClick={() => navigate('/register')}
                 className="text-yellow-500 hover:text-yellow-400 font-bold transition-colors"
               >
-                Create Account
+                Get ID
               </button>
             </p>
           </div>
