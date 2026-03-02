@@ -35,12 +35,12 @@ const ExchangePage: React.FC = () => {
                 <div className="grid grid-cols-12 items-center p-1 gap-1 bg-[#161d2f]">
                   <div className="col-span-6 pl-2 text-xs font-bold text-gray-200">{runner.name}</div>
                   <div className="col-span-3">
-                    <button onClick={() => addToBetSlip({ marketId: market.id, runnerId: runner.id, runnerName: runner.name, type: 'back' })} className="btn-back w-full py-2">
+                    <button onClick={() => addToBetSlip({ marketId: market.id, runnerId: runner.id, runnerName: runner.name, eventName: (market as any).name || 'Cricket Match', type: 'back', odds: (runner as any).back || 1.90 })} className="btn-back w-full py-2">
                       <span className="odds-text">{(runner as any).back || 1.90}</span>
                     </button>
                   </div>
                   <div className="col-span-3">
-                    <button onClick={() => addToBetSlip({ marketId: market.id, runnerId: runner.id, runnerName: runner.name, type: 'lay' })} className="btn-lay w-full py-2">
+                    <button onClick={() => addToBetSlip({ marketId: market.id, runnerId: runner.id, runnerName: runner.name, eventName: (market as any).name || 'Cricket Match', type: 'lay', odds: (runner as any).lay || 1.92 })} className="btn-lay w-full py-2">
                       <span className="odds-text">{(runner as any).lay || 1.92}</span>
                     </button>
                   </div>

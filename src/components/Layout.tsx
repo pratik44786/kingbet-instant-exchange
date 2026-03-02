@@ -13,7 +13,7 @@ import {
   ShieldCheck
 } from 'lucide-react';
 
-export const Layout: React.FC = ({ children }) => {
+export const Layout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
   const { user, logout } = useAuth();
   const { currentUser } = useApp();
   const navigate = useNavigate();

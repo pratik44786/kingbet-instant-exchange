@@ -5,7 +5,7 @@ import { AppProvider } from './context/AppContext';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import Layout from './components/Layout';
 import ProtectedRoute from './components/ProtectedRoute';
-
+import RoleGuard from './components/RoleGuard';
 // Pages
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
@@ -47,8 +47,8 @@ function App() {
                 <Route path="/wallet" element={<WalletPage />} />
                 <Route path="/history" element={<HistoryPage />} />
                 <Route path="/profile" element={<ProfilePage />} />
-                <Route path="/admin" element={<AdminPage />} />
-                <Route path="/superadmin" element={<SuperAdminPage />} />
+                <Route path="/admin" element={<RoleGuard allowedRoles={['admin', 'superadmin']}><AdminPage /></RoleGuard>} />
+                <Route path="/superadmin" element={<RoleGuard allowedRoles={['superadmin']}><SuperAdminPage /></RoleGuard>} />
                 {/* Add other casino game routes here similarly */}
               </Route>
 
