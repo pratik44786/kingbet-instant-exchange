@@ -174,7 +174,7 @@ export const Header: React.FC = () => {
               </>
             ) : (
               <>
-                {/* Not Authenticated - Login/Register Buttons */}
+                {/* Not Authenticated - Login/Get ID Buttons */}
                 <Button
                   onClick={() => navigate('/login')}
                   variant="outline"
@@ -186,7 +186,7 @@ export const Header: React.FC = () => {
                   onClick={() => navigate('/register')}
                   className="bg-yellow-600 hover:bg-yellow-700 text-white text-sm sm:text-base"
                 >
-                  Register
+                  Get ID
                 </Button>
               </>
             )}
