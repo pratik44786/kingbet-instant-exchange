@@ -80,31 +80,49 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   }, []);
 
   useEffect(() => {
-    // Set up auth state listener FIRST
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, newSession) => {
-        setSession(newSession);
-        if (newSession?.user) {
-          // Use setTimeout to avoid deadlock with Supabase client
-          setTimeout(() => fetchUserProfile(newSession.user), 0);
+    let mounted = true;
+
+    const initAuth = async () => {
+      try {
+        const { data: { session: existingSession } } = await supabase.auth.getSession();
+
+        if (!mounted) return;
+
+        setSession(existingSession);
+
+        if (existingSession?.user) {
+          await fetchUserProfile(existingSession.user);
         } else {
           setUser(null);
         }
+      } catch (err) {
+        console.error('Session init error:', err);
+        setUser(null);
+      } finally {
+        if (mounted) setIsLoading(false);
+      }
+    };
+
+    initAuth();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (_event, newSession) => {
+        setSession(newSession);
+
+        if (newSession?.user) {
+          await fetchUserProfile(newSession.user);
+        } else {
+          setUser(null);
+        }
+
         setIsLoading(false);
       }
     );
 
-    // THEN check for existing session
-    supabase.auth.getSession().then(({ data: { session: existingSession } }) => {
-      setSession(existingSession);
-      if (existingSession?.user) {
-        fetchUserProfile(existingSession.user);
-      } else {
-        setIsLoading(false);
-      }
-    });
-
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, [fetchUserProfile]);
 
   const login = useCallback(async (email: string, password: string) => {
@@ -141,8 +159,16 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   return (
     <AuthContext.Provider value={{
-      user, session, isAuthenticated: !!user, isLoading, error,
-      login, register, logout, clearError, getUserRole,
+      user,
+      session,
+      isAuthenticated: !!user,
+      isLoading,
+      error,
+      login,
+      register,
+      logout,
+      clearError,
+      getUserRole,
     }}>
       {children}
     </AuthContext.Provider>
