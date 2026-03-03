@@ -1,9 +1,10 @@
 import { useState, useCallback } from 'react';
 import { useApp } from '@/context/AppContext';
+import { bettingService } from '@/services/bettingService';
 import { ArrowLeft, Gem, Bomb } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-const GRID = 25; // 5x5
+const GRID = 25;
 const MINE_COUNT = 5;
 
 interface Cell { revealed: boolean; isMine: boolean; }
@@ -17,7 +18,7 @@ function createBoard(): Cell[] {
 }
 
 const MinesPage = () => {
-  const { currentUser, addPoints, removePoints } = useApp();
+  const { currentUser, wallet } = useApp();
   const [stake, setStake] = useState(50);
   const [board, setBoard] = useState<Cell[]>(createBoard());
   const [playing, setPlaying] = useState(false);
@@ -25,16 +26,20 @@ const MinesPage = () => {
   const [revealed, setRevealed] = useState(0);
   const [cashedOut, setCashedOut] = useState(false);
 
-  const multiplier = parseFloat((1 + revealed * 0.25).toFixed(2));
+  const [currentBetId, setCurrentBetId] = useState<string | null>(null);
 
-  const startGame = () => {
+  const startGame = async () => {
     if (stake <= 0 || stake > currentUser.balance) return;
-    removePoints(currentUser.id, stake);
-    setBoard(createBoard());
-    setPlaying(true);
-    setGameOver(false);
-    setRevealed(0);
-    setCashedOut(false);
+    try {
+      const res = await bettingService.placeBet({ bet_type: 'mines', odds: 1, stake, game_type: 'mines' });
+      setCurrentBetId(res.bet?.id || null);
+      setBoard(createBoard());
+      setPlaying(true);
+      setGameOver(false);
+      setRevealed(0);
+      setCashedOut(false);
+      wallet.refetch();
+    } catch { /* */ }
   };
 
   const revealCell = useCallback((idx: number) => {
@@ -53,12 +58,17 @@ const MinesPage = () => {
     }
   }, [board, playing, gameOver]);
 
-  const cashOut = () => {
-    if (!playing || gameOver || revealed === 0) return;
-    addPoints(currentUser.id, Math.floor(stake * multiplier));
-    setBoard(board.map(c => ({ ...c, revealed: true })));
-    setCashedOut(true);
-    setPlaying(false);
+  const multiplier = parseFloat((1 + revealed * 0.25).toFixed(2));
+
+  const cashOut = async () => {
+    if (!playing || gameOver || revealed === 0 || !currentBetId) return;
+    try {
+      await bettingService.cashOut(currentBetId, multiplier);
+      setBoard(board.map(c => ({ ...c, revealed: true })));
+      setCashedOut(true);
+      setPlaying(false);
+      wallet.refetch();
+    } catch { /* */ }
   };
 
   return (

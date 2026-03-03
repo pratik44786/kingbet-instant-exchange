@@ -1,32 +1,37 @@
 import { useState } from 'react';
 import { useApp } from '@/context/AppContext';
+import { bettingService } from '@/services/bettingService';
 import { ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const MULTIPLIERS = [0.5, 1, 0.5, 2, 1, 5, 1, 2, 0.5, 10, 0.5, 2, 1, 5, 1, 2, 0.5, 1, 0.5];
 
 const PlinkoPage = () => {
-  const { currentUser, addPoints, removePoints } = useApp();
+  const { currentUser, wallet } = useApp();
   const [stake, setStake] = useState(50);
   const [result, setResult] = useState<{ multiplier: number; winnings: number } | null>(null);
   const [dropping, setDropping] = useState(false);
   const [history, setHistory] = useState<{ mult: number; win: number }[]>([]);
 
-  const drop = () => {
+  const drop = async () => {
     if (stake <= 0 || stake > currentUser.balance || dropping) return;
-    removePoints(currentUser.id, stake);
-    setDropping(true);
-    setResult(null);
+    try {
+      const res = await bettingService.placeBet({ bet_type: 'plinko', odds: 1, stake, game_type: 'plinko' });
+      const betId = res.bet?.id;
+      setDropping(true);
+      setResult(null);
 
-    setTimeout(() => {
-      const idx = Math.floor(Math.random() * MULTIPLIERS.length);
-      const mult = MULTIPLIERS[idx];
-      const winnings = Math.floor(stake * mult);
-      if (winnings > 0) addPoints(currentUser.id, winnings);
-      setResult({ multiplier: mult, winnings });
-      setHistory(prev => [{ mult, win: winnings }, ...prev.slice(0, 19)]);
-      setDropping(false);
-    }, 1500);
+      setTimeout(async () => {
+        const idx = Math.floor(Math.random() * MULTIPLIERS.length);
+        const mult = MULTIPLIERS[idx];
+        const winnings = Math.floor(stake * mult);
+        if (betId) await bettingService.cashOut(betId, mult);
+        setResult({ multiplier: mult, winnings });
+        setHistory(prev => [{ mult, win: winnings }, ...prev.slice(0, 19)]);
+        setDropping(false);
+        wallet.refetch();
+      }, 1500);
+    } catch { setDropping(false); }
   };
 
   return (

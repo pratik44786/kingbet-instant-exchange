@@ -1,12 +1,13 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useApp } from '@/context/AppContext';
+import { bettingService } from '@/services/bettingService';
 import { ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 type State = 'waiting' | 'running' | 'crashed';
 
 const CrashPage = () => {
-  const { currentUser, addPoints, removePoints } = useApp();
+  const { currentUser, wallet } = useApp();
   const [stake, setStake] = useState(100);
   const [multiplier, setMultiplier] = useState(1.0);
   const [crashPoint, setCrashPoint] = useState(0);
@@ -50,17 +51,26 @@ const CrashPage = () => {
     return () => clearInterval(intervalRef.current);
   }, [state, startRound]);
 
-  const placeBet = () => {
+  const [currentBetId, setCurrentBetId] = useState<string | null>(null);
+
+  const placeBet = async () => {
     if (stake <= 0 || stake > currentUser.balance || hasBet || state !== 'running') return;
-    removePoints(currentUser.id, stake);
-    setHasBet(true);
+    try {
+      const res = await bettingService.placeBet({ bet_type: 'crash', odds: 1, stake, game_type: 'crash' });
+      setCurrentBetId(res.bet?.id || null);
+      setHasBet(true);
+      wallet.refetch();
+    } catch { /* */ }
   };
 
-  const cashOut = () => {
-    if (!hasBet || cashedOut || state !== 'running') return;
-    addPoints(currentUser.id, Math.floor(stake * multiplier));
-    setCashedOut(true);
-    setCashoutAt(multiplier);
+  const cashOut = async () => {
+    if (!hasBet || cashedOut || state !== 'running' || !currentBetId) return;
+    try {
+      await bettingService.cashOut(currentBetId, multiplier);
+      setCashedOut(true);
+      setCashoutAt(multiplier);
+      wallet.refetch();
+    } catch { /* */ }
   };
 
   return (

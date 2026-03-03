@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { useApp } from '@/context/AppContext';
+import { bettingService } from '@/services/bettingService';
 import { ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const DicePage = () => {
-  const { currentUser, addPoints, removePoints } = useApp();
+  const { currentUser, wallet } = useApp();
   const [stake, setStake] = useState(50);
   const [target, setTarget] = useState(50); // roll under
   const [result, setResult] = useState<number | null>(null);
@@ -15,22 +16,28 @@ const DicePage = () => {
   const multiplier = parseFloat((99 / target).toFixed(2));
   const winChance = target;
 
-  const roll = () => {
+  const roll = async () => {
     if (stake <= 0 || stake > currentUser.balance || rolling) return;
-    removePoints(currentUser.id, stake);
-    setRolling(true);
-    setResult(null);
-    setWon(null);
+    try {
+      const res = await bettingService.placeBet({ bet_type: 'dice', odds: multiplier, stake, game_type: 'dice' });
+      const betId = res.bet?.id;
+      setRolling(true);
+      setResult(null);
+      setWon(null);
 
-    setTimeout(() => {
-      const r = parseFloat((Math.random() * 100).toFixed(2));
-      const w = r < target;
-      if (w) addPoints(currentUser.id, Math.floor(stake * multiplier));
-      setResult(r);
-      setWon(w);
-      setHistory(prev => [{ roll: r, win: w }, ...prev.slice(0, 19)]);
-      setRolling(false);
-    }, 1000);
+      setTimeout(async () => {
+        const r = parseFloat((Math.random() * 100).toFixed(2));
+        const w = r < target;
+        if (betId) {
+          await bettingService.cashOut(betId, w ? multiplier : 0);
+        }
+        setResult(r);
+        setWon(w);
+        setHistory(prev => [{ roll: r, win: w }, ...prev.slice(0, 19)]);
+        setRolling(false);
+        wallet.refetch();
+      }, 1000);
+    } catch { setRolling(false); }
   };
 
   return (

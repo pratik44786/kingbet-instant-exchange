@@ -1,1 +1,7 @@
 project_id = "fhcwlulkjehfpqslqxdh"
+
+[functions.betting-engine]
+verify_jwt = false
+
+[functions.admin-controls]
+verify_jwt = false
