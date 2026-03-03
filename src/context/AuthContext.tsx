@@ -1,11 +1,6 @@
-import React, {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  ReactNode,
-  useCallback,
-} from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import type { User, Session } from '@supabase/supabase-js';
 
 export type UserRole = 'user' | 'admin' | 'superadmin';
 
@@ -13,146 +8,150 @@ export interface AuthUser {
   id: string;
   username: string;
   email?: string;
-  phone?: string;
   role: UserRole;
-  userId?: string; // For Admin/SuperAdmin User ID authentication
   balance?: number;
 }
 
 interface AuthContextType {
   user: AuthUser | null;
+  session: Session | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
-  
-  // Login methods
-  login: (user: AuthUser, token: string) => void;
-  loginWithUserId: (userId: string, user: AuthUser, token: string) => void;
-  
-  // Logout
-  logout: () => void;
-  
-  // Auth checks
-  checkAuth: () => void;
-  getUserRole: () => UserRole | null;
-  
-  // Clear error
+  login: (email: string, password: string) => Promise<void>;
+  register: (email: string, password: string, username: string) => Promise<void>;
+  logout: () => Promise<void>;
   clearError: () => void;
+  getUserRole: () => UserRole | null;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-interface AuthProviderProps {
-  children: ReactNode;
-}
-
-export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
+export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<AuthUser | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const checkAuth = useCallback(() => {
+  const fetchUserProfile = useCallback(async (authUser: User) => {
     try {
-      const storedToken = localStorage.getItem('authToken');
-      const storedUser = localStorage.getItem('authUser');
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('username, display_name, email, status')
+        .eq('id', authUser.id)
+        .single();
 
-      if (storedToken && storedUser) {
-        const parsedUser = JSON.parse(storedUser) as AuthUser;
-        setUser(parsedUser);
-      } else {
+      const { data: roleData } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', authUser.id)
+        .single();
+
+      const { data: wallet } = await supabase
+        .from('wallets')
+        .select('balance')
+        .eq('user_id', authUser.id)
+        .single();
+
+      if (profile?.status === 'blocked' || profile?.status === 'suspended') {
+        await supabase.auth.signOut();
+        setError('Your account has been ' + profile.status);
         setUser(null);
+        return;
       }
+
+      setUser({
+        id: authUser.id,
+        username: profile?.username || authUser.email?.split('@')[0] || 'User',
+        email: profile?.email || authUser.email,
+        role: (roleData?.role as UserRole) || 'user',
+        balance: wallet ? Number(wallet.balance) : 0,
+      });
     } catch (err) {
-      console.error('Error checking auth:', err);
-      // Clear corrupted storage
-      localStorage.removeItem('authToken');
-      localStorage.removeItem('authUser');
-      localStorage.removeItem('userIdLogin');
-      setUser(null);
-    } finally {
-      setIsLoading(false);
+      console.error('Error fetching profile:', err);
+      setUser({
+        id: authUser.id,
+        username: authUser.email?.split('@')[0] || 'User',
+        email: authUser.email,
+        role: 'user',
+        balance: 0,
+      });
     }
   }, []);
 
   useEffect(() => {
-    checkAuth();
-  }, [checkAuth]);
-
-  const login = useCallback((newUser: AuthUser, token: string) => {
-    try {
-      localStorage.setItem('authToken', token);
-      localStorage.setItem('authUser', JSON.stringify(newUser));
-      localStorage.removeItem('userIdLogin'); // Clear if previous login was User ID based
-      setUser(newUser);
-      setError(null);
-    } catch (err) {
-      console.error('Error logging in:', err);
-      setError('Failed to save session. Please try again.');
-    }
-  }, []);
-
-  const loginWithUserId = useCallback(
-    (userId: string, newUser: AuthUser, token: string) => {
-      try {
-        localStorage.setItem('authToken', token);
-        localStorage.setItem('authUser', JSON.stringify(newUser));
-        localStorage.setItem('userIdLogin', userId); // Store User ID for reference
-        setUser(newUser);
-        setError(null);
-      } catch (err) {
-        console.error('Error logging in with User ID:', err);
-        setError('Failed to save session. Please try again.');
+    // Set up auth state listener FIRST
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, newSession) => {
+        setSession(newSession);
+        if (newSession?.user) {
+          // Use setTimeout to avoid deadlock with Supabase client
+          setTimeout(() => fetchUserProfile(newSession.user), 0);
+        } else {
+          setUser(null);
+        }
+        setIsLoading(false);
       }
-    },
-    []
-  );
+    );
 
-  const logout = useCallback(() => {
-    try {
-      localStorage.removeItem('authToken');
-      localStorage.removeItem('authUser');
-      localStorage.removeItem('userIdLogin');
-      setUser(null);
-      setError(null);
-    } catch (err) {
-      console.error('Error logging out:', err);
+    // THEN check for existing session
+    supabase.auth.getSession().then(({ data: { session: existingSession } }) => {
+      setSession(existingSession);
+      if (existingSession?.user) {
+        fetchUserProfile(existingSession.user);
+      } else {
+        setIsLoading(false);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [fetchUserProfile]);
+
+  const login = useCallback(async (email: string, password: string) => {
+    setError(null);
+    const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+    if (signInError) {
+      setError(signInError.message);
+      throw signInError;
     }
   }, []);
 
-  const getUserRole = useCallback((): UserRole | null => {
-    return user?.role || null;
-  }, [user?.role]);
+  const register = useCallback(async (email: string, password: string, username: string) => {
+    setError(null);
+    const { error: signUpError } = await supabase.auth.signUp({
+      email,
+      password,
+      options: { data: { username } },
+    });
+    if (signUpError) {
+      setError(signUpError.message);
+      throw signUpError;
+    }
+  }, []);
 
-  const clearError = useCallback(() => {
+  const logout = useCallback(async () => {
+    await supabase.auth.signOut();
+    setUser(null);
+    setSession(null);
     setError(null);
   }, []);
 
-  const value: AuthContextType = {
-    user,
-    isAuthenticated: !!user,
-    isLoading,
-    error,
-    login,
-    loginWithUserId,
-    logout,
-    checkAuth,
-    getUserRole,
-    clearError,
-  };
+  const getUserRole = useCallback(() => user?.role || null, [user?.role]);
+  const clearError = useCallback(() => setError(null), []);
 
   return (
-    <AuthContext.Provider value={value}>
+    <AuthContext.Provider value={{
+      user, session, isAuthenticated: !!user, isLoading, error,
+      login, register, logout, clearError, getUserRole,
+    }}>
       {children}
     </AuthContext.Provider>
   );
 };
 
-// Custom hook to use auth context with error handling
 export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
+  if (!context) throw new Error('useAuth must be used within an AuthProvider');
   return context;
 };
 

@@ -14,6 +14,8 @@ const HistoryPage = () => {
     { id: 'games' as const, label: 'Game History', icon: Gamepad2 },
   ];
 
+  const isCredit = (type: string) => ['bet_win', 'admin_credit', 'deposit', 'bonus_credit', 'bet_refund'].includes(type);
+
   return (
     <div className="flex-1 p-4 overflow-auto max-w-4xl mx-auto w-full">
       <h2 className="text-lg font-bold text-foreground mb-4 flex items-center gap-2">
@@ -23,7 +25,7 @@ const HistoryPage = () => {
       <div className="flex gap-1 mb-4">
         {tabs.map(t => (
           <button key={t.id} onClick={() => setTab(t.id)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${tab === t.id ? 'bg-primary text-primary-foreground' : 'bg-secondary text-secondary-foreground hover:bg-surface-3'}`}>
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${tab === t.id ? 'bg-primary text-primary-foreground' : 'bg-secondary text-secondary-foreground'}`}>
             <t.icon className="w-4 h-4" /> {t.label}
           </button>
         ))}
@@ -31,7 +33,7 @@ const HistoryPage = () => {
 
       {tab === 'bets' && (
         <div className="surface-card rounded-lg overflow-hidden">
-          <div className="px-4 py-2.5 bg-surface-2 border-b border-border">
+          <div className="px-4 py-2.5 bg-[#1e273e] border-b border-border">
             <h3 className="text-sm font-semibold text-foreground">All Bets ({bets.length})</h3>
           </div>
           <div className="divide-y divide-border/50">
@@ -40,17 +42,17 @@ const HistoryPage = () => {
             ) : bets.map(bet => (
               <div key={bet.id} className="px-4 py-3 flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <span className={`text-[10px] uppercase font-bold px-1.5 py-0.5 rounded ${bet.type === 'back' ? 'bg-back text-back-foreground' : 'bg-lay text-lay-foreground'}`}>
-                    {bet.type}
+                  <span className={`text-[10px] uppercase font-bold px-1.5 py-0.5 rounded ${bet.bet_type.includes('back') ? 'bg-[#72bbef]/20 text-[#72bbef]' : 'bg-[#faa9ba]/20 text-[#faa9ba]'}`}>
+                    {bet.bet_type}
                   </span>
                   <div>
-                    <p className="text-sm font-medium text-foreground">{bet.runnerName}</p>
-                    <p className="text-xs text-muted-foreground">@ {bet.odds} • {new Date(bet.timestamp).toLocaleString()}</p>
+                    <p className="text-sm font-medium text-foreground">@ {bet.odds}</p>
+                    <p className="text-xs text-muted-foreground">{new Date(bet.created_at).toLocaleString()}</p>
                   </div>
                 </div>
                 <div className="text-right">
                   <p className="text-sm font-mono font-semibold text-foreground">{bet.stake} PTS</p>
-                  <span className={`text-xs px-1.5 py-0.5 rounded ${bet.status === 'matched' ? 'bg-positive/20 text-positive' : 'bg-primary/20 text-primary'}`}>
+                  <span className={`text-xs px-1.5 py-0.5 rounded ${bet.status === 'won' ? 'bg-green-500/20 text-green-400' : bet.status === 'lost' ? 'bg-red-500/20 text-red-400' : 'bg-primary/20 text-primary'}`}>
                     {bet.status}
                   </span>
                 </div>
@@ -62,28 +64,28 @@ const HistoryPage = () => {
 
       {tab === 'transactions' && (
         <div className="surface-card rounded-lg overflow-hidden">
-          <div className="px-4 py-2.5 bg-surface-2 border-b border-border">
+          <div className="px-4 py-2.5 bg-[#1e273e] border-b border-border">
             <h3 className="text-sm font-semibold text-foreground">All Transactions ({transactions.length})</h3>
           </div>
           <div className="divide-y divide-border/50">
-            {transactions.map(txn => (
+            {transactions.length === 0 ? (
+              <p className="px-4 py-8 text-center text-sm text-muted-foreground">No transactions yet</p>
+            ) : transactions.map(txn => (
               <div key={txn.id} className="px-4 py-3 flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center ${txn.type === 'credit' || txn.type === 'bet_win' ? 'bg-positive/20' : 'bg-destructive/20'}`}>
-                    {txn.type === 'credit' || txn.type === 'bet_win'
-                      ? <ArrowDownRight className="w-4 h-4 text-positive" />
-                      : <ArrowUpRight className="w-4 h-4 text-destructive" />}
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center ${isCredit(txn.type) ? 'bg-green-500/20' : 'bg-red-500/20'}`}>
+                    {isCredit(txn.type) ? <ArrowDownRight className="w-4 h-4 text-green-400" /> : <ArrowUpRight className="w-4 h-4 text-red-400" />}
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-foreground">{txn.description}</p>
-                    <p className="text-xs text-muted-foreground">{new Date(txn.timestamp).toLocaleString()}</p>
+                    <p className="text-sm font-medium text-foreground">{txn.description || txn.type}</p>
+                    <p className="text-xs text-muted-foreground">{new Date(txn.created_at).toLocaleString()}</p>
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className={`text-sm font-mono font-semibold ${txn.type === 'credit' || txn.type === 'bet_win' ? 'text-positive' : 'text-destructive'}`}>
-                    {txn.type === 'credit' || txn.type === 'bet_win' ? '+' : '-'}{txn.amount.toLocaleString()}
+                  <p className={`text-sm font-mono font-semibold ${isCredit(txn.type) ? 'text-green-400' : 'text-red-400'}`}>
+                    {isCredit(txn.type) ? '+' : '-'}{txn.amount.toLocaleString()}
                   </p>
-                  <p className="text-xs text-muted-foreground font-mono">{txn.balanceAfter.toLocaleString()} PTS</p>
+                  <p className="text-xs text-muted-foreground font-mono">{txn.balance_after.toLocaleString()} PTS</p>
                 </div>
               </div>
             ))}

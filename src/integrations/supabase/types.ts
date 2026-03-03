@@ -14,16 +14,433 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      bets: {
+        Row: {
+          actual_profit: number | null
+          bet_type: Database["public"]["Enums"]["bet_type"]
+          created_at: string
+          exposure: number
+          game_round_id: string | null
+          game_type: Database["public"]["Enums"]["game_type"] | null
+          id: string
+          market_id: string | null
+          odds: number
+          potential_profit: number
+          runner_id: string | null
+          settled_at: string | null
+          stake: number
+          status: Database["public"]["Enums"]["bet_status"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          actual_profit?: number | null
+          bet_type: Database["public"]["Enums"]["bet_type"]
+          created_at?: string
+          exposure?: number
+          game_round_id?: string | null
+          game_type?: Database["public"]["Enums"]["game_type"] | null
+          id?: string
+          market_id?: string | null
+          odds: number
+          potential_profit?: number
+          runner_id?: string | null
+          settled_at?: string | null
+          stake: number
+          status?: Database["public"]["Enums"]["bet_status"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          actual_profit?: number | null
+          bet_type?: Database["public"]["Enums"]["bet_type"]
+          created_at?: string
+          exposure?: number
+          game_round_id?: string | null
+          game_type?: Database["public"]["Enums"]["game_type"] | null
+          id?: string
+          market_id?: string | null
+          odds?: number
+          potential_profit?: number
+          runner_id?: string | null
+          settled_at?: string | null
+          stake?: number
+          status?: Database["public"]["Enums"]["bet_status"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bets_market_id_fkey"
+            columns: ["market_id"]
+            isOneToOne: false
+            referencedRelation: "markets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bets_runner_id_fkey"
+            columns: ["runner_id"]
+            isOneToOne: false
+            referencedRelation: "runners"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      game_logs: {
+        Row: {
+          action: string
+          bet_id: string | null
+          created_at: string
+          details: Json | null
+          game: Database["public"]["Enums"]["game_type"]
+          id: string
+          round_id: string | null
+          user_id: string
+        }
+        Insert: {
+          action: string
+          bet_id?: string | null
+          created_at?: string
+          details?: Json | null
+          game: Database["public"]["Enums"]["game_type"]
+          id?: string
+          round_id?: string | null
+          user_id: string
+        }
+        Update: {
+          action?: string
+          bet_id?: string | null
+          created_at?: string
+          details?: Json | null
+          game?: Database["public"]["Enums"]["game_type"]
+          id?: string
+          round_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "game_logs_bet_id_fkey"
+            columns: ["bet_id"]
+            isOneToOne: false
+            referencedRelation: "bets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "game_logs_round_id_fkey"
+            columns: ["round_id"]
+            isOneToOne: false
+            referencedRelation: "game_rounds"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      game_rounds: {
+        Row: {
+          created_at: string
+          ended_at: string | null
+          game: Database["public"]["Enums"]["game_type"]
+          id: string
+          multiplier: number | null
+          result: Json | null
+          round_data: Json
+          started_at: string
+        }
+        Insert: {
+          created_at?: string
+          ended_at?: string | null
+          game: Database["public"]["Enums"]["game_type"]
+          id?: string
+          multiplier?: number | null
+          result?: Json | null
+          round_data?: Json
+          started_at?: string
+        }
+        Update: {
+          created_at?: string
+          ended_at?: string | null
+          game?: Database["public"]["Enums"]["game_type"]
+          id?: string
+          multiplier?: number | null
+          result?: Json | null
+          round_data?: Json
+          started_at?: string
+        }
+        Relationships: []
+      }
+      markets: {
+        Row: {
+          competition: string
+          created_at: string
+          event_name: string
+          id: string
+          metadata: Json | null
+          sport: Database["public"]["Enums"]["sport_type"]
+          start_time: string
+          status: Database["public"]["Enums"]["market_status"]
+          updated_at: string
+        }
+        Insert: {
+          competition: string
+          created_at?: string
+          event_name: string
+          id?: string
+          metadata?: Json | null
+          sport: Database["public"]["Enums"]["sport_type"]
+          start_time: string
+          status?: Database["public"]["Enums"]["market_status"]
+          updated_at?: string
+        }
+        Update: {
+          competition?: string
+          created_at?: string
+          event_name?: string
+          id?: string
+          metadata?: Json | null
+          sport?: Database["public"]["Enums"]["sport_type"]
+          start_time?: string
+          status?: Database["public"]["Enums"]["market_status"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          display_name: string | null
+          email: string | null
+          id: string
+          parent_id: string | null
+          phone: string | null
+          status: Database["public"]["Enums"]["account_status"]
+          updated_at: string
+          username: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          email?: string | null
+          id: string
+          parent_id?: string | null
+          phone?: string | null
+          status?: Database["public"]["Enums"]["account_status"]
+          updated_at?: string
+          username: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          email?: string | null
+          id?: string
+          parent_id?: string | null
+          phone?: string | null
+          status?: Database["public"]["Enums"]["account_status"]
+          updated_at?: string
+          username?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      runners: {
+        Row: {
+          back_odds: number
+          back_size: number
+          created_at: string
+          id: string
+          is_winner: boolean | null
+          lay_odds: number
+          lay_size: number
+          market_id: string
+          name: string
+          sort_order: number
+        }
+        Insert: {
+          back_odds?: number
+          back_size?: number
+          created_at?: string
+          id?: string
+          is_winner?: boolean | null
+          lay_odds?: number
+          lay_size?: number
+          market_id: string
+          name: string
+          sort_order?: number
+        }
+        Update: {
+          back_odds?: number
+          back_size?: number
+          created_at?: string
+          id?: string
+          is_winner?: boolean | null
+          lay_odds?: number
+          lay_size?: number
+          market_id?: string
+          name?: string
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "runners_market_id_fkey"
+            columns: ["market_id"]
+            isOneToOne: false
+            referencedRelation: "markets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      transactions: {
+        Row: {
+          amount: number
+          balance_after: number
+          balance_before: number
+          created_at: string
+          description: string | null
+          id: string
+          reference_id: string | null
+          reference_type: string | null
+          type: Database["public"]["Enums"]["txn_type"]
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          balance_after: number
+          balance_before: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          reference_id?: string | null
+          reference_type?: string | null
+          type: Database["public"]["Enums"]["txn_type"]
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          balance_after?: number
+          balance_before?: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          reference_id?: string | null
+          reference_type?: string | null
+          type?: Database["public"]["Enums"]["txn_type"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      wallets: {
+        Row: {
+          balance: number
+          bonus_balance: number
+          exposure: number
+          id: string
+          total_profit_loss: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          balance?: number
+          bonus_balance?: number
+          exposure?: number
+          id?: string
+          total_profit_loss?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          balance?: number
+          bonus_balance?: number
+          exposure?: number
+          id?: string
+          total_profit_loss?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_user_role: {
+        Args: { uid: string }
+        Returns: Database["public"]["Enums"]["app_role"]
+      }
+      has_role: {
+        Args: { _role: Database["public"]["Enums"]["app_role"]; uid: string }
+        Returns: boolean
+      }
+      is_admin_or_above: { Args: { uid: string }; Returns: boolean }
+      is_in_downline: {
+        Args: { admin_uid: string; target_uid: string }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      account_status: "active" | "suspended" | "blocked"
+      app_role: "user" | "admin" | "superadmin"
+      bet_status: "pending" | "matched" | "won" | "lost" | "void" | "cancelled"
+      bet_type:
+        | "back"
+        | "lay"
+        | "fancy_yes"
+        | "fancy_no"
+        | "session_over"
+        | "session_under"
+        | "casino"
+        | "crash"
+        | "dice"
+        | "mines"
+        | "plinko"
+        | "aviator"
+        | "teen_patti"
+      game_type:
+        | "aviator"
+        | "plinko"
+        | "crash"
+        | "dice"
+        | "mines"
+        | "teen_patti"
+        | "casino"
+      market_status: "open" | "suspended" | "closed" | "settled"
+      sport_type: "cricket" | "football" | "tennis"
+      txn_type:
+        | "deposit"
+        | "withdrawal"
+        | "bet_debit"
+        | "bet_win"
+        | "bet_refund"
+        | "admin_credit"
+        | "admin_debit"
+        | "bonus_credit"
+        | "adjustment"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +567,47 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      account_status: ["active", "suspended", "blocked"],
+      app_role: ["user", "admin", "superadmin"],
+      bet_status: ["pending", "matched", "won", "lost", "void", "cancelled"],
+      bet_type: [
+        "back",
+        "lay",
+        "fancy_yes",
+        "fancy_no",
+        "session_over",
+        "session_under",
+        "casino",
+        "crash",
+        "dice",
+        "mines",
+        "plinko",
+        "aviator",
+        "teen_patti",
+      ],
+      game_type: [
+        "aviator",
+        "plinko",
+        "crash",
+        "dice",
+        "mines",
+        "teen_patti",
+        "casino",
+      ],
+      market_status: ["open", "suspended", "closed", "settled"],
+      sport_type: ["cricket", "football", "tennis"],
+      txn_type: [
+        "deposit",
+        "withdrawal",
+        "bet_debit",
+        "bet_win",
+        "bet_refund",
+        "admin_credit",
+        "admin_debit",
+        "bonus_credit",
+        "adjustment",
+      ],
+    },
   },
 } as const

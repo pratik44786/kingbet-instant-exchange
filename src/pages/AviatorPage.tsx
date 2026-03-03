@@ -1,12 +1,13 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useApp } from '@/context/AppContext';
+import { bettingService } from '@/services/bettingService';
 import { ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 type GameState = 'waiting' | 'flying' | 'crashed';
 
 const AviatorPage = () => {
-  const { currentUser, addPoints, removePoints } = useApp();
+  const { currentUser, wallet } = useApp();
   const [stake, setStake] = useState(100);
   const [multiplier, setMultiplier] = useState(1.0);
   const [crashPoint, setCrashPoint] = useState(0);
@@ -55,23 +56,27 @@ const AviatorPage = () => {
     return () => clearInterval(intervalRef.current);
   }, [state, startRound]);
 
-  const placeBet = () => {
+  const [currentBetId, setCurrentBetId] = useState<string | null>(null);
+
+  const placeBet = async () => {
     try {
       if (stake <= 0 || stake > currentUser.balance || state !== 'flying' || hasBet) return;
-      removePoints(currentUser.id, stake);
+      const result = await bettingService.placeBet({ bet_type: 'aviator', odds: 1, stake, game_type: 'aviator' });
+      setCurrentBetId(result.bet?.id || null);
       setHasBet(true);
+      wallet.refetch();
     } catch (error) {
       console.error('Error placing bet:', error);
     }
   };
 
-  const cashOut = () => {
+  const cashOut = async () => {
     try {
-      if (!hasBet || cashedOut || state !== 'flying') return;
-      const winnings = Math.floor(stake * multiplier);
-      addPoints(currentUser.id, winnings);
+      if (!hasBet || cashedOut || state !== 'flying' || !currentBetId) return;
+      await bettingService.cashOut(currentBetId, multiplier);
       setCashedOut(true);
       setCashoutMultiplier(multiplier);
+      wallet.refetch();
     } catch (error) {
       console.error('Error cashing out:', error);
     }
