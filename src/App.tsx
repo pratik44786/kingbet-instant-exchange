@@ -21,7 +21,20 @@ import HistoryPage from './pages/HistoryPage';
 
 // Smart redirect: authenticated users go to dashboard, else landing
 const RootRedirect = () => {
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, isLoading, user } = useAuth();
+
+  // ✅ FIX: Handle loading state first
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-yellow-500 mx-auto mb-4"></div>
+          <p className="text-gray-300">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
   if (!isAuthenticated) return <LandingPage />;
 
   const role = user?.role as string;
@@ -43,14 +56,34 @@ function App() {
               <Route path="/register" element={<RegisterPage />} />
 
               {/* Protected with Dashboard Layout */}
-              <Route element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
+              <Route
+                element={
+                  <ProtectedRoute>
+                    <DashboardLayout />
+                  </ProtectedRoute>
+                }
+              >
                 <Route path="/exchange" element={<ExchangePage />} />
                 <Route path="/casino" element={<CasinoPage />} />
                 <Route path="/wallet" element={<WalletPage />} />
                 <Route path="/history" element={<HistoryPage />} />
                 <Route path="/profile" element={<ProfilePage />} />
-                <Route path="/admin" element={<RoleGuard allowedRoles={['admin', 'superadmin']}><AdminPage /></RoleGuard>} />
-                <Route path="/superadmin" element={<RoleGuard allowedRoles={['superadmin']}><SuperAdminPage /></RoleGuard>} />
+                <Route
+                  path="/admin"
+                  element={
+                    <RoleGuard allowedRoles={['admin', 'superadmin']}>
+                      <AdminPage />
+                    </RoleGuard>
+                  }
+                />
+                <Route
+                  path="/superadmin"
+                  element={
+                    <RoleGuard allowedRoles={['superadmin']}>
+                      <SuperAdminPage />
+                    </RoleGuard>
+                  }
+                />
               </Route>
 
               <Route path="*" element={<Navigate to="/" replace />} />
