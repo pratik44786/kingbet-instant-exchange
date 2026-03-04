@@ -345,6 +345,6 @@ const LandingPage = () => (
 </footer>
 
   </div>  
-);  export default LandingPage;
+);
 
-Ye lo.isme issue fix krke or baki chize bi a change kiye ye code copy paste ready de do
+export default LandingPage;

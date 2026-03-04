@@ -1,45 +1,63 @@
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { AppProvider } from './context/AppContext';
 import { ErrorBoundary } from './components/ErrorBoundary';
-import DashboardLayout from './components/DashboardLayout';
-import ProtectedRoute from './components/ProtectedRoute';
-import RoleGuard from './components/RoleGuard';
+import { Toaster } from 'sonner';
 
-// Pages
-import LandingPage from './pages/LandingPage';
-import LoginPage from './pages/LoginPage';
-import RegisterPage from './pages/RegisterPage';
-import ExchangePage from './pages/ExchangePage';
-import CasinoPage from './pages/CasinoPage';
-import ProfilePage from './pages/ProfilePage';
-import AdminPage from './pages/AdminPage';
-import SuperAdminPage from './pages/SuperAdminPage';
-import WalletPage from './pages/WalletPage';
-import HistoryPage from './pages/HistoryPage';
+// Loading fallback
+const PageLoader = () => (
+  <div className="min-h-screen bg-[#0b1221] flex items-center justify-center">
+    <div className="text-center">
+      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-yellow-500 mx-auto mb-4" />
+      <p className="text-gray-300">Loading...</p>
+    </div>
+  </div>
+);
 
-// Smart redirect: authenticated users go to dashboard, else landing
+// Lazy loaded pages
+const LandingPage = lazy(() => import('./pages/LandingPage'));
+const LoginPage = lazy(() => import('./pages/LoginPage'));
+const ExchangePage = lazy(() => import('./pages/ExchangePage'));
+const CasinoPage = lazy(() => import('./pages/CasinoPage'));
+const ProfilePage = lazy(() => import('./pages/ProfilePage'));
+const AdminPage = lazy(() => import('./pages/AdminPage'));
+const SuperAdminPage = lazy(() => import('./pages/SuperAdminPage'));
+const WalletPage = lazy(() => import('./pages/WalletPage'));
+const HistoryPage = lazy(() => import('./pages/HistoryPage'));
+const AviatorPage = lazy(() => import('./pages/AviatorPage'));
+const CrashPage = lazy(() => import('./pages/CrashPage'));
+const DicePage = lazy(() => import('./pages/DicePage'));
+const MinesPage = lazy(() => import('./pages/MinesPage'));
+const PlinkoPage = lazy(() => import('./pages/PlinkoPage'));
+
+// Lazy loaded layout
+const DashboardLayout = lazy(() => import('./components/DashboardLayout'));
+
+// Protected route wrapper
+const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { isAuthenticated, isLoading } = useAuth();
+  if (isLoading) return <PageLoader />;
+  if (!isAuthenticated) return <Navigate to="/login" replace />;
+  return <>{children}</>;
+};
+
+// Role guard wrapper
+const RoleGuard: React.FC<{ children: React.ReactNode; allowedRoles: string[] }> = ({ children, allowedRoles }) => {
+  const { user } = useAuth();
+  if (!user || !allowedRoles.includes(user.role)) {
+    return <Navigate to="/exchange" replace />;
+  }
+  return <>{children}</>;
+};
+
+// Smart redirect based on auth + role
 const RootRedirect = () => {
   const { isAuthenticated, isLoading, user } = useAuth();
-
-  // ✅ FIX: Handle loading state first
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-yellow-500 mx-auto mb-4"></div>
-          <p className="text-gray-300">Loading...</p>
-        </div>
-      </div>
-    );
-  }
-
+  if (isLoading) return <PageLoader />;
   if (!isAuthenticated) return <LandingPage />;
-
-  const role = user?.role as string;
-  if (role === 'superadmin') return <Navigate to="/superadmin" replace />;
-  if (role === 'admin') return <Navigate to="/admin" replace />;
+  if (user?.role === 'superadmin') return <Navigate to="/superadmin" replace />;
+  if (user?.role === 'admin') return <Navigate to="/admin" replace />;
   return <Navigate to="/exchange" replace />;
 };
 
@@ -48,23 +66,29 @@ function App() {
     <ErrorBoundary>
       <Router>
         <AuthProvider>
-          <AppProvider>
+          <Suspense fallback={<PageLoader />}>
             <Routes>
-              {/* Public */}
+              {/* Public routes */}
               <Route path="/" element={<RootRedirect />} />
               <Route path="/login" element={<LoginPage />} />
-              <Route path="/register" element={<RegisterPage />} />
 
-              {/* Protected with Dashboard Layout */}
+              {/* Protected routes with Dashboard Layout */}
               <Route
                 element={
                   <ProtectedRoute>
-                    <DashboardLayout />
+                    <AppProvider>
+                      <DashboardLayout />
+                    </AppProvider>
                   </ProtectedRoute>
                 }
               >
                 <Route path="/exchange" element={<ExchangePage />} />
                 <Route path="/casino" element={<CasinoPage />} />
+                <Route path="/casino/aviator" element={<AviatorPage />} />
+                <Route path="/casino/crash" element={<CrashPage />} />
+                <Route path="/casino/dice" element={<DicePage />} />
+                <Route path="/casino/mines" element={<MinesPage />} />
+                <Route path="/casino/plinko" element={<PlinkoPage />} />
                 <Route path="/wallet" element={<WalletPage />} />
                 <Route path="/history" element={<HistoryPage />} />
                 <Route path="/profile" element={<ProfilePage />} />
@@ -86,9 +110,11 @@ function App() {
                 />
               </Route>
 
+              {/* Catch-all redirect */}
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
-          </AppProvider>
+          </Suspense>
+          <Toaster position="top-right" richColors />
         </AuthProvider>
       </Router>
     </ErrorBoundary>

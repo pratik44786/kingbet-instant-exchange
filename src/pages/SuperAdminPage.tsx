@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Shield, Plus, Minus, Users, UserPlus, Network, ChevronRight, BarChart3, Ban, Check, Loader2 } from 'lucide-react';
+import { Shield, Plus, Minus, Users, UserPlus, BarChart3, Ban, Check, Loader2 } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
 import { adminService } from '@/services/bettingService';
 import { toast } from 'sonner';
@@ -21,8 +21,7 @@ const SuperAdminPage = () => {
   const [tab, setTab] = useState<'users' | 'create' | 'topup' | 'reports'>('users');
   const [selectedUserId, setSelectedUserId] = useState('');
   const [amount, setAmount] = useState(0);
-  const [newEmail, setNewEmail] = useState('');
-  const [newUsername, setNewUsername] = useState('');
+  const [newUserId, setNewUserId] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [newRole, setNewRole] = useState<'admin' | 'user'>('admin');
   const [summary, setSummary] = useState<any>(null);
@@ -57,10 +56,19 @@ const SuperAdminPage = () => {
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!newUserId.trim() || !newPassword.trim()) {
+      toast.error('User ID and password are required');
+      return;
+    }
+    if (newPassword.length < 6) {
+      toast.error('Password must be at least 6 characters');
+      return;
+    }
     try {
-      await adminService.createUser(newEmail, newPassword, newUsername, newRole);
-      toast.success(`${newRole} "${newUsername}" created!`);
-      setNewEmail(''); setNewUsername(''); setNewPassword('');
+      await adminService.createUser(newUserId.trim(), newPassword.trim(), newUserId.trim(), newRole);
+      toast.success(`${newRole} "${newUserId}" created!`);
+      setNewUserId('');
+      setNewPassword('');
       fetchUsers();
     } catch (err: any) { toast.error(err.message); }
   };
@@ -79,9 +87,6 @@ const SuperAdminPage = () => {
     try { const res = await adminService.pnlReport(period); setPnl(res); }
     catch { /* */ }
   };
-
-  const allAdmins = users.filter(u => u.user_roles?.[0]?.role === 'admin');
-  const allRegular = users.filter(u => u.user_roles?.[0]?.role === 'user');
 
   const tabs = [
     { id: 'users' as const, label: 'All Users', icon: Users },
@@ -129,38 +134,40 @@ const SuperAdminPage = () => {
           {loading ? (
             <div className="flex items-center justify-center p-8"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>
           ) : (
-            <table className="w-full">
-              <thead>
-                <tr className="text-xs text-muted-foreground uppercase border-b border-border">
-                  <th className="text-left px-4 py-2">Username</th>
-                  <th className="text-left px-4 py-2">Role</th>
-                  <th className="text-left px-4 py-2">Status</th>
-                  <th className="text-right px-4 py-2">Balance</th>
-                  <th className="text-right px-4 py-2">Exposure</th>
-                  <th className="text-right px-4 py-2">P/L</th>
-                  <th className="text-right px-4 py-2">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border/50">
-                {users.map((u: UserRow) => (
-                  <tr key={u.id} className="hover:bg-white/5">
-                    <td className="px-4 py-2.5 text-sm font-medium text-foreground">{u.username}</td>
-                    <td className="px-4 py-2.5"><span className="text-xs px-2 py-0.5 rounded bg-secondary uppercase font-semibold">{u.user_roles?.[0]?.role || 'user'}</span></td>
-                    <td className="px-4 py-2.5"><span className={`text-xs px-2 py-0.5 rounded uppercase font-semibold ${u.status === 'active' ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>{u.status}</span></td>
-                    <td className="px-4 py-2.5 text-right font-mono text-sm">{(u.wallets?.[0]?.balance || 0).toLocaleString()}</td>
-                    <td className="px-4 py-2.5 text-right font-mono text-sm text-red-400">{(u.wallets?.[0]?.exposure || 0).toLocaleString()}</td>
-                    <td className="px-4 py-2.5 text-right font-mono text-sm">{(u.wallets?.[0]?.total_profit_loss || 0).toLocaleString()}</td>
-                    <td className="px-4 py-2.5 text-right">
-                      {u.status === 'active' ? (
-                        <button onClick={() => handleBlock(u.id)} className="text-xs bg-red-500/20 text-red-400 px-2 py-1 rounded hover:bg-red-500/30"><Ban className="w-3 h-3 inline" /> Block</button>
-                      ) : (
-                        <button onClick={() => handleUnblock(u.id)} className="text-xs bg-green-500/20 text-green-400 px-2 py-1 rounded hover:bg-green-500/30"><Check className="w-3 h-3 inline" /> Unblock</button>
-                      )}
-                    </td>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="text-xs text-muted-foreground uppercase border-b border-border">
+                    <th className="text-left px-4 py-2">User ID</th>
+                    <th className="text-left px-4 py-2">Role</th>
+                    <th className="text-left px-4 py-2">Status</th>
+                    <th className="text-right px-4 py-2">Balance</th>
+                    <th className="text-right px-4 py-2">Exposure</th>
+                    <th className="text-right px-4 py-2">P/L</th>
+                    <th className="text-right px-4 py-2">Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-border/50">
+                  {users.map((u: UserRow) => (
+                    <tr key={u.id} className="hover:bg-white/5">
+                      <td className="px-4 py-2.5 text-sm font-medium text-foreground">{u.username}</td>
+                      <td className="px-4 py-2.5"><span className="text-xs px-2 py-0.5 rounded bg-secondary uppercase font-semibold">{u.user_roles?.[0]?.role || 'user'}</span></td>
+                      <td className="px-4 py-2.5"><span className={`text-xs px-2 py-0.5 rounded uppercase font-semibold ${u.status === 'active' ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>{u.status}</span></td>
+                      <td className="px-4 py-2.5 text-right font-mono text-sm">{(u.wallets?.[0]?.balance || 0).toLocaleString()}</td>
+                      <td className="px-4 py-2.5 text-right font-mono text-sm text-red-400">{(u.wallets?.[0]?.exposure || 0).toLocaleString()}</td>
+                      <td className="px-4 py-2.5 text-right font-mono text-sm">{(u.wallets?.[0]?.total_profit_loss || 0).toLocaleString()}</td>
+                      <td className="px-4 py-2.5 text-right">
+                        {u.status === 'active' ? (
+                          <button onClick={() => handleBlock(u.id)} className="text-xs bg-red-500/20 text-red-400 px-2 py-1 rounded hover:bg-red-500/30"><Ban className="w-3 h-3 inline mr-1" />Block</button>
+                        ) : (
+                          <button onClick={() => handleUnblock(u.id)} className="text-xs bg-green-500/20 text-green-400 px-2 py-1 rounded hover:bg-green-500/30"><Check className="w-3 h-3 inline mr-1" />Unblock</button>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
         </div>
       )}
@@ -169,17 +176,24 @@ const SuperAdminPage = () => {
         <div className="surface-card rounded-lg p-6 max-w-md">
           <h3 className="text-sm font-semibold text-foreground mb-4">Create Account</h3>
           <form onSubmit={handleCreate} className="space-y-4">
-            <select value={newRole} onChange={e => setNewRole(e.target.value as 'admin' | 'user')}
-              className="w-full bg-[#1e273e] text-foreground rounded-lg px-3 py-2 text-sm border border-border">
-              <option value="admin">Admin</option>
-              <option value="user">User</option>
-            </select>
-            <input type="text" value={newUsername} onChange={e => setNewUsername(e.target.value)}
-              className="w-full bg-[#1e273e] text-foreground rounded-lg px-3 py-2 text-sm border border-border" placeholder="Username" />
-            <input type="email" value={newEmail} onChange={e => setNewEmail(e.target.value)}
-              className="w-full bg-[#1e273e] text-foreground rounded-lg px-3 py-2 text-sm border border-border" placeholder="Email" />
-            <input type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)}
-              className="w-full bg-[#1e273e] text-foreground rounded-lg px-3 py-2 text-sm border border-border" placeholder="Password (min 6 chars)" />
+            <div>
+              <label className="text-xs text-muted-foreground uppercase font-semibold mb-1 block">Account Type</label>
+              <select value={newRole} onChange={e => setNewRole(e.target.value as 'admin' | 'user')}
+                className="w-full bg-[#1e273e] text-foreground rounded-lg px-3 py-2 text-sm border border-border">
+                <option value="admin">Admin</option>
+                <option value="user">User</option>
+              </select>
+            </div>
+            <div>
+              <label className="text-xs text-muted-foreground uppercase font-semibold mb-1 block">User ID</label>
+              <input type="text" value={newUserId} onChange={e => setNewUserId(e.target.value)}
+                className="w-full bg-[#1e273e] text-foreground rounded-lg px-3 py-2 text-sm border border-border" placeholder="Enter unique user ID" required />
+            </div>
+            <div>
+              <label className="text-xs text-muted-foreground uppercase font-semibold mb-1 block">Password</label>
+              <input type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)}
+                className="w-full bg-[#1e273e] text-foreground rounded-lg px-3 py-2 text-sm border border-border" placeholder="Min 6 characters" required />
+            </div>
             <button type="submit" className="w-full bg-primary text-primary-foreground py-2.5 rounded-lg font-semibold text-sm">Create {newRole}</button>
           </form>
         </div>
