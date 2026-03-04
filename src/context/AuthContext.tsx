@@ -4,6 +4,14 @@ import type { User, Session } from '@supabase/supabase-js';
 
 export type UserRole = 'user' | 'admin' | 'superadmin';
 
+const EMAIL_DOMAIN = 'kingbet.local';
+
+/** Map a plain userId string to the internal email used by Supabase Auth */
+function toInternalEmail(userId: string): string {
+  if (userId.includes('@')) return userId; // already an email (legacy compat)
+  return `${userId.toLowerCase().trim()}@${EMAIL_DOMAIN}`;
+}
+
 export interface AuthUser {
   id: string;
   username: string;
@@ -18,8 +26,8 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
-  login: (email: string, password: string) => Promise<void>;
-  register: (email: string, password: string, username: string) => Promise<void>;
+  login: (userId: string, password: string) => Promise<void>;
+  register: (userId: string, password: string, username?: string) => Promise<void>;
   logout: () => Promise<void>;
   clearError: () => void;
   getUserRole: () => UserRole | null;
@@ -55,14 +63,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
       if (profile?.status === 'blocked' || profile?.status === 'suspended') {
         await supabase.auth.signOut();
-        setError('Your account has been ' + profile.status);
+        setError('Your account has been ' + profile.status + '. Contact your admin.');
         setUser(null);
         return;
       }
 
       setUser({
         id: authUser.id,
-        username: profile?.username || authUser.email?.split('@')[0] || 'User',
+        username: profile?.username || authUser.user_metadata?.username || 'User',
         email: profile?.email || authUser.email,
         role: (roleData?.role as UserRole) || 'user',
         balance: wallet ? Number(wallet.balance) : 0,
@@ -71,7 +79,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       console.error('Error fetching profile:', err);
       setUser({
         id: authUser.id,
-        username: authUser.email?.split('@')[0] || 'User',
+        username: authUser.user_metadata?.username || 'User',
         email: authUser.email,
         role: 'user',
         balance: 0,
@@ -85,11 +93,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const initAuth = async () => {
       try {
         const { data: { session: existingSession } } = await supabase.auth.getSession();
-
         if (!mounted) return;
-
         setSession(existingSession);
-
         if (existingSession?.user) {
           await fetchUserProfile(existingSession.user);
         } else {
@@ -108,13 +113,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (_event, newSession) => {
         setSession(newSession);
-
         if (newSession?.user) {
           await fetchUserProfile(newSession.user);
         } else {
           setUser(null);
         }
-
         setIsLoading(false);
       }
     );
@@ -125,21 +128,23 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     };
   }, [fetchUserProfile]);
 
-  const login = useCallback(async (email: string, password: string) => {
+  const login = useCallback(async (userId: string, password: string) => {
     setError(null);
+    const email = toInternalEmail(userId);
     const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
     if (signInError) {
-      setError(signInError.message);
+      setError('Invalid User ID or password');
       throw signInError;
     }
   }, []);
 
-  const register = useCallback(async (email: string, password: string, username: string) => {
+  const register = useCallback(async (userId: string, password: string, username?: string) => {
     setError(null);
+    const email = toInternalEmail(userId);
     const { error: signUpError } = await supabase.auth.signUp({
       email,
       password,
-      options: { data: { username } },
+      options: { data: { username: username || userId } },
     });
     if (signUpError) {
       setError(signUpError.message);
@@ -152,6 +157,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setUser(null);
     setSession(null);
     setError(null);
+    // Clear any legacy localStorage
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('authUser');
+    localStorage.removeItem('userIdLogin');
   }, []);
 
   const getUserRole = useCallback(() => user?.role || null, [user?.role]);

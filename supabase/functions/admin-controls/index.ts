@@ -2,8 +2,10 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 }
+
+const EMAIL_DOMAIN = 'kingbet.local'
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -18,7 +20,8 @@ Deno.serve(async (req) => {
     const authHeader = req.headers.get('Authorization')
     if (!authHeader) return json({ error: 'Unauthorized' }, 401)
 
-    const userClient = createClient(supabaseUrl, Deno.env.get('SUPABASE_PUBLISHABLE_KEY') ?? '', {
+    const anonKey = Deno.env.get('SUPABASE_ANON_KEY') ?? Deno.env.get('SUPABASE_PUBLISHABLE_KEY') ?? ''
+    const userClient = createClient(supabaseUrl, anonKey, {
       global: { headers: { Authorization: authHeader } },
     })
     const { data: { user } } = await userClient.auth.getUser()
@@ -70,8 +73,8 @@ Deno.serve(async (req) => {
 async function listUsers(client: any, adminId: string, isSuperAdmin: boolean) {
   let query = client.from('profiles').select(`
     *, 
-    wallets!wallets_user_id_fkey(balance, bonus_balance, exposure, total_profit_loss),
-    user_roles!user_roles_user_id_fkey(role)
+    wallets(balance, bonus_balance, exposure, total_profit_loss),
+    user_roles(role)
   `)
   
   if (!isSuperAdmin) {
@@ -84,10 +87,9 @@ async function listUsers(client: any, adminId: string, isSuperAdmin: boolean) {
 }
 
 async function adjustBalance(client: any, adminId: string, data: any, isSuperAdmin: boolean) {
-  const { user_id, amount, type } = data // type: 'credit' | 'debit'
+  const { user_id, amount, type } = data
   if (!user_id || !amount || !type) return json({ error: 'Missing params' }, 400)
 
-  // Verify target user is in downline (unless superadmin)
   if (!isSuperAdmin) {
     const { data: profile } = await client.from('profiles').select('parent_id')
       .eq('id', user_id).single()
@@ -129,7 +131,12 @@ async function updateUserStatus(client: any, userId: string, status: string) {
 
 async function createUser(client: any, adminId: string, data: any, isSuperAdmin: boolean) {
   const { email, password, username, role } = data
-  if (!email || !password || !username) return json({ error: 'Missing fields' }, 400)
+  // Support both userId-based and legacy email-based creation
+  const userId = username || email
+  if (!userId || !password) return json({ error: 'User ID and password are required' }, 400)
+  
+  // Map userId to internal email
+  const internalEmail = email?.includes('@') ? email : `${userId.toLowerCase().trim()}@${EMAIL_DOMAIN}`
 
   // Only superadmin can create admins
   if (role === 'admin' && !isSuperAdmin) {
@@ -140,10 +147,10 @@ async function createUser(client: any, adminId: string, data: any, isSuperAdmin:
   }
 
   const { data: newUser, error } = await client.auth.admin.createUser({
-    email,
+    email: internalEmail,
     password,
     email_confirm: true,
-    user_metadata: { username },
+    user_metadata: { username: userId },
   })
   if (error) return json({ error: error.message }, 500)
 
@@ -155,7 +162,7 @@ async function createUser(client: any, adminId: string, data: any, isSuperAdmin:
     await client.from('user_roles').update({ role: 'admin' }).eq('user_id', newUser.user.id)
   }
 
-  return json({ success: true, user_id: newUser.user.id })
+  return json({ success: true, user_id: newUser.user.id, username: userId })
 }
 
 async function changeRole(client: any, data: any) {
@@ -170,10 +177,7 @@ async function changeRole(client: any, data: any) {
 }
 
 async function listBets(client: any, data: any) {
-  let query = client.from('bets').select(`
-    *,
-    profiles!bets_user_id_fkey(username)
-  `)
+  let query = client.from('bets').select('*')
   
   if (data?.user_id) query = query.eq('user_id', data.user_id)
   if (data?.status) query = query.eq('status', data.status)
@@ -235,9 +239,8 @@ async function forceSettle(client: any, data: any) {
 }
 
 async function platformSummary(client: any) {
-  const { data: totalUsers } = await client.from('profiles').select('id', { count: 'exact', head: true })
   const { data: wallets } = await client.from('wallets').select('balance, exposure, total_profit_loss')
-  const { data: activeBets } = await client.from('bets').select('id, stake, exposure', { count: 'exact' })
+  const { data: activeBets } = await client.from('bets').select('id')
     .in('status', ['pending', 'matched'])
 
   const totalBalance = wallets?.reduce((s: number, w: any) => s + Number(w.balance), 0) || 0
@@ -245,7 +248,7 @@ async function platformSummary(client: any) {
   const totalPnL = wallets?.reduce((s: number, w: any) => s + Number(w.total_profit_loss), 0) || 0
 
   return json({
-    total_users: totalUsers,
+    total_users: wallets?.length || 0,
     total_balance: totalBalance,
     total_exposure: totalExposure,
     total_pnl: totalPnL,
@@ -255,7 +258,7 @@ async function platformSummary(client: any) {
 }
 
 async function pnlReport(client: any, data: any) {
-  const { period, user_id } = data || {} // period: 'daily' | 'weekly' | 'monthly' | 'all'
+  const { period, user_id } = data || {}
 
   let fromDate = new Date()
   if (period === 'daily') fromDate.setDate(fromDate.getDate() - 1)
@@ -283,7 +286,6 @@ async function pnlReport(client: any, data: any) {
     total_debit: totalDebit,
     net_pnl: totalCredit - totalDebit,
     transaction_count: txns?.length || 0,
-    transactions: txns,
   })
 }
 

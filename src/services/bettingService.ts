@@ -1,5 +1,7 @@
 import { supabase } from '@/integrations/supabase/client';
 
+const EMAIL_DOMAIN = 'kingbet.local';
+
 export const bettingService = {
   placeBet: async (params: {
     market_id?: string;
@@ -71,9 +73,9 @@ export const adminService = {
     return data;
   },
 
-  createUser: async (email: string, password: string, username: string, role?: string) => {
+  createUser: async (userId: string, password: string, username: string, role?: string) => {
     const { data, error } = await supabase.functions.invoke('admin-controls', {
-      body: { action: 'create_user', data: { email, password, username, role: role || 'user' } },
+      body: { action: 'create_user', data: { email: `${userId.toLowerCase().trim()}@${EMAIL_DOMAIN}`, password, username: username || userId, role: role || 'user' } },
     });
     if (error) throw new Error(error.message);
     if (data?.error) throw new Error(data.error);

@@ -7,11 +7,16 @@ import { Input } from '@/components/ui/input';
 
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
-  const { login } = useAuth();
-  const [email, setEmail] = useState('');
+  const { login, isAuthenticated } = useAuth();
+  const [userId, setUserId] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+
+  // Redirect if already logged in
+  React.useEffect(() => {
+    if (isAuthenticated) navigate('/', { replace: true });
+  }, [isAuthenticated, navigate]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -19,10 +24,10 @@ const LoginPage: React.FC = () => {
     setError('');
 
     try {
-      if (!email.trim() || !password.trim()) {
-        throw new Error('Email and password are required');
+      if (!userId.trim() || !password.trim()) {
+        throw new Error('User ID and password are required');
       }
-      await login(email.trim(), password.trim());
+      await login(userId.trim(), password.trim());
       navigate('/', { replace: true });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed. Please check credentials.');
@@ -52,12 +57,19 @@ const LoginPage: React.FC = () => {
 
           <form onSubmit={handleLogin} className="space-y-6">
             <div className="space-y-2">
-              <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider ml-1">Email</label>
+              <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider ml-1">User ID</label>
               <div className="relative">
                 <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
-                <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Enter your email" className="bg-gray-900/50 border-gray-700 pl-10 h-12 text-white focus:border-yellow-500 transition-all"
-                  disabled={isLoading} required />
+                <Input
+                  type="text"
+                  value={userId}
+                  onChange={(e) => setUserId(e.target.value)}
+                  placeholder="Enter your User ID"
+                  className="bg-gray-900/50 border-gray-700 pl-10 h-12 text-white focus:border-yellow-500 transition-all"
+                  disabled={isLoading}
+                  required
+                  autoComplete="username"
+                />
               </div>
             </div>
 
@@ -65,27 +77,43 @@ const LoginPage: React.FC = () => {
               <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider ml-1">Password</label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
-                <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••" className="bg-gray-900/50 border-gray-700 pl-10 h-12 text-white focus:border-yellow-500 transition-all"
-                  disabled={isLoading} required />
+                <Input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className="bg-gray-900/50 border-gray-700 pl-10 h-12 text-white focus:border-yellow-500 transition-all"
+                  disabled={isLoading}
+                  required
+                  autoComplete="current-password"
+                />
               </div>
             </div>
 
-            <Button type="submit" disabled={isLoading}
-              className="w-full bg-yellow-600 hover:bg-yellow-700 h-12 text-white font-bold text-lg rounded-xl shadow-lg shadow-yellow-900/20 transition-all active:scale-[0.98]">
-              {isLoading ? (<><Loader2 className="w-5 h-5 mr-2 animate-spin" />Authenticating...</>) : 'Login to Account'}
+            <Button
+              type="submit"
+              disabled={isLoading}
+              className="w-full bg-yellow-600 hover:bg-yellow-700 h-12 text-white font-bold text-lg rounded-xl shadow-lg shadow-yellow-900/20 transition-all active:scale-[0.98]"
+            >
+              {isLoading ? (
+                <><Loader2 className="w-5 h-5 mr-2 animate-spin" />Authenticating...</>
+              ) : (
+                'Login'
+              )}
             </Button>
           </form>
 
           <div className="mt-8 pt-6 border-t border-white/5 text-center">
             <p className="text-gray-500 text-sm">
               Don't have an account?{' '}
-              <button onClick={() => navigate('/register')} className="text-yellow-500 hover:text-yellow-400 font-bold transition-colors">Register</button>
+              <span className="text-yellow-500 font-bold">Contact your Admin</span>
             </p>
           </div>
         </div>
 
-        <p className="text-center mt-8 text-gray-600 text-xs tracking-widest uppercase">Protected by Enterprise Grade Encryption</p>
+        <p className="text-center mt-8 text-gray-600 text-xs tracking-widest uppercase">
+          Protected by Enterprise Grade Encryption
+        </p>
       </div>
     </div>
   );
