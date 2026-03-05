@@ -100,7 +100,7 @@ const LandingPage = () => (
         <Link to="/login" className="flex items-center gap-2 bg-yellow-600 hover:bg-yellow-700 text-white px-8 py-3.5 rounded-lg font-bold text-base transition-colors shadow-lg shadow-yellow-900/30">  
           <TrendingUp className="w-5 h-5" /> Start Trading <ArrowRight className="w-4 h-4" />  
         </Link>  
-        <Link to="/register" className="flex items-center gap-2 bg-[#1e273e] hover:bg-[#283550] border border-white/10 text-white px-8 py-3.5 rounded-lg font-bold text-base transition-colors">  
+        <Link to="/login" className="flex items-center gap-2 bg-[#1e273e] hover:bg-[#283550] border border-white/10 text-white px-8 py-3.5 rounded-lg font-bold text-base transition-colors">  
           <Gamepad2 className="w-5 h-5" /> Get Your ID  
         </Link>  
       </div>  
