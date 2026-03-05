@@ -69,9 +69,9 @@ const LandingPage = () => (
     <Link to="/login" className="text-sm text-gray-300 hover:text-yellow-500 transition-colors font-medium px-3 py-2">  
       Login  
     </Link>  
-    <Link to="/register" className="text-sm bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded-lg font-bold transition-colors">  
+    <Link to="/login" className="text-sm bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded-lg font-bold transition-colors">  
       Get ID  
-    </Link>  
+    </Link>
   </div>  
 </header>  
 
