@@ -266,7 +266,7 @@ const LandingPage = () => (
     <h2 className="text-2xl lg:text-3xl font-black mb-3">Ready to Start Trading?</h2>  
     <p className="text-gray-400 mb-6 max-w-lg mx-auto">Join thousands of users on India's most trusted points-based exchange platform.</p>  
     <div className="flex gap-3 justify-center flex-wrap">  
-      <Link to="/register" className="flex items-center gap-2 bg-yellow-600 hover:bg-yellow-700 text-white px-8 py-3 rounded-lg font-bold transition-colors shadow-lg shadow-yellow-900/30">  
+      <Link to="/login" className="flex items-center gap-2 bg-yellow-600 hover:bg-yellow-700 text-white px-8 py-3 rounded-lg font-bold transition-colors shadow-lg shadow-yellow-900/30">  
         Get Your ID Now <ArrowRight className="w-4 h-4" />  
       </Link>  
       <Link to="/login" className="flex items-center gap-2 bg-[#1e273e] hover:bg-[#283550] border border-white/10 text-white px-8 py-3 rounded-lg font-bold transition-colors">  
