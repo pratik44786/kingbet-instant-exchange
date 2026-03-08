@@ -4,6 +4,8 @@ import { RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { MarketData, RunnerData } from '@/hooks/useMarkets';
 
+const sportIcon: Record<string, string> = { cricket: '🏏', football: '⚽', tennis: '🎾' };
+
 // Generate deterministic fancy markets for cricket
 function generateFancyMarkets(market: MarketData) {
   const teams = market.event_name.split(' vs ');
