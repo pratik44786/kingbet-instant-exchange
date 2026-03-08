@@ -214,16 +214,23 @@ async function forceSettle(client: any, data: any) {
     .eq('user_id', bet.user_id).single()
   if (!wallet) return json({ error: 'Wallet not found' }, 404)
 
+  // Stake is already deducted at placement, so:
+  // Won: return stake + profit
+  // Lost: nothing (stake already gone)
+  // Void: return stake (refund)
   let profit = 0
   let newBalance = wallet.balance
   const newExposure = Math.max(0, wallet.exposure - bet.exposure)
 
   if (result === 'won') {
     profit = bet.potential_profit
-    newBalance += profit
+    newBalance = wallet.balance + bet.stake + profit  // return stake + winnings
   } else if (result === 'lost') {
-    profit = -bet.exposure
-    newBalance = Math.max(0, newBalance - bet.exposure)
+    profit = -bet.stake
+    newBalance = wallet.balance  // stake already deducted, nothing to do
+  } else if (result === 'void') {
+    profit = 0
+    newBalance = wallet.balance + bet.stake  // refund the stake
   }
 
   await client.from('bets').update({
@@ -238,16 +245,20 @@ async function forceSettle(client: any, data: any) {
     total_profit_loss: wallet.total_profit_loss + profit,
   }).eq('user_id', bet.user_id)
 
-  await client.from('transactions').insert({
-    user_id: bet.user_id,
-    type: result === 'won' ? 'bet_win' : 'bet_debit',
-    amount: Math.abs(profit) || bet.exposure,
-    balance_before: wallet.balance,
-    balance_after: newBalance,
-    description: `Force settle: ${result}`,
-    reference_id: bet_id,
-    reference_type: 'force_settle',
-  })
+  const txnType = result === 'won' ? 'bet_win' : (result === 'void' ? 'bet_refund' : 'bet_debit')
+  const txnAmount = result === 'won' ? (bet.stake + profit) : (result === 'void' ? bet.stake : 0)
+  if (txnAmount > 0) {
+    await client.from('transactions').insert({
+      user_id: bet.user_id,
+      type: txnType,
+      amount: txnAmount,
+      balance_before: wallet.balance,
+      balance_after: newBalance,
+      description: `Force settle: ${result}`,
+      reference_id: bet_id,
+      reference_type: 'force_settle',
+    })
+  }
 
   return json({ success: true, profit, new_balance: newBalance })
 }
