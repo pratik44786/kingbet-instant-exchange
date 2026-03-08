@@ -276,12 +276,14 @@ async function cashOut(client: any, userId: string, data: Record<string, unknown
   }
 
   const cashOutMultiplier = Number(multiplier) || 1
-  const profit = (bet.stake * cashOutMultiplier) - bet.stake
+  // Stake already deducted at placement, so cashout returns stake * multiplier
+  const cashOutAmount = bet.stake * cashOutMultiplier
+  const profit = cashOutAmount - bet.stake
 
   const { data: wallet } = await client.from('wallets').select('*').eq('user_id', userId).single()
   if (!wallet) return jsonResponse({ error: 'Wallet not found' }, 404)
 
-  const newBalance = wallet.balance + profit
+  const newBalance = wallet.balance + cashOutAmount  // return stake + profit
   const newExposure = Math.max(0, wallet.exposure - bet.exposure)
 
   await client.from('bets').update({
