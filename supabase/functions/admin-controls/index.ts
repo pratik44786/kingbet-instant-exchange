@@ -254,12 +254,11 @@ async function forceSettle(client: any, data: any) {
       amount: txnAmount,
       balance_before: wallet.balance,
       balance_after: newBalance,
-    balance_before: wallet.balance,
-    balance_after: newBalance,
-    description: `Force settle: ${result}`,
-    reference_id: bet_id,
-    reference_type: 'force_settle',
-  })
+      description: `Force settle: ${result}`,
+      reference_id: bet_id,
+      reference_type: 'force_settle',
+    })
+  }
 
   return json({ success: true, profit, new_balance: newBalance })
 }
