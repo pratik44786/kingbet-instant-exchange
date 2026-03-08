@@ -28,10 +28,9 @@ const LoginPage: React.FC = () => {
         throw new Error('User ID and password are required');
       }
       await login(userId.trim(), password.trim());
-      navigate('/', { replace: true });
+      // Don't navigate here — the useEffect will handle redirect when isAuthenticated changes
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed. Please check credentials.');
-    } finally {
       setIsLoading(false);
     }
   };

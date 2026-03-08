@@ -120,15 +120,18 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }, 8000);
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, newSession) => {
+      (_event, newSession) => {
         if (!mounted) return;
         setSession(newSession);
         if (newSession?.user) {
-          await fetchUserProfile(newSession.user);
+          // Fire-and-forget to avoid deadlock — never await inside onAuthStateChange
+          fetchUserProfile(newSession.user).finally(() => {
+            if (mounted) setIsLoading(false);
+          });
         } else {
           setUser(null);
+          if (mounted) setIsLoading(false);
         }
-        if (mounted) setIsLoading(false);
       }
     );
 
