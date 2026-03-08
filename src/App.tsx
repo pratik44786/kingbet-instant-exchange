@@ -1,4 +1,4 @@
-import React, { Suspense, lazy } from 'react';
+import React, { Suspense, lazy, ComponentType } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { AppProvider } from './context/AppContext';
@@ -15,26 +15,41 @@ const PageLoader = () => (
   </div>
 );
 
-// Eagerly loaded (homepage - must load instantly)
+// Retry wrapper for lazy imports — retries 3 times on chunk load failure
+function lazyRetry<T extends ComponentType<any>>(
+  importFn: () => Promise<{ default: T }>,
+  retries = 3
+): React.LazyExoticComponent<T> {
+  return lazy(() => {
+    const attempt = (remaining: number): Promise<{ default: T }> =>
+      importFn().catch((err) => {
+        if (remaining <= 0) throw err;
+        return new Promise<{ default: T }>((res) =>
+          setTimeout(() => res(attempt(remaining - 1)), 1000)
+        );
+      });
+    return attempt(retries);
+  });
+}
+
+// Eagerly loaded (critical pages - must load instantly)
 import LandingPage from './pages/LandingPage';
+import LoginPage from './pages/LoginPage';
 
-// Lazy loaded pages
-const LoginPage = lazy(() => import('./pages/LoginPage'));
-const ExchangePage = lazy(() => import('./pages/ExchangePage'));
-const CasinoPage = lazy(() => import('./pages/CasinoPage'));
-const ProfilePage = lazy(() => import('./pages/ProfilePage'));
-const AdminPage = lazy(() => import('./pages/AdminPage'));
-const SuperAdminPage = lazy(() => import('./pages/SuperAdminPage'));
-const WalletPage = lazy(() => import('./pages/WalletPage'));
-const HistoryPage = lazy(() => import('./pages/HistoryPage'));
-const AviatorPage = lazy(() => import('./pages/AviatorPage'));
-const CrashPage = lazy(() => import('./pages/CrashPage'));
-const DicePage = lazy(() => import('./pages/DicePage'));
-const MinesPage = lazy(() => import('./pages/MinesPage'));
-const PlinkoPage = lazy(() => import('./pages/PlinkoPage'));
-
-// Lazy loaded layout
-const DashboardLayout = lazy(() => import('./components/DashboardLayout'));
+// Lazy loaded with retry
+const ExchangePage = lazyRetry(() => import('./pages/ExchangePage'));
+const CasinoPage = lazyRetry(() => import('./pages/CasinoPage'));
+const ProfilePage = lazyRetry(() => import('./pages/ProfilePage'));
+const AdminPage = lazyRetry(() => import('./pages/AdminPage'));
+const SuperAdminPage = lazyRetry(() => import('./pages/SuperAdminPage'));
+const WalletPage = lazyRetry(() => import('./pages/WalletPage'));
+const HistoryPage = lazyRetry(() => import('./pages/HistoryPage'));
+const AviatorPage = lazyRetry(() => import('./pages/AviatorPage'));
+const CrashPage = lazyRetry(() => import('./pages/CrashPage'));
+const DicePage = lazyRetry(() => import('./pages/DicePage'));
+const MinesPage = lazyRetry(() => import('./pages/MinesPage'));
+const PlinkoPage = lazyRetry(() => import('./pages/PlinkoPage'));
+const DashboardLayout = lazyRetry(() => import('./components/DashboardLayout'));
 
 // Protected route wrapper
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
