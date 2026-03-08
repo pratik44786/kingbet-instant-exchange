@@ -44,23 +44,16 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const fetchUserProfile = useCallback(async (authUser: User) => {
     try {
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('username, display_name, email, status')
-        .eq('id', authUser.id)
-        .single();
+      // Parallel fetch all user data at once — reduces 3 sequential calls to 1 round-trip
+      const [profileRes, roleRes, walletRes] = await Promise.all([
+        supabase.from('profiles').select('username, display_name, email, status').eq('id', authUser.id).single(),
+        supabase.from('user_roles').select('role').eq('user_id', authUser.id).single(),
+        supabase.from('wallets').select('balance').eq('user_id', authUser.id).single(),
+      ]);
 
-      const { data: roleData } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', authUser.id)
-        .single();
-
-      const { data: wallet } = await supabase
-        .from('wallets')
-        .select('balance')
-        .eq('user_id', authUser.id)
-        .single();
+      const profile = profileRes.data;
+      const roleData = roleRes.data;
+      const wallet = walletRes.data;
 
       if (profile?.status === 'blocked' || profile?.status === 'suspended') {
         await supabase.auth.signOut();
