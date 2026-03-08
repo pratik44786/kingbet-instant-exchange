@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo, useCallback, memo } from 'react';
 import { useApp } from '@/context/AppContext';
 import { RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -46,7 +46,6 @@ function generateSecondaryMarkets(market: MarketData) {
     };
   }
 
-  // tennis
   return {
     title: 'SET & GAME MARKETS', icon: '🎾', noLabel: 'UNDER', yesLabel: 'OVER', isCricket: false,
     items: [
@@ -60,23 +59,21 @@ function generateSecondaryMarkets(market: MarketData) {
   };
 }
 
-interface SecondaryMarketProps {
+// ═══ Memoized Secondary Markets ═══
+const SecondaryMarketsSection = memo<{
   market: MarketData;
   betSlip: BetSlipItem[];
   addToBetSlip: (item: Omit<BetSlipItem, 'stake'>) => void;
   updateBetSlipStake: (runnerId: string, stake: number) => void;
   placeBets: () => Promise<void>;
-}
-
-const SecondaryMarketsSection: React.FC<SecondaryMarketProps> = ({ market, betSlip, addToBetSlip, updateBetSlipStake, placeBets }) => {
-  const data = generateSecondaryMarkets(market);
+}>(({ market, betSlip, addToBetSlip, updateBetSlipStake, placeBets }) => {
+  const data = useMemo(() => generateSecondaryMarkets(market), [market.id, market.sport, market.event_name]);
 
   const getBetType = (isYes: boolean): BetSlipItem['type'] => {
     if (data.isCricket) return isYes ? 'fancy_yes' : 'fancy_no';
     return isYes ? 'session_over' : 'session_under';
   };
 
-  // Generate a deterministic fake runner ID for each secondary item
   const getFakeRunnerId = (idx: number) => `${market.id}-secondary-${idx}`;
 
   return (
@@ -119,7 +116,6 @@ const SecondaryMarketsSection: React.FC<SecondaryMarketProps> = ({ market, betSl
               </div>
             </div>
 
-            {/* Inline Slip */}
             {slip && (
               <div className={`m-2 p-3 rounded border-l-4 shadow-2xl ${slip.type.includes('yes') || slip.type.includes('over') ? 'bg-[#e2f2ff] border-[#2b92e4]' : 'bg-[#fff0f3] border-[#ef6e8b]'}`}>
                 <div className="text-[10px] font-bold text-gray-600 mb-1 uppercase">{slip.type.replace('_', ' ')} @ {slip.odds}</div>
@@ -138,21 +134,24 @@ const SecondaryMarketsSection: React.FC<SecondaryMarketProps> = ({ market, betSl
       })}
     </div>
   );
-};
+});
 
+SecondaryMarketsSection.displayName = 'SecondaryMarketsSection';
 
-const ExchangePage: React.FC = () => {
-  const { markets, marketsLoading, addToBetSlip, betSlip, updateBetSlipStake, placeBets, refreshData } = useApp();
-  const [sportFilter, setSportFilter] = useState<string>('all');
+// ═══ Memoized Market Card ═══
+const MarketCard = memo<{
+  market: MarketData;
+  isLive: boolean;
+  betSlip: BetSlipItem[];
+  addToBetSlip: (item: Omit<BetSlipItem, 'stake'>) => void;
+  updateBetSlipStake: (runnerId: string, stake: number) => void;
+  placeBets: () => Promise<void>;
+}>(({ market, isLive, betSlip, addToBetSlip, updateBetSlipStake, placeBets }) => {
+  // Only get slips relevant to this market for comparison
+  const marketSlips = useMemo(() => betSlip.filter(b => b.marketId === market.id), [betSlip, market.id]);
 
-  const filtered = sportFilter === 'all' ? markets : markets.filter(m => m.sport === sportFilter);
-
-  const now = new Date();
-  const liveMarkets = filtered.filter(m => new Date(m.start_time) <= now);
-  const upcomingMarkets = filtered.filter(m => new Date(m.start_time) > now);
-
-  const renderMarketCard = (market: MarketData, isLive: boolean) => (
-    <div key={market.id} className="bg-[#161d2f] rounded-lg border border-white/5 overflow-hidden">
+  return (
+    <div className="bg-[#161d2f] rounded-lg border border-white/5 overflow-hidden">
       {/* Header */}
       <div className="bg-[#1e273e] p-3 flex justify-between items-center border-b border-yellow-500/20">
         <div className="flex items-center gap-2">
@@ -173,7 +172,7 @@ const ExchangePage: React.FC = () => {
         )}
       </div>
 
-      {/* Market Table */}
+      {/* Table Header */}
       <div className="grid grid-cols-12 bg-[#121a2d] py-2 px-1 text-[10px] font-bold text-gray-500">
         <div className="col-span-6 pl-2">MATCH ODDS</div>
         <div className="col-span-3 text-center text-[#72bbef]">BACK</div>
@@ -185,7 +184,7 @@ const ExchangePage: React.FC = () => {
       )}
 
       {market.runners.map((runner) => {
-        const slip = betSlip.find(b => b.runnerId === runner.id);
+        const slip = marketSlips.find(b => b.runnerId === runner.id);
         return (
           <div key={runner.id} className="border-b border-white/5 last:border-0">
             <div className="grid grid-cols-12 items-center p-1 gap-1 bg-[#161d2f]">
@@ -210,7 +209,6 @@ const ExchangePage: React.FC = () => {
               </div>
             </div>
 
-            {/* Inline Slip */}
             {slip && isLive && (
               <div className={`m-2 p-3 rounded border-l-4 shadow-2xl ${slip.type === 'back' ? 'bg-[#e2f2ff] border-[#2b92e4]' : 'bg-[#fff0f3] border-[#ef6e8b]'}`}>
                 <div className="flex items-end gap-3">
@@ -227,12 +225,25 @@ const ExchangePage: React.FC = () => {
         );
       })}
 
-      {/* Secondary Markets - All Sports */}
       {isLive && (
-        <SecondaryMarketsSection market={market} betSlip={betSlip} addToBetSlip={addToBetSlip} updateBetSlipStake={updateBetSlipStake} placeBets={placeBets} />
+        <SecondaryMarketsSection market={market} betSlip={marketSlips} addToBetSlip={addToBetSlip} updateBetSlipStake={updateBetSlipStake} placeBets={placeBets} />
       )}
     </div>
   );
+});
+
+MarketCard.displayName = 'MarketCard';
+
+// ═══ Main Page ═══
+const ExchangePage: React.FC = () => {
+  const { markets, marketsLoading, addToBetSlip, betSlip, updateBetSlipStake, placeBets, refreshData } = useApp();
+  const [sportFilter, setSportFilter] = useState<string>('all');
+
+  const filtered = useMemo(() => sportFilter === 'all' ? markets : markets.filter(m => m.sport === sportFilter), [markets, sportFilter]);
+
+  const now = useMemo(() => Date.now(), [markets]); // recalculate only when markets change
+  const liveMarkets = useMemo(() => filtered.filter(m => new Date(m.start_time).getTime() <= now), [filtered, now]);
+  const upcomingMarkets = useMemo(() => filtered.filter(m => new Date(m.start_time).getTime() > now), [filtered, now]);
 
   return (
     <div className="p-2 lg:p-4 max-w-6xl mx-auto space-y-4">
@@ -276,7 +287,9 @@ const ExchangePage: React.FC = () => {
           <div className="flex items-center gap-2 text-sm font-bold text-green-500">
             <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" /> LIVE MATCHES ({liveMarkets.length})
           </div>
-          {liveMarkets.map(m => renderMarketCard(m, true))}
+          {liveMarkets.map(m => (
+            <MarketCard key={m.id} market={m} isLive betSlip={betSlip} addToBetSlip={addToBetSlip} updateBetSlipStake={updateBetSlipStake} placeBets={placeBets} />
+          ))}
         </>
       )}
 
@@ -286,7 +299,9 @@ const ExchangePage: React.FC = () => {
           <div className="flex items-center gap-2 text-sm font-bold text-yellow-500 mt-4">
             🕐 UPCOMING MATCHES ({upcomingMarkets.length})
           </div>
-          {upcomingMarkets.map(m => renderMarketCard(m, false))}
+          {upcomingMarkets.map(m => (
+            <MarketCard key={m.id} market={m} isLive={false} betSlip={betSlip} addToBetSlip={addToBetSlip} updateBetSlipStake={updateBetSlipStake} placeBets={placeBets} />
+          ))}
         </>
       )}
     </div>

@@ -161,11 +161,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   }, []);
 
   const logout = useCallback(async () => {
+    clearCachedUserId();
     await supabase.auth.signOut();
     setUser(null);
     setSession(null);
     setError(null);
-    // Clear any legacy localStorage
     localStorage.removeItem('authToken');
     localStorage.removeItem('authUser');
     localStorage.removeItem('userIdLogin');
