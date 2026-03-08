@@ -107,6 +107,7 @@ function App() {
                 <Route path="/casino/dice" element={<DicePage />} />
                 <Route path="/casino/mines" element={<MinesPage />} />
                 <Route path="/casino/plinko" element={<PlinkoPage />} />
+                <Route path="/casino/live" element={<LiveCasinoPage />} />
                 <Route path="/wallet" element={<WalletPage />} />
                 <Route path="/history" element={<HistoryPage />} />
                 <Route path="/profile" element={<ProfilePage />} />

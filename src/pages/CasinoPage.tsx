@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { Gamepad2 } from 'lucide-react';
 
 const games = [
+  { name: '🔴 Live Casino', icon: '🎰', desc: 'Real-time casino tables with live dealers. Powered by Diamond Casino API.', path: '/casino/live', color: 'from-red-600/20 to-red-400/20' },
   { name: 'Aviator', icon: '✈️', desc: 'Watch the multiplier climb. Cash out before it crashes!', path: '/casino/aviator', color: 'from-red-500/20 to-orange-500/20' },
   { name: 'Plinko', icon: '🎯', desc: 'Drop the ball and watch it bounce to a multiplier slot.', path: '/casino/plinko', color: 'from-blue-500/20 to-cyan-500/20' },
   { name: 'Crash', icon: '📈', desc: 'Ride the curve up. Exit before it crashes to zero.', path: '/casino/crash', color: 'from-green-500/20 to-emerald-500/20' },
