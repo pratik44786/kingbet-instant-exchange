@@ -5,7 +5,7 @@ import { useApp } from '@/context/AppContext';
 import {
   Crown, LogOut, Menu, X, ChevronDown,
   BarChart3, Gamepad2, Wallet, History as HistoryIcon,
-  User, Shield, Trophy, Globe, ChevronRight,
+  User, Shield, Trophy, Globe, ChevronRight, Tv,
 } from 'lucide-react';
 
 const sportsSidebar = [
@@ -20,6 +20,7 @@ const topNavTabs = [
   { label: 'FOOTBALL', path: '/exchange?sport=football' },
   { label: 'TENNIS', path: '/exchange?sport=tennis' },
   { label: 'CASINO', path: '/casino' },
+  { label: 'LIVE CASINO', path: '/live-casino' },
 ];
 
 const DashboardLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
@@ -38,6 +39,7 @@ const DashboardLayout: React.FC<{ children?: React.ReactNode }> = ({ children })
   const mainNav = [
     { label: 'Exchange', path: '/exchange', icon: BarChart3 },
     { label: 'Casino', path: '/casino', icon: Gamepad2 },
+    { label: 'Live Casino', path: '/live-casino', icon: Tv },
     { label: 'Wallet', path: '/wallet', icon: Wallet },
     { label: 'History', path: '/history', icon: HistoryIcon },
     { label: 'Profile', path: '/profile', icon: User },
