@@ -1,20 +1,62 @@
 import React, { useState } from 'react';
 import { useApp } from '@/context/AppContext';
-import { Trophy, Timer, Info } from 'lucide-react';
+import { Trophy, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
+const sportIcon: Record<string, string> = { cricket: '🏏', football: '⚽', tennis: '🎾' };
+
 const ExchangePage: React.FC = () => {
-  const { markets, addToBetSlip, betSlip, updateBetSlipStake, placeBets } = useApp();
+  const { markets, marketsLoading, addToBetSlip, betSlip, updateBetSlipStake, placeBets, refreshData } = useApp();
+  const [sportFilter, setSportFilter] = useState<string>('all');
+
+  const filtered = sportFilter === 'all' ? markets : markets.filter(m => m.sport === sportFilter);
 
   return (
     <div className="p-2 lg:p-4 max-w-6xl mx-auto space-y-4">
-      {markets.map((market) => (
+      {/* Sport Tabs */}
+      <div className="flex items-center gap-2 overflow-x-auto pb-1">
+        {['all', 'cricket', 'football', 'tennis'].map(s => (
+          <button
+            key={s}
+            onClick={() => setSportFilter(s)}
+            className={`px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-colors ${
+              sportFilter === s
+                ? 'bg-yellow-600 text-white'
+                : 'bg-[#1e273e] text-gray-400 hover:text-white'
+            }`}
+          >
+            {s === 'all' ? '🔥 All' : `${sportIcon[s] || ''} ${s.charAt(0).toUpperCase() + s.slice(1)}`}
+          </button>
+        ))}
+        <button onClick={refreshData} className="ml-auto p-2 text-gray-500 hover:text-yellow-500">
+          <RefreshCw className="w-4 h-4" />
+        </button>
+      </div>
+
+      {marketsLoading && filtered.length === 0 && (
+        <div className="text-center py-12 text-gray-500">
+          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-yellow-500 mx-auto mb-3" />
+          Loading live markets...
+        </div>
+      )}
+
+      {!marketsLoading && filtered.length === 0 && (
+        <div className="text-center py-12 text-gray-500">
+          <p className="text-sm">No live markets available right now.</p>
+          <p className="text-xs mt-1">Markets refresh automatically every 15 seconds.</p>
+        </div>
+      )}
+
+      {filtered.map((market) => (
         <div key={market.id} className="bg-[#161d2f] rounded-lg border border-white/5 overflow-hidden">
           {/* Header */}
           <div className="bg-[#1e273e] p-3 flex justify-between items-center border-b border-yellow-500/20">
             <div className="flex items-center gap-2">
-              <Trophy className="w-4 h-4 text-yellow-500" />
-              <span className="font-black text-sm uppercase italic">{(market as any).name || 'Cricket Match'}</span>
+              <span className="text-lg">{sportIcon[market.sport] || '🏆'}</span>
+              <div>
+                <span className="font-black text-sm uppercase italic text-gray-200">{market.event_name}</span>
+                <p className="text-[10px] text-gray-500">{market.competition}</p>
+              </div>
             </div>
             <div className="flex items-center gap-1 text-[10px] text-green-500 font-bold">
               <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" /> LIVE
@@ -35,13 +77,19 @@ const ExchangePage: React.FC = () => {
                 <div className="grid grid-cols-12 items-center p-1 gap-1 bg-[#161d2f]">
                   <div className="col-span-6 pl-2 text-xs font-bold text-gray-200">{runner.name}</div>
                   <div className="col-span-3">
-                    <button onClick={() => addToBetSlip({ marketId: market.id, runnerId: runner.id, runnerName: runner.name, eventName: (market as any).name || 'Cricket Match', type: 'back', odds: (runner as any).back || 1.90 })} className="btn-back w-full py-2">
-                      <span className="odds-text">{(runner as any).back || 1.90}</span>
+                    <button
+                      onClick={() => addToBetSlip({ marketId: market.id, runnerId: runner.id, runnerName: runner.name, eventName: market.event_name, type: 'back', odds: runner.back_odds })}
+                      className="btn-back w-full py-2"
+                    >
+                      <span className="odds-text">{runner.back_odds.toFixed(2)}</span>
                     </button>
                   </div>
                   <div className="col-span-3">
-                    <button onClick={() => addToBetSlip({ marketId: market.id, runnerId: runner.id, runnerName: runner.name, eventName: (market as any).name || 'Cricket Match', type: 'lay', odds: (runner as any).lay || 1.92 })} className="btn-lay w-full py-2">
-                      <span className="odds-text">{(runner as any).lay || 1.92}</span>
+                    <button
+                      onClick={() => addToBetSlip({ marketId: market.id, runnerId: runner.id, runnerName: runner.name, eventName: market.event_name, type: 'lay', odds: runner.lay_odds })}
+                      className="btn-lay w-full py-2"
+                    >
+                      <span className="odds-text">{runner.lay_odds.toFixed(2)}</span>
                     </button>
                   </div>
                 </div>

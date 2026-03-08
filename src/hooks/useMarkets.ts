@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
 export interface RunnerData {
@@ -22,9 +22,10 @@ export interface MarketData {
   runners: RunnerData[];
 }
 
-export function useMarkets(sport?: string) {
+export function useMarkets(sport?: string, pollInterval = 15000) {
   const [markets, setMarkets] = useState<MarketData[]>([]);
   const [loading, setLoading] = useState(true);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const fetchMarkets = useCallback(async () => {
     let query = supabase.from('markets').select(`
@@ -51,7 +52,33 @@ export function useMarkets(sport?: string) {
     setLoading(false);
   }, [sport]);
 
-  useEffect(() => { fetchMarkets(); }, [fetchMarkets]);
+  // Trigger a sync from the odds-fetcher edge function
+  const syncOdds = useCallback(async () => {
+    try {
+      await supabase.functions.invoke('odds-fetcher', {
+        body: null,
+      });
+      await fetchMarkets();
+    } catch (err) {
+      console.error('Odds sync error:', err);
+    }
+  }, [fetchMarkets]);
 
-  return { markets, loading, refetch: fetchMarkets };
+  useEffect(() => {
+    // Initial fetch from DB
+    fetchMarkets();
+    // Initial sync from API
+    syncOdds();
+
+    // Poll every pollInterval ms
+    timerRef.current = setInterval(() => {
+      fetchMarkets();
+    }, pollInterval);
+
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, [fetchMarkets, syncOdds, pollInterval]);
+
+  return { markets, loading, refetch: fetchMarkets, syncOdds };
 }
