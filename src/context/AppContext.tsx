@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
+import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from './AuthContext';
 import { useWallet } from '@/hooks/useWallet';
@@ -73,22 +74,32 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   const placeBets = useCallback(async () => {
     const validBets = betSlip.filter(b => b.stake > 0);
-    if (validBets.length === 0) return;
-
-    for (const bet of validBets) {
-      await bettingService.placeBet({
-        market_id: bet.marketId,
-        runner_id: bet.runnerId,
-        bet_type: bet.type,
-        odds: bet.odds,
-        stake: bet.stake,
-      });
+    if (validBets.length === 0) {
+      toast.error('Stake enter karo pehle');
+      return;
     }
 
-    setBetSlip([]);
-    walletHook.refetch();
-    refetchBets();
-    refetchTransactions();
+    try {
+      for (const bet of validBets) {
+        const isSecondary = bet.runnerId.includes('-secondary-');
+        await bettingService.placeBet({
+          market_id: bet.marketId,
+          runner_id: isSecondary ? undefined : bet.runnerId,
+          bet_type: bet.type,
+          odds: bet.odds,
+          stake: bet.stake,
+        });
+      }
+
+      toast.success(`${validBets.length} bet(s) placed successfully! ✅`);
+      setBetSlip([]);
+      walletHook.refetch();
+      refetchBets();
+      refetchTransactions();
+    } catch (err: any) {
+      toast.error(err?.message || 'Bet place nahi ho payi, try again');
+      console.error('Place bet error:', err);
+    }
   }, [betSlip, walletHook, refetchBets, refetchTransactions]);
 
   const clearBetSlip = useCallback(() => setBetSlip([]), []);
