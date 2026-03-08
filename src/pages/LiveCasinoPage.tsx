@@ -1,8 +1,7 @@
 import { useState, useMemo } from 'react';
-import { supabase } from '@/integrations/supabase/client';
 import { casinoApiService } from '@/services/casinoApiService';
 import { CASINO_GAMES, GAME_PROVIDERS, GAME_TYPES, type CasinoGame } from '@/data/casinoGames';
-import { Search, Gamepad2, X, Maximize2, Minimize2, Tv, Loader2 } from 'lucide-react';
+import { Search, Gamepad2, Tv, ExternalLink } from 'lucide-react';
 import { toast } from 'sonner';
 
 const LiveCasinoPage = () => {
@@ -10,10 +9,6 @@ const LiveCasinoPage = () => {
   const [selectedProvider, setSelectedProvider] = useState('all');
   const [selectedType, setSelectedType] = useState('all');
   const [launchingId, setLaunchingId] = useState<string | null>(null);
-  const [gameHtml, setGameHtml] = useState<string | null>(null);
-  const [gameName, setGameName] = useState('');
-  const [isFullscreen, setIsFullscreen] = useState(false);
-  const [isLoadingGame, setIsLoadingGame] = useState(false);
 
   const filteredGames = useMemo(() => {
     let filtered = CASINO_GAMES;
@@ -29,7 +24,6 @@ const LiveCasinoPage = () => {
   const launchGame = async (game: CasinoGame) => {
     setLaunchingId(game.gameId);
     try {
-      // Step 1: Get game launch URL from casino API
       const res = await casinoApiService.getGameUrl(game.gameId);
       if (res?.success === false) {
         toast.error(res?.message || 'Game launch failed');
@@ -42,107 +36,80 @@ const LiveCasinoPage = () => {
         return;
       }
 
-      // Step 2: Proxy the game URL through our edge function to bypass X-Frame-Options
-      setGameName(res?.payload?.game_name || game.name);
-      setIsLoadingGame(true);
-      setGameHtml(null);
-      setIsFullscreen(false);
+      const name = res?.payload?.game_name || game.name;
 
-      const { data: proxyData, error: proxyError } = await supabase.functions.invoke('game-proxy', {
-        body: { url },
-      });
+      // Open a styled popup window with the game
+      const width = Math.min(1200, window.screen.availWidth - 100);
+      const height = Math.min(800, window.screen.availHeight - 100);
+      const left = Math.round((window.screen.availWidth - width) / 2);
+      const top = Math.round((window.screen.availHeight - height) / 2);
 
-      if (proxyError) {
-        console.error('Proxy error:', proxyError);
-        // Fallback: try opening in new tab
+      const popup = window.open(
+        '',
+        `game_${game.gameId}`,
+        `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=no,menubar=no,toolbar=no,location=no,status=no`
+      );
+
+      if (!popup) {
+        // Popup blocked - fallback to new tab
         window.open(url, '_blank', 'noopener,noreferrer');
-        toast.info('Game opened in new tab (iframe blocked)');
-        setIsLoadingGame(false);
+        toast.info('Game opened in new tab (popup blocked)');
         return;
       }
 
-      // proxyData could be HTML string or JSON
-      if (typeof proxyData === 'string') {
-        setGameHtml(proxyData);
-      } else if (proxyData?.error) {
-        toast.error(proxyData.error);
-        window.open(url, '_blank', 'noopener,noreferrer');
-        setIsLoadingGame(false);
-        return;
-      } else {
-        // Unexpected response - fallback
-        console.error('Unexpected proxy response:', proxyData);
-        window.open(url, '_blank', 'noopener,noreferrer');
-        toast.info('Game opened in new tab');
-        setIsLoadingGame(false);
-        return;
-      }
+      // Write a branded game page into the popup
+      popup.document.write(`
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+          <meta charset="UTF-8" />
+          <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+          <title>${name} - KingBet</title>
+          <style>
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            body { background: #0a0a0a; font-family: system-ui, -apple-system, sans-serif; overflow: hidden; }
+            .header {
+              display: flex; align-items: center; justify-content: space-between;
+              padding: 8px 16px; background: #111; border-bottom: 1px solid #222;
+              height: 40px;
+            }
+            .brand { display: flex; align-items: center; gap: 8px; }
+            .brand-name { color: #f59e0b; font-weight: 800; font-size: 14px; letter-spacing: 0.05em; }
+            .game-name { color: #fff; font-size: 13px; font-weight: 600; }
+            .close-btn {
+              background: transparent; border: 1px solid #333; color: #999;
+              padding: 4px 12px; border-radius: 6px; cursor: pointer; font-size: 12px;
+              transition: all 0.2s;
+            }
+            .close-btn:hover { background: #dc2626; color: #fff; border-color: #dc2626; }
+            .game-frame {
+              width: 100%; height: calc(100vh - 40px); border: none; display: block;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <div class="brand">
+              <span class="brand-name">KINGBET</span>
+              <span style="color:#444">|</span>
+              <span class="game-name">${name}</span>
+            </div>
+            <button class="close-btn" onclick="window.close()">✕ Close</button>
+          </div>
+          <iframe src="${url}" class="game-frame" allow="autoplay; fullscreen; encrypted-media" allowfullscreen></iframe>
+        </body>
+        </html>
+      `);
+      popup.document.close();
 
-      setIsLoadingGame(false);
-      toast.success(`${res?.payload?.game_name || game.name} launched!`);
+      toast.success(`${name} launched!`);
     } catch (err: any) {
       console.error('Failed to launch game:', err);
       toast.error('Game launch failed');
-      setIsLoadingGame(false);
     } finally {
       setLaunchingId(null);
     }
   };
-
-  const closeGame = () => {
-    setGameHtml(null);
-    setGameName('');
-    setIsFullscreen(false);
-    setIsLoadingGame(false);
-  };
-
-  // Game view (srcdoc iframe)
-  if (gameHtml || isLoadingGame) {
-    return (
-      <div className={`flex flex-col ${isFullscreen ? 'fixed inset-0 z-50 bg-background' : 'flex-1'}`}>
-        {/* Game header bar */}
-        <div className="flex items-center justify-between px-4 py-2 bg-card border-b border-border shrink-0">
-          <div className="flex items-center gap-2">
-            <Gamepad2 className="w-4 h-4 text-primary" />
-            <span className="text-sm font-bold text-foreground">{gameName}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setIsFullscreen(!isFullscreen)}
-              className="p-1.5 rounded-lg hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
-            >
-              {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
-            </button>
-            <button
-              onClick={closeGame}
-              className="p-1.5 rounded-lg hover:bg-destructive/20 transition-colors text-muted-foreground hover:text-destructive"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
-        {/* Game content */}
-        <div className="flex-1 relative bg-black min-h-[400px]">
-          {isLoadingGame && !gameHtml ? (
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="flex flex-col items-center gap-3">
-                <Loader2 className="w-8 h-8 text-primary animate-spin" />
-                <p className="text-sm text-muted-foreground">Loading {gameName}...</p>
-              </div>
-            </div>
-          ) : gameHtml ? (
-            <iframe
-              srcDoc={gameHtml}
-              className="absolute inset-0 w-full h-full border-0"
-              allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
-              sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-modals allow-orientation-lock allow-pointer-lock allow-presentation"
-              allowFullScreen
-            />
-          ) : null}
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="flex-1 p-4 overflow-auto">
@@ -211,7 +178,9 @@ const LiveCasinoPage = () => {
                         </div>
                       )}
                       <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-2">
-                        <span className="text-xs font-bold text-primary flex items-center gap-1">▶ PLAY</span>
+                        <span className="text-xs font-bold text-primary flex items-center gap-1">
+                          <ExternalLink className="w-3 h-3" /> PLAY
+                        </span>
                       </div>
                       <span className="absolute top-1.5 right-1.5 text-[9px] uppercase bg-primary/90 text-primary-foreground px-1.5 py-0.5 rounded font-bold">
                         {game.type}
