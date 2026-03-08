@@ -219,7 +219,6 @@ async function settleBet(client: any, userId: string, data: Record<string, unkno
       reference_type: 'settlement',
     })
   }
-  })
 
   return jsonResponse({ success: true, bet_id, result, actual_profit: actualProfit })
 }
