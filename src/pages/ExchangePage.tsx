@@ -180,9 +180,9 @@ const ExchangePage: React.FC = () => {
         );
       })}
 
-      {/* Fancy Markets - Cricket Only */}
-      {market.sport === 'cricket' && isLive && (
-        <FancySection market={market} />
+      {/* Secondary Markets - All Sports */}
+      {isLive && (
+        <SecondaryMarketsSection market={market} />
       )}
     </div>
   );
