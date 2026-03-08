@@ -6,6 +6,13 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+// Convert a hex string (like Odds API event ID) to a valid UUID v4 format
+function toUUID(hex: string): string {
+  // Pad or trim to 32 hex chars
+  const h = hex.replace(/[^a-f0-9]/gi, "").padEnd(32, "0").slice(0, 32);
+  return `${h.slice(0, 8)}-${h.slice(8, 12)}-${h.slice(12, 16)}-${h.slice(16, 20)}-${h.slice(20, 32)}`;
+}
+
 // Sport key mapping for The Odds API
 const SPORT_KEYS: Record<string, string[]> = {
   cricket: [
