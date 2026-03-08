@@ -245,10 +245,15 @@ async function forceSettle(client: any, data: any) {
     total_profit_loss: wallet.total_profit_loss + profit,
   }).eq('user_id', bet.user_id)
 
-  await client.from('transactions').insert({
-    user_id: bet.user_id,
-    type: result === 'won' ? 'bet_win' : 'bet_debit',
-    amount: Math.abs(profit) || bet.exposure,
+  const txnType = result === 'won' ? 'bet_win' : (result === 'void' ? 'bet_refund' : 'bet_debit')
+  const txnAmount = result === 'won' ? (bet.stake + profit) : (result === 'void' ? bet.stake : 0)
+  if (txnAmount > 0) {
+    await client.from('transactions').insert({
+      user_id: bet.user_id,
+      type: txnType,
+      amount: txnAmount,
+      balance_before: wallet.balance,
+      balance_after: newBalance,
     balance_before: wallet.balance,
     balance_after: newBalance,
     description: `Force settle: ${result}`,
