@@ -37,8 +37,9 @@ const LiveCasinoPage = () => {
         toast.error('Game launch nahi ho paya');
         return;
       }
-      setGameUrl(url);
-      setGameName(res?.payload?.game_name || game.name);
+      // Open in new tab since the game provider blocks iframe embedding
+      window.open(url, '_blank', 'noopener,noreferrer');
+      toast.success(`${res?.payload?.game_name || game.name} launched!`);
     } catch (err: any) {
       console.error('Failed to launch game:', err);
       toast.error('Game launch failed');
