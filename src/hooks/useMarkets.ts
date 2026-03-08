@@ -55,9 +55,7 @@ export function useMarkets(sport?: string, pollInterval = 15000) {
   // Trigger a sync from the odds-fetcher edge function
   const syncOdds = useCallback(async () => {
     try {
-      await supabase.functions.invoke('odds-fetcher', {
-        body: null,
-      });
+      await supabase.functions.invoke('odds-fetcher');
       await fetchMarkets();
     } catch (err) {
       console.error('Odds sync error:', err);
