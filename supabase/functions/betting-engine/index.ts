@@ -274,7 +274,22 @@ async function cashOut(client: any, userId: string, data: Record<string, unknown
     return jsonResponse({ error: 'Bet already settled' }, 400)
   }
 
-  const cashOutMultiplier = Number(multiplier) || 1
+  // Validate multiplier server-side: fetch from game round if available, else cap at bet odds
+  let allowedMultiplier = Number(multiplier) || 1
+  if (allowedMultiplier <= 0) allowedMultiplier = 1
+
+  // If bet is linked to a game round, use the server-side multiplier (never trust client)
+  if (bet.game_round_id) {
+    const { data: round } = await client.from('game_rounds').select('multiplier').eq('id', bet.game_round_id).single()
+    if (round?.multiplier) {
+      allowedMultiplier = Math.min(allowedMultiplier, Number(round.multiplier))
+    }
+  }
+
+  // Hard ceiling: no cashout can exceed 100x regardless
+  const MAX_MULTIPLIER = 100
+  const cashOutMultiplier = Math.min(allowedMultiplier, MAX_MULTIPLIER)
+
   // Stake already deducted at placement, so cashout returns stake * multiplier
   const cashOutAmount = bet.stake * cashOutMultiplier
   const profit = cashOutAmount - bet.stake
