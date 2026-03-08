@@ -32,7 +32,7 @@ Deno.serve(async (req) => {
           method: 'POST',
           headers,
           body: JSON.stringify({
-            username: data.username || 'player_' + Date.now(),
+            username: data.username || 'user' + Math.random().toString(36).slice(2, 10),
             gameId: data.gameId,
             lang: data.lang || 'en',
             money: data.money || 0,
