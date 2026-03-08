@@ -53,13 +53,14 @@ export function useMarkets(sport?: string, pollInterval = 15000) {
     if (mountedRef.current) setLoading(false);
   }, [sport]);
 
+  // syncOdds is admin-only on the server; call silently and ignore 403 for regular users
   const syncOdds = useCallback(async () => {
     try {
       await supabase.functions.invoke('odds-fetcher');
-      await fetchMarkets();
-    } catch (err) {
-      console.error('Odds sync error:', err);
+    } catch {
+      // Silently ignore — non-admins get 403 which is expected
     }
+    await fetchMarkets();
   }, [fetchMarkets]);
 
   useEffect(() => {
