@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
 export interface WalletData {
@@ -12,10 +12,12 @@ export interface WalletData {
 export function useWallet() {
   const [wallet, setWallet] = useState<WalletData | null>(null);
   const [loading, setLoading] = useState(true);
+  const userIdRef = useRef<string | null>(null);
 
   const fetchWallet = useCallback(async () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { setLoading(false); return; }
+    userIdRef.current = user.id;
 
     const { data, error } = await supabase
       .from('wallets')
@@ -35,19 +37,42 @@ export function useWallet() {
     setLoading(false);
   }, []);
 
+  // Optimistic update: deduct exposure immediately on bet placement
+  const optimisticDeduct = useCallback((exposure: number) => {
+    setWallet(prev => {
+      if (!prev) return prev;
+      const newExposure = prev.exposure + exposure;
+      return {
+        ...prev,
+        exposure: newExposure,
+        available: prev.balance - newExposure,
+      };
+    });
+  }, []);
+
   useEffect(() => {
     fetchWallet();
 
-    // Subscribe to wallet changes
+    // Subscribe to wallet changes filtered by user
     const channel = supabase
       .channel('wallet-changes')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'wallets' }, () => {
-        fetchWallet();
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'wallets' }, (payload) => {
+        // Only update if it's for the current user
+        if (userIdRef.current && payload.new && (payload.new as any).user_id === userIdRef.current) {
+          const d = payload.new as any;
+          setWallet({
+            balance: Number(d.balance),
+            bonus_balance: Number(d.bonus_balance),
+            exposure: Number(d.exposure),
+            total_profit_loss: Number(d.total_profit_loss),
+            available: Number(d.balance) - Number(d.exposure),
+          });
+        }
       })
       .subscribe();
 
     return () => { supabase.removeChannel(channel); };
   }, [fetchWallet]);
 
-  return { wallet, loading, refetch: fetchWallet };
+  return { wallet, loading, refetch: fetchWallet, optimisticDeduct };
 }
