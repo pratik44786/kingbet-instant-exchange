@@ -1,5 +1,6 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { getCachedUserId } from './useAuthSession';
 
 export interface ProfileData {
   id: string;
@@ -16,33 +17,32 @@ export interface ProfileData {
 export function useProfile() {
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [loading, setLoading] = useState(true);
+  const mountedRef = useRef(true);
 
   const fetchProfile = useCallback(async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) { setLoading(false); return; }
+    const userId = await getCachedUserId();
+    if (!userId || !mountedRef.current) { setLoading(false); return; }
 
-    const { data: profileData } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', user.id)
-      .single();
+    // Parallel fetch profile + role
+    const [profileRes, roleRes] = await Promise.all([
+      supabase.from('profiles').select('*').eq('id', userId).single(),
+      supabase.from('user_roles').select('role').eq('user_id', userId).single(),
+    ]);
 
-    const { data: roleData } = await supabase
-      .from('user_roles')
-      .select('role')
-      .eq('user_id', user.id)
-      .single();
-
-    if (profileData) {
+    if (profileRes.data && mountedRef.current) {
       setProfile({
-        ...profileData,
-        role: roleData?.role || 'user',
+        ...profileRes.data,
+        role: roleRes.data?.role || 'user',
       } as ProfileData);
     }
-    setLoading(false);
+    if (mountedRef.current) setLoading(false);
   }, []);
 
-  useEffect(() => { fetchProfile(); }, [fetchProfile]);
+  useEffect(() => {
+    mountedRef.current = true;
+    fetchProfile();
+    return () => { mountedRef.current = false; };
+  }, [fetchProfile]);
 
   return { profile, loading, refetch: fetchProfile };
 }

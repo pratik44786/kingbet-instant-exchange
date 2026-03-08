@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { clearCachedUserId } from '@/hooks/useAuthSession';
 import type { User, Session } from '@supabase/supabase-js';
 
 export type UserRole = 'user' | 'admin' | 'superadmin';
@@ -43,23 +44,16 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const fetchUserProfile = useCallback(async (authUser: User) => {
     try {
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('username, display_name, email, status')
-        .eq('id', authUser.id)
-        .single();
+      // Parallel fetch all user data at once — reduces 3 sequential calls to 1 round-trip
+      const [profileRes, roleRes, walletRes] = await Promise.all([
+        supabase.from('profiles').select('username, display_name, email, status').eq('id', authUser.id).single(),
+        supabase.from('user_roles').select('role').eq('user_id', authUser.id).single(),
+        supabase.from('wallets').select('balance').eq('user_id', authUser.id).single(),
+      ]);
 
-      const { data: roleData } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', authUser.id)
-        .single();
-
-      const { data: wallet } = await supabase
-        .from('wallets')
-        .select('balance')
-        .eq('user_id', authUser.id)
-        .single();
+      const profile = profileRes.data;
+      const roleData = roleRes.data;
+      const wallet = walletRes.data;
 
       if (profile?.status === 'blocked' || profile?.status === 'suspended') {
         await supabase.auth.signOut();
@@ -167,11 +161,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   }, []);
 
   const logout = useCallback(async () => {
+    clearCachedUserId();
     await supabase.auth.signOut();
     setUser(null);
     setSession(null);
     setError(null);
-    // Clear any legacy localStorage
     localStorage.removeItem('authToken');
     localStorage.removeItem('authUser');
     localStorage.removeItem('userIdLogin');
