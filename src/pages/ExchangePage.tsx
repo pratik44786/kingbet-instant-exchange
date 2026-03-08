@@ -3,6 +3,7 @@ import { useApp } from '@/context/AppContext';
 import { RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { MarketData, RunnerData } from '@/hooks/useMarkets';
+import type { BetSlipItem } from '@/types/exchange';
 
 const sportIcon: Record<string, string> = { cricket: '🏏', football: '⚽', tennis: '🎾' };
 
@@ -59,8 +60,24 @@ function generateSecondaryMarkets(market: MarketData) {
   };
 }
 
-const SecondaryMarketsSection: React.FC<{ market: MarketData }> = ({ market }) => {
+interface SecondaryMarketProps {
+  market: MarketData;
+  betSlip: BetSlipItem[];
+  addToBetSlip: (item: Omit<BetSlipItem, 'stake'>) => void;
+  updateBetSlipStake: (runnerId: string, stake: number) => void;
+  placeBets: () => Promise<void>;
+}
+
+const SecondaryMarketsSection: React.FC<SecondaryMarketProps> = ({ market, betSlip, addToBetSlip, updateBetSlipStake, placeBets }) => {
   const data = generateSecondaryMarkets(market);
+
+  const getBetType = (isYes: boolean): BetSlipItem['type'] => {
+    if (data.isCricket) return isYes ? 'fancy_yes' : 'fancy_no';
+    return isYes ? 'session_over' : 'session_under';
+  };
+
+  // Generate a deterministic fake runner ID for each secondary item
+  const getFakeRunnerId = (idx: number) => `${market.id}-secondary-${idx}`;
 
   return (
     <div className="mt-1">
@@ -72,23 +89,53 @@ const SecondaryMarketsSection: React.FC<{ market: MarketData }> = ({ market }) =
         <div className="col-span-3 text-center text-[#72bbef]">{data.yesLabel}</div>
       </div>
 
-      {data.items.map((f, idx) => (
-        <div key={idx} className="grid grid-cols-12 items-center p-1 gap-1 bg-[#161d2f] border-b border-white/5">
-          <div className="col-span-6 pl-2 text-xs font-bold text-gray-200">{f.label}</div>
-          <div className="col-span-3">
-            <button className="btn-lay w-full py-2">
-              <span className="odds-text">{data.isCricket ? f.no : f.no.toFixed(2)}</span>
-              <span className="block text-[8px] opacity-60">100</span>
-            </button>
+      {data.items.map((f, idx) => {
+        const fakeId = getFakeRunnerId(idx);
+        const slip = betSlip.find(b => b.runnerId === fakeId);
+        const noOdds = data.isCricket ? f.no : Number(f.no.toFixed(2));
+        const yesOdds = data.isCricket ? f.yes : Number(f.yes.toFixed(2));
+
+        return (
+          <div key={idx} className="border-b border-white/5">
+            <div className="grid grid-cols-12 items-center p-1 gap-1 bg-[#161d2f]">
+              <div className="col-span-6 pl-2 text-xs font-bold text-gray-200">{f.label}</div>
+              <div className="col-span-3">
+                <button
+                  onClick={() => addToBetSlip({ marketId: market.id, runnerId: fakeId, runnerName: f.label, eventName: market.event_name, type: getBetType(false), odds: noOdds })}
+                  className="btn-lay w-full py-2"
+                >
+                  <span className="odds-text">{data.isCricket ? f.no : f.no.toFixed(2)}</span>
+                  <span className="block text-[8px] opacity-60">100</span>
+                </button>
+              </div>
+              <div className="col-span-3">
+                <button
+                  onClick={() => addToBetSlip({ marketId: market.id, runnerId: fakeId, runnerName: f.label, eventName: market.event_name, type: getBetType(true), odds: yesOdds })}
+                  className="btn-back w-full py-2"
+                >
+                  <span className="odds-text">{data.isCricket ? f.yes : f.yes.toFixed(2)}</span>
+                  <span className="block text-[8px] opacity-60">100</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Inline Slip */}
+            {slip && (
+              <div className={`m-2 p-3 rounded border-l-4 shadow-2xl ${slip.type.includes('yes') || slip.type.includes('over') ? 'bg-[#e2f2ff] border-[#2b92e4]' : 'bg-[#fff0f3] border-[#ef6e8b]'}`}>
+                <div className="text-[10px] font-bold text-gray-600 mb-1 uppercase">{slip.type.replace('_', ' ')} @ {slip.odds}</div>
+                <div className="flex items-end gap-3">
+                  <div className="flex-1">
+                    <label className="text-[10px] font-black text-gray-600 block uppercase mb-1">Stake</label>
+                    <input type="number" className="w-full p-2 rounded bg-white text-black font-bold outline-none border border-gray-300" placeholder="Amount" value={slip.stake || ''} onChange={(e) => updateBetSlipStake(fakeId, Number(e.target.value))} />
+                  </div>
+                  <Button onClick={placeBets} className="bg-yellow-600 hover:bg-yellow-700 h-10 px-6 font-black rounded-sm shadow-md">PLACE BET</Button>
+                  <Button variant="ghost" onClick={() => updateBetSlipStake(fakeId, 0)} className="h-10 text-gray-500 font-bold">CANCEL</Button>
+                </div>
+              </div>
+            )}
           </div>
-          <div className="col-span-3">
-            <button className="btn-back w-full py-2">
-              <span className="odds-text">{data.isCricket ? f.yes : f.yes.toFixed(2)}</span>
-              <span className="block text-[8px] opacity-60">100</span>
-            </button>
-          </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 };
@@ -182,7 +229,7 @@ const ExchangePage: React.FC = () => {
 
       {/* Secondary Markets - All Sports */}
       {isLive && (
-        <SecondaryMarketsSection market={market} />
+        <SecondaryMarketsSection market={market} betSlip={betSlip} addToBetSlip={addToBetSlip} updateBetSlipStake={updateBetSlipStake} placeBets={placeBets} />
       )}
     </div>
   );
