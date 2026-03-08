@@ -229,7 +229,7 @@ const ExchangePage: React.FC = () => {
 
       {/* Secondary Markets - All Sports */}
       {isLive && (
-        <SecondaryMarketsSection market={market} />
+        <SecondaryMarketsSection market={market} betSlip={betSlip} addToBetSlip={addToBetSlip} updateBetSlipStake={updateBetSlipStake} placeBets={placeBets} />
       )}
     </div>
   );
