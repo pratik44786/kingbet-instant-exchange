@@ -75,7 +75,7 @@ const ExchangePage: React.FC = () => {
               </div>
             </div>
 
-            {/* Inline Slip - only for live matches */}
+            {/* Inline Slip */}
             {slip && isLive && (
               <div className={`m-2 p-3 rounded border-l-4 shadow-2xl ${slip.type === 'back' ? 'bg-[#e2f2ff] border-[#2b92e4]' : 'bg-[#fff0f3] border-[#ef6e8b]'}`}>
                 <div className="flex items-end gap-3">
@@ -91,6 +91,11 @@ const ExchangePage: React.FC = () => {
           </div>
         );
       })}
+
+      {/* Fancy Markets - Cricket Only */}
+      {market.sport === 'cricket' && isLive && (
+        <FancySection market={market} />
+      )}
     </div>
   );
 
