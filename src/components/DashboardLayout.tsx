@@ -20,6 +20,7 @@ const topNavTabs = [
   { label: 'FOOTBALL', path: '/exchange?sport=football' },
   { label: 'TENNIS', path: '/exchange?sport=tennis' },
   { label: 'CASINO', path: '/casino' },
+  { label: 'LIVE CASINO', path: '/live-casino' },
 ];
 
 const DashboardLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
