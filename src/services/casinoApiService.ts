@@ -23,7 +23,7 @@ export const casinoApiService = {
         action: 'get_game_url',
         data: {
           gameId,
-          username: username || 'player_' + Date.now(),
+          username: username || 'user' + Math.random().toString(36).slice(2, 10),
           lang: 'en',
           money: 0,
           currency: 'INR',
