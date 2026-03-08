@@ -27,6 +27,10 @@ const LiveCasinoPage = () => {
     setLaunchingId(game.gameId);
     try {
       const res = await casinoApiService.getGameUrl(game.gameId);
+      if (res?.success === false) {
+        toast.error(res?.message || 'Game launch failed');
+        return;
+      }
       const url = res?.payload?.game_launch_url || res?.url || res?.game_url;
       if (!url) {
         console.error('Game URL response:', res);
