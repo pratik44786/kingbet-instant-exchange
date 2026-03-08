@@ -76,9 +76,11 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     if (validBets.length === 0) return;
 
     for (const bet of validBets) {
+      // Secondary market bets use fake runner IDs (contain '-secondary-'), pass null instead
+      const isSecondary = bet.runnerId.includes('-secondary-');
       await bettingService.placeBet({
         market_id: bet.marketId,
-        runner_id: bet.runnerId,
+        runner_id: isSecondary ? undefined : bet.runnerId,
         bet_type: bet.type,
         odds: bet.odds,
         stake: bet.stake,
