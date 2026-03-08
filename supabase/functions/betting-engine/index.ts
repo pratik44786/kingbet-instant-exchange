@@ -96,6 +96,9 @@ async function placeBet(client: any, userId: string, data: Record<string, unknow
     return jsonResponse({ error: 'Insufficient balance', available: availableBalance }, 400)
   }
 
+  // Exchange bets (with market_id) auto-match; casino bets stay pending until round ends
+  const initialStatus = market_id ? 'matched' : 'pending';
+
   const { data: bet, error: betErr } = await client.from('bets').insert({
     user_id: userId,
     market_id: market_id || null,
@@ -107,7 +110,7 @@ async function placeBet(client: any, userId: string, data: Record<string, unknow
     stake: stakeNum,
     potential_profit: potentialProfit,
     exposure,
-    status: 'pending',
+    status: initialStatus,
   }).select().single()
 
   if (betErr) {
