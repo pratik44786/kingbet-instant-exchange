@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.admin-controls]
 verify_jwt = false
+
+[functions.casino-api]
+verify_jwt = false

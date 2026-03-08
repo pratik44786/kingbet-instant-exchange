@@ -49,6 +49,7 @@ const CrashPage = lazyRetry(() => import('./pages/CrashPage'));
 const DicePage = lazyRetry(() => import('./pages/DicePage'));
 const MinesPage = lazyRetry(() => import('./pages/MinesPage'));
 const PlinkoPage = lazyRetry(() => import('./pages/PlinkoPage'));
+const LiveCasinoPage = lazyRetry(() => import('./pages/LiveCasinoPage'));
 const DashboardLayout = lazyRetry(() => import('./components/DashboardLayout'));
 
 // Protected route wrapper
@@ -106,6 +107,7 @@ function App() {
                 <Route path="/casino/dice" element={<DicePage />} />
                 <Route path="/casino/mines" element={<MinesPage />} />
                 <Route path="/casino/plinko" element={<PlinkoPage />} />
+                <Route path="/casino/live" element={<LiveCasinoPage />} />
                 <Route path="/wallet" element={<WalletPage />} />
                 <Route path="/history" element={<HistoryPage />} />
                 <Route path="/profile" element={<ProfilePage />} />
