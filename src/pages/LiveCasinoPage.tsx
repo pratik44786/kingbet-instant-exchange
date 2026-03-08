@@ -71,14 +71,14 @@ const LiveCasinoPage = () => {
     setLaunchingId(id);
     try {
       const res = await casinoApiService.getGameUrl(id);
-      const url = res?.url || res?.game_url || res?.launch_url || res?.data?.url;
+      const url = res?.payload?.game_launch_url || res?.url || res?.game_url || res?.launch_url || res?.data?.url;
       if (!url) {
         console.error('Game URL response:', res);
         toast.error('Game URL nahi mila');
         return;
       }
       setGameUrl(url);
-      setGameName(game.gameName || game.name || 'Game');
+      setGameName(res?.payload?.game_name || game.gameName || game.name || 'Game');
     } catch (err: any) {
       console.error('Failed to launch game:', err);
       toast.error('Game launch nahi ho paya');
