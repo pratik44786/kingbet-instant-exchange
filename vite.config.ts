@@ -24,5 +24,6 @@ export default defineConfig(({ mode }) => ({
       "@utils": path.resolve(__dirname, "src/utils"),
       "@types": path.resolve(__dirname, "src/types")
     },
+    dedupe: ["react", "react-dom", "react/jsx-runtime"],
   },
 }));
