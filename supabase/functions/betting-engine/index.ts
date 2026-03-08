@@ -118,15 +118,20 @@ async function placeBet(client: any, userId: string, data: Record<string, unknow
     return jsonResponse({ error: 'Failed to place bet' }, 500)
   }
 
+  // Deduct stake from balance immediately + track exposure
+  const newBalance = wallet.balance - stakeNum
   const newExposure = wallet.exposure + exposure
-  await client.from('wallets').update({ exposure: newExposure }).eq('user_id', userId)
+  await client.from('wallets').update({
+    balance: newBalance,
+    exposure: newExposure,
+  }).eq('user_id', userId)
 
   await client.from('transactions').insert({
     user_id: userId,
     type: 'bet_debit',
-    amount: exposure,
+    amount: stakeNum,
     balance_before: wallet.balance,
-    balance_after: wallet.balance,
+    balance_after: newBalance,
     description: `Bet placed: ${bet_type} @ ${oddsNum}`,
     reference_id: bet.id,
     reference_type: 'bet',
