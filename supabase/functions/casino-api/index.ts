@@ -1,11 +1,9 @@
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
-const RAPIDAPI_HOST = 'diamond-casino-api-no-ggr.p.rapidapi.com';
+const RAPIDAPI_HOST = 'live-casino-slots-evolution-jili-and-50-plus-provider.p.rapidapi.com';
 const BASE_URL = `https://${RAPIDAPI_HOST}`;
 
 Deno.serve(async (req) => {
@@ -17,61 +15,64 @@ Deno.serve(async (req) => {
     const RAPIDAPI_KEY = Deno.env.get('RAPIDAPI_KEY');
     if (!RAPIDAPI_KEY) throw new Error('RAPIDAPI_KEY not configured');
 
-    // Auth check
-    const authHeader = req.headers.get('Authorization');
-    if (!authHeader?.startsWith('Bearer ')) {
-      return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
-    }
-
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL')!,
-      Deno.env.get('SUPABASE_ANON_KEY')!,
-      { global: { headers: { Authorization: authHeader } } }
-    );
-
-    const token = authHeader.replace('Bearer ', '');
-    const { data: claims, error: claimsErr } = await supabase.auth.getClaims(token);
-    if (claimsErr || !claims?.claims) {
-      return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
-    }
-
     const { action, data } = await req.json();
-    const headers = {
+
+    const headers: Record<string, string> = {
       'X-RapidAPI-Key': RAPIDAPI_KEY,
       'X-RapidAPI-Host': RAPIDAPI_HOST,
+      'Content-Type': 'application/json',
     };
 
-    let url = '';
+    let apiRes: Response;
+
     switch (action) {
-      case 'get_all_tables':
-        url = `${BASE_URL}/casino/getAllCasinoTableIdTTime`;
+      case 'get_game_url': {
+        // POST /getgameurl - Launch a game
+        apiRes = await fetch(`${BASE_URL}/getgameurl`, {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({
+            username: data.username || 'player_' + Date.now(),
+            gameId: data.gameId,
+            lang: data.lang || 'en',
+            money: data.money || 0,
+            home_url: data.home_url || 'https://kingbet-instant-exchange.lovable.app',
+            platform: data.platform || 1,
+            currency: data.currency || 'INR',
+          }),
+        });
         break;
-      case 'get_table_data':
-        url = `${BASE_URL}/casino/getCasinoTableData5Sec?mid=${data.mid}`;
+      }
+
+      case 'get_game_list': {
+        // GET /getgamelist - Fetch all available games
+        const params = new URLSearchParams();
+        if (data?.provider) params.set('provider', data.provider);
+        if (data?.type) params.set('type', data.type);
+        const qs = params.toString();
+        apiRes = await fetch(`${BASE_URL}/getgamelist${qs ? '?' + qs : ''}`, {
+          method: 'GET',
+          headers,
+        });
         break;
-      case 'get_result':
-        url = `${BASE_URL}/casino/casinoResult5Sec?mid=${data.mid}`;
+      }
+
+      case 'get_providers': {
+        // GET /getproviders - Fetch provider list
+        apiRes = await fetch(`${BASE_URL}/getproviders`, {
+          method: 'GET',
+          headers,
+        });
         break;
-      case 'get_detail_result':
-        url = `${BASE_URL}/casino/detail_result?mid=${data.mid}&type=${data.type || ''}`;
-        break;
-      case 'get_table_rules':
-        url = `${BASE_URL}/casino/getCasinoTableRules1Time?mid=${data.mid}`;
-        break;
-      case 'get_stream_url':
-        url = `${BASE_URL}/casino/getCasinoStreamUrlUserCall?mid=${data.mid}`;
-        break;
-      case 'get_virtual_table_data':
-        url = `${BASE_URL}/casino/getVirtualCasinoTableDetail5Sec?mid=${data.mid}`;
-        break;
-      case 'get_virtual_result':
-        url = `${BASE_URL}/casino/getVirtualCasinoResult5Sec?mid=${data.mid}`;
-        break;
+      }
+
       default:
-        return new Response(JSON.stringify({ error: 'Unknown action' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+        return new Response(JSON.stringify({ error: 'Unknown action' }), {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
     }
 
-    const apiRes = await fetch(url, { headers });
     const apiData = await apiRes.json();
 
     return new Response(JSON.stringify(apiData), {

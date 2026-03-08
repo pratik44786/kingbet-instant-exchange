@@ -1,4 +1,4 @@
-import { BarChart3, CircleDot, Dribbble, Gamepad2, Wallet, Shield, Trophy, History, Globe } from 'lucide-react';
+import { BarChart3, CircleDot, Dribbble, Gamepad2, Wallet, Shield, Trophy, History, Globe, Tv } from 'lucide-react';
 import { useLocation, Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { useApp } from '@/context/AppContext';
@@ -9,6 +9,7 @@ const navItems = [
   { icon: Dribbble, label: 'Football', path: '/football' },
   { icon: Globe, label: 'Tennis', path: '/tennis' },
   { icon: Gamepad2, label: 'Casino', path: '/casino' },
+  { icon: Tv, label: 'Live Casino', path: '/live-casino' },
   { icon: Wallet, label: 'Wallet', path: '/wallet' },
   { icon: History, label: 'History', path: '/history' },
 ];
