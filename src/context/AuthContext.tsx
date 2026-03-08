@@ -89,6 +89,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   useEffect(() => {
     let mounted = true;
+    let loadingTimeout: ReturnType<typeof setTimeout>;
 
     const initAuth = async () => {
       try {
@@ -110,20 +111,30 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     initAuth();
 
+    // Safety timeout: never stay loading for more than 8 seconds
+    loadingTimeout = setTimeout(() => {
+      if (mounted) {
+        console.warn('Auth loading timeout — forcing ready state');
+        setIsLoading(false);
+      }
+    }, 8000);
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (_event, newSession) => {
+        if (!mounted) return;
         setSession(newSession);
         if (newSession?.user) {
           await fetchUserProfile(newSession.user);
         } else {
           setUser(null);
         }
-        setIsLoading(false);
+        if (mounted) setIsLoading(false);
       }
     );
 
     return () => {
       mounted = false;
+      clearTimeout(loadingTimeout);
       subscription.unsubscribe();
     };
   }, [fetchUserProfile]);
