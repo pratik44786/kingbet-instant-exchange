@@ -9,6 +9,7 @@ const navItems = [
   { icon: Dribbble, label: 'Football', path: '/football' },
   { icon: Globe, label: 'Tennis', path: '/tennis' },
   { icon: Gamepad2, label: 'Casino', path: '/casino' },
+  { icon: Tv, label: 'Live Casino', path: '/live-casino' },
   { icon: Wallet, label: 'Wallet', path: '/wallet' },
   { icon: History, label: 'History', path: '/history' },
 ];
