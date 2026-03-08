@@ -79,6 +79,14 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       return;
     }
 
+    // Optimistic: deduct exposure immediately for instant UI feedback
+    for (const bet of validBets) {
+      const oddsNum = Number(bet.odds);
+      const stakeNum = Number(bet.stake);
+      const exposure = bet.type === 'lay' ? (stakeNum * oddsNum) - stakeNum : stakeNum;
+      walletHook.optimisticDeduct(exposure);
+    }
+
     try {
       for (const bet of validBets) {
         const isSecondary = bet.runnerId.includes('-secondary-');
@@ -93,12 +101,15 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
       toast.success(`${validBets.length} bet(s) placed successfully! ✅`);
       setBetSlip([]);
+      // Sync with server for accurate values
       walletHook.refetch();
       refetchBets();
       refetchTransactions();
     } catch (err: any) {
       toast.error(err?.message || 'Bet place nahi ho payi, try again');
       console.error('Place bet error:', err);
+      // Rollback: refetch actual wallet state on error
+      walletHook.refetch();
     }
   }, [betSlip, walletHook, refetchBets, refetchTransactions]);
 
