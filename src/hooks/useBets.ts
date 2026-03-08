@@ -1,5 +1,6 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { getCachedUserId } from './useAuthSession';
 
 export interface BetData {
   id: string;
@@ -20,21 +21,35 @@ export interface BetData {
 export function useBets(filters?: { status?: string; limit?: number }) {
   const [bets, setBets] = useState<BetData[]>([]);
   const [loading, setLoading] = useState(true);
+  const mountedRef = useRef(true);
 
   const fetchBets = useCallback(async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) { setLoading(false); return; }
+    const userId = await getCachedUserId();
+    if (!userId || !mountedRef.current) { setLoading(false); return; }
 
-    let query = supabase.from('bets').select('*').eq('user_id', user.id);
+    let query = supabase.from('bets').select('*').eq('user_id', userId);
     if (filters?.status) query = query.eq('status', filters.status as any);
     query = query.order('created_at', { ascending: false }).limit(filters?.limit || 50);
 
     const { data } = await query;
-    if (data) setBets(data.map(b => ({ ...b, odds: Number(b.odds), stake: Number(b.stake), potential_profit: Number(b.potential_profit), actual_profit: b.actual_profit ? Number(b.actual_profit) : null, exposure: Number(b.exposure) })) as BetData[]);
-    setLoading(false);
+    if (data && mountedRef.current) {
+      setBets(data.map(b => ({
+        ...b,
+        odds: Number(b.odds),
+        stake: Number(b.stake),
+        potential_profit: Number(b.potential_profit),
+        actual_profit: b.actual_profit ? Number(b.actual_profit) : null,
+        exposure: Number(b.exposure),
+      })) as BetData[]);
+    }
+    if (mountedRef.current) setLoading(false);
   }, [filters?.status, filters?.limit]);
 
-  useEffect(() => { fetchBets(); }, [fetchBets]);
+  useEffect(() => {
+    mountedRef.current = true;
+    fetchBets();
+    return () => { mountedRef.current = false; };
+  }, [fetchBets]);
 
   return { bets, loading, refetch: fetchBets };
 }

@@ -26,18 +26,19 @@ export function useMarkets(sport?: string, pollInterval = 15000) {
   const [markets, setMarkets] = useState<MarketData[]>([]);
   const [loading, setLoading] = useState(true);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const mountedRef = useRef(true);
+  const visibleRef = useRef(true);
 
   const fetchMarkets = useCallback(async () => {
-    let query = supabase.from('markets').select(`
-      *,
-      runners(*)
-    `).in('status', ['open', 'suspended']);
+    // Skip fetch if tab is hidden (save bandwidth for 100K users)
+    if (!visibleRef.current || !mountedRef.current) return;
 
+    let query = supabase.from('markets').select(`*, runners(*)`).in('status', ['open', 'suspended']);
     if (sport) query = query.eq('sport', sport as any);
     query = query.order('start_time', { ascending: true }).limit(50);
 
     const { data } = await query;
-    if (data) {
+    if (data && mountedRef.current) {
       setMarkets(data.map(m => ({
         ...m,
         runners: (m.runners || []).map((r: any) => ({
@@ -49,10 +50,9 @@ export function useMarkets(sport?: string, pollInterval = 15000) {
         })).sort((a: RunnerData, b: RunnerData) => a.sort_order - b.sort_order),
       })) as MarketData[]);
     }
-    setLoading(false);
+    if (mountedRef.current) setLoading(false);
   }, [sport]);
 
-  // Trigger a sync from the odds-fetcher edge function
   const syncOdds = useCallback(async () => {
     try {
       await supabase.functions.invoke('odds-fetcher');
@@ -63,17 +63,26 @@ export function useMarkets(sport?: string, pollInterval = 15000) {
   }, [fetchMarkets]);
 
   useEffect(() => {
-    // Initial fetch from DB
+    mountedRef.current = true;
+    visibleRef.current = !document.hidden;
+
+    // Pause polling when tab is hidden
+    const handleVisibility = () => {
+      visibleRef.current = !document.hidden;
+      if (!document.hidden) fetchMarkets(); // Refresh when coming back
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+
     fetchMarkets();
-    // Initial sync from API
     syncOdds();
 
-    // Poll every pollInterval ms
     timerRef.current = setInterval(() => {
-      fetchMarkets();
+      if (visibleRef.current) fetchMarkets();
     }, pollInterval);
 
     return () => {
+      mountedRef.current = false;
+      document.removeEventListener('visibilitychange', handleVisibility);
       if (timerRef.current) clearInterval(timerRef.current);
     };
   }, [fetchMarkets, syncOdds, pollInterval]);
