@@ -1,4 +1,4 @@
-import { BarChart3, CircleDot, Dribbble, Gamepad2, Wallet, Shield, Trophy, History, Globe } from 'lucide-react';
+import { BarChart3, CircleDot, Dribbble, Gamepad2, Wallet, Shield, Trophy, History, Globe, Tv } from 'lucide-react';
 import { useLocation, Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { useApp } from '@/context/AppContext';

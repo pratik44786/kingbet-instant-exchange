@@ -10,6 +10,7 @@ const mobileNavItems = [
   { label: 'Football', path: '/football', icon: '⚽' },
   { label: 'Tennis', path: '/tennis', icon: '🎾' },
   { label: 'Casino', path: '/casino', icon: '🎰' },
+  { label: 'Live Casino', path: '/live-casino', icon: '📺' },
   { label: 'Wallet', path: '/wallet', icon: '💰' },
   { label: 'History', path: '/history', icon: '📜' },
 ];
