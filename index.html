@@ -25,6 +25,14 @@
 
   <body>
     <div id="root"></div>
+    <script>
+      window.onerror = function(msg, src, line, col, err) {
+        var root = document.getElementById('root');
+        if (root && !root.hasChildNodes()) {
+          root.innerHTML = '<div style="color:#fff;padding:2rem;font-family:sans-serif;background:#0b1221;min-height:100vh"><h2 style="color:#eab308">KingBet - Loading Error</h2><p style="color:#9ca3af">Please try refreshing. If the issue persists, clear your browser cache.</p><pre style="color:#ef4444;font-size:12px;margin-top:1rem;white-space:pre-wrap">' + msg + '</pre><button onclick="location.reload()" style="margin-top:1rem;padding:8px 24px;background:#ca8a04;color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:bold">Refresh</button></div>';
+        }
+      };
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
