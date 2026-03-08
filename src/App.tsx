@@ -15,8 +15,10 @@ const PageLoader = () => (
   </div>
 );
 
+// Eagerly loaded (homepage - must load instantly)
+import LandingPage from './pages/LandingPage';
+
 // Lazy loaded pages
-const LandingPage = lazy(() => import('./pages/LandingPage'));
 const LoginPage = lazy(() => import('./pages/LoginPage'));
 const ExchangePage = lazy(() => import('./pages/ExchangePage'));
 const CasinoPage = lazy(() => import('./pages/CasinoPage'));
