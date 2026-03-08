@@ -118,15 +118,20 @@ async function placeBet(client: any, userId: string, data: Record<string, unknow
     return jsonResponse({ error: 'Failed to place bet' }, 500)
   }
 
+  // Deduct stake from balance immediately + track exposure
+  const newBalance = wallet.balance - stakeNum
   const newExposure = wallet.exposure + exposure
-  await client.from('wallets').update({ exposure: newExposure }).eq('user_id', userId)
+  await client.from('wallets').update({
+    balance: newBalance,
+    exposure: newExposure,
+  }).eq('user_id', userId)
 
   await client.from('transactions').insert({
     user_id: userId,
     type: 'bet_debit',
-    amount: exposure,
+    amount: stakeNum,
     balance_before: wallet.balance,
-    balance_after: wallet.balance,
+    balance_after: newBalance,
     description: `Bet placed: ${bet_type} @ ${oddsNum}`,
     reference_id: bet.id,
     reference_type: 'bet',
@@ -146,7 +151,7 @@ async function placeBet(client: any, userId: string, data: Record<string, unknow
   return jsonResponse({
     success: true,
     bet,
-    wallet: { balance: wallet.balance, exposure: newExposure, available: wallet.balance - newExposure },
+    wallet: { balance: newBalance, exposure: newExposure, available: newBalance - newExposure },
   })
 }
 
@@ -169,16 +174,23 @@ async function settleBet(client: any, userId: string, data: Record<string, unkno
   const { data: wallet } = await client.from('wallets').select('*').eq('user_id', bet.user_id).single()
   if (!wallet) return jsonResponse({ error: 'Wallet not found' }, 404)
 
+  // Since stake is already deducted at placement:
+  // Won: return stake + profit
+  // Lost: nothing (stake already gone)
+  // Void: return stake (refund)
   let actualProfit = 0
   let newBalance = wallet.balance
   const newExposure = Math.max(0, wallet.exposure - bet.exposure)
 
   if (result === 'won') {
     actualProfit = bet.potential_profit
-    newBalance = wallet.balance + actualProfit
+    newBalance = wallet.balance + bet.stake + actualProfit  // return stake + winnings
   } else if (result === 'lost') {
-    actualProfit = -bet.exposure
-    newBalance = wallet.balance - bet.exposure
+    actualProfit = -bet.stake
+    newBalance = wallet.balance  // stake already deducted, nothing to do
+  } else if (result === 'void') {
+    actualProfit = 0
+    newBalance = wallet.balance + bet.stake  // refund the stake
   }
 
   await client.from('bets').update({
@@ -194,16 +206,19 @@ async function settleBet(client: any, userId: string, data: Record<string, unkno
   }).eq('user_id', bet.user_id)
 
   const txnType = result === 'won' ? 'bet_win' : (result === 'void' ? 'bet_refund' : 'bet_debit')
-  await client.from('transactions').insert({
-    user_id: bet.user_id,
-    type: txnType,
-    amount: Math.abs(actualProfit) || bet.exposure,
-    balance_before: wallet.balance,
-    balance_after: Math.max(0, newBalance),
-    description: `Bet ${result}: ${bet.bet_type} @ ${bet.odds}`,
-    reference_id: bet_id,
-    reference_type: 'settlement',
-  })
+  const txnAmount = result === 'won' ? (bet.stake + actualProfit) : (result === 'void' ? bet.stake : 0)
+  if (txnAmount > 0) {
+    await client.from('transactions').insert({
+      user_id: bet.user_id,
+      type: txnType,
+      amount: txnAmount,
+      balance_before: wallet.balance,
+      balance_after: Math.max(0, newBalance),
+      description: `Bet ${result}: ${bet.bet_type} @ ${bet.odds}`,
+      reference_id: bet_id,
+      reference_type: 'settlement',
+    })
+  }
 
   return jsonResponse({ success: true, bet_id, result, actual_profit: actualProfit })
 }
@@ -260,12 +275,14 @@ async function cashOut(client: any, userId: string, data: Record<string, unknown
   }
 
   const cashOutMultiplier = Number(multiplier) || 1
-  const profit = (bet.stake * cashOutMultiplier) - bet.stake
+  // Stake already deducted at placement, so cashout returns stake * multiplier
+  const cashOutAmount = bet.stake * cashOutMultiplier
+  const profit = cashOutAmount - bet.stake
 
   const { data: wallet } = await client.from('wallets').select('*').eq('user_id', userId).single()
   if (!wallet) return jsonResponse({ error: 'Wallet not found' }, 404)
 
-  const newBalance = wallet.balance + profit
+  const newBalance = wallet.balance + cashOutAmount  // return stake + profit
   const newExposure = Math.max(0, wallet.exposure - bet.exposure)
 
   await client.from('bets').update({

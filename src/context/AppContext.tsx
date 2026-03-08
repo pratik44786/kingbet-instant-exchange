@@ -79,12 +79,10 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       return;
     }
 
-    // Optimistic: deduct exposure immediately for instant UI feedback
+    // Optimistic: deduct stake from balance immediately for instant UI feedback
     for (const bet of validBets) {
-      const oddsNum = Number(bet.odds);
       const stakeNum = Number(bet.stake);
-      const exposure = bet.type === 'lay' ? (stakeNum * oddsNum) - stakeNum : stakeNum;
-      walletHook.optimisticDeduct(exposure);
+      walletHook.optimisticDeductStake(stakeNum);
     }
 
     try {
