@@ -71,19 +71,33 @@ Deno.serve(async (req) => {
 })
 
 async function listUsers(client: any, adminId: string, isSuperAdmin: boolean) {
-  let query = client.from('profiles').select(`
-    *, 
-    wallets(balance, bonus_balance, exposure, total_profit_loss),
-    user_roles(role)
-  `)
+  let query = client.from('profiles').select('*')
   
   if (!isSuperAdmin) {
     query = query.eq('parent_id', adminId)
   }
 
-  const { data, error } = await query.order('created_at', { ascending: false })
+  const { data: profiles, error } = await query.order('created_at', { ascending: false })
   if (error) return json({ error: error.message }, 500)
-  return json({ users: data })
+
+  // Fetch wallets and roles separately (no FK relationship)
+  const userIds = profiles?.map((p: any) => p.id) || []
+  
+  const { data: wallets } = await client.from('wallets').select('*')
+    .in('user_id', userIds)
+  const { data: roles } = await client.from('user_roles').select('*')
+    .in('user_id', userIds)
+
+  const walletsMap = Object.fromEntries((wallets || []).map((w: any) => [w.user_id, w]))
+  const rolesMap = Object.fromEntries((roles || []).map((r: any) => [r.user_id, r]))
+
+  const users = (profiles || []).map((p: any) => ({
+    ...p,
+    wallets: walletsMap[p.id] ? [walletsMap[p.id]] : [],
+    user_roles: rolesMap[p.id] ? [rolesMap[p.id]] : [],
+  }))
+
+  return json({ users })
 }
 
 async function adjustBalance(client: any, adminId: string, data: any, isSuperAdmin: boolean) {

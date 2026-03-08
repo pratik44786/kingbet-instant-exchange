@@ -171,12 +171,15 @@ Deno.serve(async (req) => {
       const eventName = `${ev.home_team} vs ${ev.away_team}`;
       const competition = competitionFromKey(ev.sport_key);
 
+      // Generate deterministic UUID from event ID
+      const marketId = toUUID(ev.id);
+
       // Upsert market
       const { data: market, error: mErr } = await supabase
         .from("markets")
         .upsert(
           {
-            id: ev.id,
+            id: marketId,
             event_name: eventName,
             sport,
             competition,
@@ -195,24 +198,20 @@ Deno.serve(async (req) => {
       const h2h = bm?.markets?.find((m) => m.key === "h2h");
       if (!h2h) continue;
 
-      for (let i = 0; i < h2h.outcomes.length; i++) {
-        const outcome = h2h.outcomes[i];
-        const runnerId = `${ev.id}_${outcome.name.replace(/\s+/g, "_").toLowerCase()}`;
+      // Delete old runners for this market, then insert fresh
+      await supabase.from("runners").delete().eq("market_id", market.id);
 
-        await supabase.from("runners").upsert(
-          {
-            id: runnerId,
-            market_id: market.id,
-            name: outcome.name,
-            back_odds: outcome.price,
-            lay_odds: +(outcome.price + 0.02).toFixed(2),
-            back_size: Math.floor(Math.random() * 50000) + 10000,
-            lay_size: Math.floor(Math.random() * 50000) + 10000,
-            sort_order: i,
-          },
-          { onConflict: "id" }
-        );
-      }
+      const runnersToInsert = h2h.outcomes.map((outcome, i) => ({
+        market_id: market.id,
+        name: outcome.name,
+        back_odds: outcome.price,
+        lay_odds: +(outcome.price + 0.02).toFixed(2),
+        back_size: Math.floor(Math.random() * 50000) + 10000,
+        lay_size: Math.floor(Math.random() * 50000) + 10000,
+        sort_order: i,
+      }));
+
+      await supabase.from("runners").insert(runnersToInsert);
       upsertedCount++;
     }
 
