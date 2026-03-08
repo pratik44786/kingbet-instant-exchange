@@ -9,7 +9,6 @@ const LiveCasinoPage = () => {
   const [selectedProvider, setSelectedProvider] = useState('all');
   const [selectedType, setSelectedType] = useState('all');
   const [launchingId, setLaunchingId] = useState<string | null>(null);
-  const [launchingId, setLaunchingId] = useState<string | null>(null);
 
   const filteredGames = useMemo(() => {
     let filtered = CASINO_GAMES;
@@ -36,7 +35,6 @@ const LiveCasinoPage = () => {
         toast.error('Game launch nahi ho paya');
         return;
       }
-      // Open in new tab since the game provider blocks iframe embedding
       window.open(url, '_blank', 'noopener,noreferrer');
       toast.success(`${res?.payload?.game_name || game.name} launched!`);
     } catch (err: any) {
@@ -46,29 +44,6 @@ const LiveCasinoPage = () => {
       setLaunchingId(null);
     }
   };
-
-  // Game iframe view
-  if (gameUrl) {
-    return (
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <div className="flex items-center justify-between px-4 py-2 bg-card border-b border-border">
-          <button onClick={() => setGameUrl(null)} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
-            <ArrowLeft className="w-4 h-4" /> Back
-          </button>
-          <span className="text-sm font-bold text-foreground truncate mx-4">{gameName}</span>
-          <button onClick={() => setGameUrl(null)} className="text-muted-foreground hover:text-foreground">
-            <X className="w-4 h-4" />
-          </button>
-        </div>
-        <iframe
-          src={gameUrl}
-          className="flex-1 w-full border-0"
-          allow="autoplay; fullscreen; encrypted-media"
-          allowFullScreen
-        />
-      </div>
-    );
-  }
 
   return (
     <div className="flex-1 p-4 overflow-auto">
@@ -137,7 +112,9 @@ const LiveCasinoPage = () => {
                         </div>
                       )}
                       <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-2">
-                        <span className="text-xs font-bold text-primary">▶ PLAY</span>
+                        <span className="text-xs font-bold text-primary flex items-center gap-1">
+                          <ExternalLink className="w-3 h-3" /> PLAY
+                        </span>
                       </div>
                       <span className="absolute top-1.5 right-1.5 text-[9px] uppercase bg-primary/90 text-primary-foreground px-1.5 py-0.5 rounded font-bold">
                         {game.type}
