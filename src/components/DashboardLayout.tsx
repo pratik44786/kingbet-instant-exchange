@@ -5,7 +5,7 @@ import { useApp } from '@/context/AppContext';
 import {
   Crown, LogOut, Menu, X, ChevronDown,
   BarChart3, Gamepad2, Wallet, History as HistoryIcon,
-  User, Shield, Trophy, Globe, ChevronRight,
+  User, Shield, Trophy, Globe, ChevronRight, Tv,
 } from 'lucide-react';
 
 const sportsSidebar = [
