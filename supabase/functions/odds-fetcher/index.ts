@@ -6,6 +6,13 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+// Convert a hex string (like Odds API event ID) to a valid UUID v4 format
+function toUUID(hex: string): string {
+  // Pad or trim to 32 hex chars
+  const h = hex.replace(/[^a-f0-9]/gi, "").padEnd(32, "0").slice(0, 32);
+  return `${h.slice(0, 8)}-${h.slice(8, 12)}-${h.slice(12, 16)}-${h.slice(16, 20)}-${h.slice(20, 32)}`;
+}
+
 // Sport key mapping for The Odds API
 const SPORT_KEYS: Record<string, string[]> = {
   cricket: [
@@ -171,12 +178,15 @@ Deno.serve(async (req) => {
       const eventName = `${ev.home_team} vs ${ev.away_team}`;
       const competition = competitionFromKey(ev.sport_key);
 
+      // Generate deterministic UUID from event ID
+      const marketId = toUUID(ev.id);
+
       // Upsert market
       const { data: market, error: mErr } = await supabase
         .from("markets")
         .upsert(
           {
-            id: ev.id,
+            id: marketId,
             event_name: eventName,
             sport,
             competition,
@@ -195,24 +205,20 @@ Deno.serve(async (req) => {
       const h2h = bm?.markets?.find((m) => m.key === "h2h");
       if (!h2h) continue;
 
-      for (let i = 0; i < h2h.outcomes.length; i++) {
-        const outcome = h2h.outcomes[i];
-        const runnerId = `${ev.id}_${outcome.name.replace(/\s+/g, "_").toLowerCase()}`;
+      // Delete old runners for this market, then insert fresh
+      await supabase.from("runners").delete().eq("market_id", market.id);
 
-        await supabase.from("runners").upsert(
-          {
-            id: runnerId,
-            market_id: market.id,
-            name: outcome.name,
-            back_odds: outcome.price,
-            lay_odds: +(outcome.price + 0.02).toFixed(2),
-            back_size: Math.floor(Math.random() * 50000) + 10000,
-            lay_size: Math.floor(Math.random() * 50000) + 10000,
-            sort_order: i,
-          },
-          { onConflict: "id" }
-        );
-      }
+      const runnersToInsert = h2h.outcomes.map((outcome, i) => ({
+        market_id: market.id,
+        name: outcome.name,
+        back_odds: outcome.price,
+        lay_odds: +(outcome.price + 0.02).toFixed(2),
+        back_size: Math.floor(Math.random() * 50000) + 10000,
+        lay_size: Math.floor(Math.random() * 50000) + 10000,
+        sort_order: i,
+      }));
+
+      await supabase.from("runners").insert(runnersToInsert);
       upsertedCount++;
     }
 
