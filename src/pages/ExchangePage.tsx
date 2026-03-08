@@ -11,57 +11,31 @@ const ExchangePage: React.FC = () => {
 
   const filtered = sportFilter === 'all' ? markets : markets.filter(m => m.sport === sportFilter);
 
-  return (
-    <div className="p-2 lg:p-4 max-w-6xl mx-auto space-y-4">
-      {/* Sport Tabs */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-1">
-        {['all', 'cricket', 'football', 'tennis'].map(s => (
-          <button
-            key={s}
-            onClick={() => setSportFilter(s)}
-            className={`px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-colors ${
-              sportFilter === s
-                ? 'bg-yellow-600 text-white'
-                : 'bg-[#1e273e] text-gray-400 hover:text-white'
-            }`}
-          >
-            {s === 'all' ? '🔥 All' : `${sportIcon[s] || ''} ${s.charAt(0).toUpperCase() + s.slice(1)}`}
-          </button>
-        ))}
-        <button onClick={refreshData} className="ml-auto p-2 text-gray-500 hover:text-yellow-500">
-          <RefreshCw className="w-4 h-4" />
-        </button>
-      </div>
+  const now = new Date();
+  const liveMarkets = filtered.filter(m => new Date(m.start_time) <= now);
+  const upcomingMarkets = filtered.filter(m => new Date(m.start_time) > now);
 
-      {marketsLoading && filtered.length === 0 && (
-        <div className="text-center py-12 text-gray-500">
-          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-yellow-500 mx-auto mb-3" />
-          Loading live markets...
-        </div>
-      )}
-
-      {!marketsLoading && filtered.length === 0 && (
-        <div className="text-center py-12 text-gray-500">
-          <p className="text-sm">No live markets available right now.</p>
-          <p className="text-xs mt-1">Markets refresh automatically every 15 seconds.</p>
-        </div>
-      )}
-
-      {filtered.map((market) => (
-        <div key={market.id} className="bg-[#161d2f] rounded-lg border border-white/5 overflow-hidden">
-          {/* Header */}
-          <div className="bg-[#1e273e] p-3 flex justify-between items-center border-b border-yellow-500/20">
-            <div className="flex items-center gap-2">
-              <span className="text-lg">{sportIcon[market.sport] || '🏆'}</span>
-              <div>
-                <span className="font-black text-sm uppercase italic text-gray-200">{market.event_name}</span>
-                <p className="text-[10px] text-gray-500">{market.competition}</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-1 text-[10px] text-green-500 font-bold">
-              <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" /> LIVE
-            </div>
+  const renderMarketCard = (market: typeof markets[0], isLive: boolean) => (
+    <div key={market.id} className="bg-[#161d2f] rounded-lg border border-white/5 overflow-hidden">
+      {/* Header */}
+      <div className="bg-[#1e273e] p-3 flex justify-between items-center border-b border-yellow-500/20">
+        <div className="flex items-center gap-2">
+          <span className="text-lg">{sportIcon[market.sport] || '🏆'}</span>
+          <div>
+            <span className="font-black text-sm uppercase italic text-gray-200">{market.event_name}</span>
+            <p className="text-[10px] text-gray-500">{market.competition}</p>
           </div>
+        </div>
+        {isLive ? (
+          <div className="flex items-center gap-1 text-[10px] text-green-500 font-bold">
+            <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" /> LIVE
+          </div>
+        ) : (
+          <div className="text-[10px] text-yellow-500 font-bold">
+            🕐 {new Date(market.start_time).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })} • {new Date(market.start_time).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}
+          </div>
+        )}
+      </div>
 
           {/* Market Table */}
           <div className="grid grid-cols-12 bg-[#121a2d] py-2 px-1 text-[10px] font-bold text-gray-500">
