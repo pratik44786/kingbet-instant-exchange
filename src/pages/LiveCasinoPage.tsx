@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { casinoApiService } from '@/services/casinoApiService';
 import { CASINO_GAMES, GAME_PROVIDERS, GAME_TYPES, type CasinoGame } from '@/data/casinoGames';
-import { RefreshCw, Tv, Search, Gamepad2, ExternalLink } from 'lucide-react';
+import { Search, Gamepad2, X, Maximize2, Minimize2, Tv } from 'lucide-react';
 import { toast } from 'sonner';
 
 const LiveCasinoPage = () => {
@@ -9,6 +9,9 @@ const LiveCasinoPage = () => {
   const [selectedProvider, setSelectedProvider] = useState('all');
   const [selectedType, setSelectedType] = useState('all');
   const [launchingId, setLaunchingId] = useState<string | null>(null);
+  const [gameUrl, setGameUrl] = useState<string | null>(null);
+  const [gameName, setGameName] = useState('');
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   const filteredGames = useMemo(() => {
     let filtered = CASINO_GAMES;
@@ -35,7 +38,9 @@ const LiveCasinoPage = () => {
         toast.error('Game launch nahi ho paya');
         return;
       }
-      window.open(url, '_blank', 'noopener,noreferrer');
+      setGameName(res?.payload?.game_name || game.name);
+      setGameUrl(url);
+      setIsFullscreen(false);
       toast.success(`${res?.payload?.game_name || game.name} launched!`);
     } catch (err: any) {
       console.error('Failed to launch game:', err);
@@ -44,6 +49,53 @@ const LiveCasinoPage = () => {
       setLaunchingId(null);
     }
   };
+
+  const closeGame = () => {
+    setGameUrl(null);
+    setGameName('');
+    setIsFullscreen(false);
+  };
+
+  // Game iframe view
+  if (gameUrl) {
+    return (
+      <div className={`flex flex-col ${isFullscreen ? 'fixed inset-0 z-50 bg-background' : 'flex-1'}`}>
+        {/* Game header bar */}
+        <div className="flex items-center justify-between px-4 py-2 bg-card border-b border-border">
+          <div className="flex items-center gap-2">
+            <Gamepad2 className="w-4 h-4 text-primary" />
+            <span className="text-sm font-bold text-foreground">{gameName}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setIsFullscreen(!isFullscreen)}
+              className="p-1.5 rounded-lg hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
+              title={isFullscreen ? 'Exit fullscreen' : 'Fullscreen'}
+            >
+              {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+            </button>
+            <button
+              onClick={closeGame}
+              className="p-1.5 rounded-lg hover:bg-destructive/20 transition-colors text-muted-foreground hover:text-destructive"
+              title="Close game"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+        {/* Game iframe */}
+        <div className="flex-1 relative bg-black">
+          <iframe
+            src={gameUrl}
+            className="absolute inset-0 w-full h-full border-0"
+            allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
+            sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-modals allow-orientation-lock allow-pointer-lock allow-presentation"
+            allowFullScreen
+          />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex-1 p-4 overflow-auto">
@@ -113,7 +165,7 @@ const LiveCasinoPage = () => {
                       )}
                       <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-2">
                         <span className="text-xs font-bold text-primary flex items-center gap-1">
-                          <ExternalLink className="w-3 h-3" /> PLAY
+                          ▶ PLAY
                         </span>
                       </div>
                       <span className="absolute top-1.5 right-1.5 text-[9px] uppercase bg-primary/90 text-primary-foreground px-1.5 py-0.5 rounded font-bold">
