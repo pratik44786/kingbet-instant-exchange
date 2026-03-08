@@ -205,21 +205,30 @@ Deno.serve(async (req) => {
       const h2h = bm?.markets?.find((m) => m.key === "h2h");
       if (!h2h) continue;
 
-      // Delete old runners for this market, then insert fresh
-      await supabase.from("runners").delete().eq("market_id", market.id);
+      // Generate deterministic runner IDs based on market + outcome name
+      const runnersToUpsert = h2h.outcomes.map((outcome, i) => {
+        // Create deterministic runner ID from market ID + runner name hash
+        const runnerHash = `${market.id}-${outcome.name}`.replace(/[^a-z0-9]/gi, '').padEnd(32, '0').slice(0, 32);
+        const runnerId = `${runnerHash.slice(0, 8)}-${runnerHash.slice(8, 12)}-${runnerHash.slice(12, 16)}-${runnerHash.slice(16, 20)}-${runnerHash.slice(20, 32)}`;
+        
+        return {
+          id: runnerId,
+          market_id: market.id,
+          name: outcome.name,
+          back_odds: outcome.price,
+          lay_odds: +(outcome.price + 0.02).toFixed(2),
+          back_size: Math.floor(Math.random() * 50000) + 10000,
+          lay_size: Math.floor(Math.random() * 50000) + 10000,
+          sort_order: i,
+        };
+      });
 
-      const runnersToInsert = h2h.outcomes.map((outcome, i) => ({
-        market_id: market.id,
-        name: outcome.name,
-        back_odds: outcome.price,
-        lay_odds: +(outcome.price + 0.02).toFixed(2),
-        back_size: Math.floor(Math.random() * 50000) + 10000,
-        lay_size: Math.floor(Math.random() * 50000) + 10000,
-        sort_order: i,
-      }));
+      // Upsert runners with deterministic IDs to avoid duplicates
+      const { error: rErr } = await supabase
+        .from("runners")
+        .upsert(runnersToUpsert, { onConflict: "id" });
 
-      await supabase.from("runners").insert(runnersToInsert);
-      upsertedCount++;
+      if (!rErr) upsertedCount++;
     }
 
     return new Response(
