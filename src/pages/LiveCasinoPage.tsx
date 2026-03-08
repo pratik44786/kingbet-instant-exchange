@@ -44,8 +44,9 @@ const LiveCasinoPage = () => {
       const left = Math.round((window.screen.availWidth - width) / 2);
       const top = Math.round((window.screen.availHeight - height) / 2);
 
+      // Open game URL directly in popup - no iframe to avoid "Nested Frame Detected"
       const popup = window.open(
-        '',
+        url,
         `game_${game.gameId}`,
         `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=no,menubar=no,toolbar=no,location=no,status=no`
       );
@@ -56,51 +57,6 @@ const LiveCasinoPage = () => {
         toast.info('Game opened in new tab (popup blocked)');
         return;
       }
-
-      // Write a branded game page into the popup
-      popup.document.write(`
-        <!DOCTYPE html>
-        <html lang="en">
-        <head>
-          <meta charset="UTF-8" />
-          <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-          <title>${name} - KingBet</title>
-          <style>
-            * { margin: 0; padding: 0; box-sizing: border-box; }
-            body { background: #0a0a0a; font-family: system-ui, -apple-system, sans-serif; overflow: hidden; }
-            .header {
-              display: flex; align-items: center; justify-content: space-between;
-              padding: 8px 16px; background: #111; border-bottom: 1px solid #222;
-              height: 40px;
-            }
-            .brand { display: flex; align-items: center; gap: 8px; }
-            .brand-name { color: #f59e0b; font-weight: 800; font-size: 14px; letter-spacing: 0.05em; }
-            .game-name { color: #fff; font-size: 13px; font-weight: 600; }
-            .close-btn {
-              background: transparent; border: 1px solid #333; color: #999;
-              padding: 4px 12px; border-radius: 6px; cursor: pointer; font-size: 12px;
-              transition: all 0.2s;
-            }
-            .close-btn:hover { background: #dc2626; color: #fff; border-color: #dc2626; }
-            .game-frame {
-              width: 100%; height: calc(100vh - 40px); border: none; display: block;
-            }
-          </style>
-        </head>
-        <body>
-          <div class="header">
-            <div class="brand">
-              <span class="brand-name">KINGBET</span>
-              <span style="color:#444">|</span>
-              <span class="game-name">${name}</span>
-            </div>
-            <button class="close-btn" onclick="window.close()">✕ Close</button>
-          </div>
-          <iframe src="${url}" class="game-frame" allow="autoplay; fullscreen; encrypted-media" allowfullscreen></iframe>
-        </body>
-        </html>
-      `);
-      popup.document.close();
 
       toast.success(`${name} launched!`);
     } catch (err: any) {
