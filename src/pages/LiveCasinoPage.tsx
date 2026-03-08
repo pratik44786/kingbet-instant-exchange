@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { casinoApiService } from '@/services/casinoApiService';
 import { CASINO_GAMES, GAME_PROVIDERS, GAME_TYPES, type CasinoGame } from '@/data/casinoGames';
-import { ArrowLeft, RefreshCw, Tv, Search, X, Gamepad2 } from 'lucide-react';
+import { RefreshCw, Tv, Search, Gamepad2, ExternalLink } from 'lucide-react';
 import { toast } from 'sonner';
 
 const LiveCasinoPage = () => {
