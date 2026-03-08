@@ -57,24 +57,26 @@ const ExchangePage: React.FC = () => {
               <div className="col-span-6 pl-2 text-xs font-bold text-gray-200">{runner.name}</div>
               <div className="col-span-3">
                 <button
-                  onClick={() => addToBetSlip({ marketId: market.id, runnerId: runner.id, runnerName: runner.name, eventName: market.event_name, type: 'back', odds: runner.back_odds })}
-                  className="btn-back w-full py-2"
+                  onClick={() => isLive && addToBetSlip({ marketId: market.id, runnerId: runner.id, runnerName: runner.name, eventName: market.event_name, type: 'back', odds: runner.back_odds })}
+                  disabled={!isLive}
+                  className={`btn-back w-full py-2 ${!isLive ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                   <span className="odds-text">{runner.back_odds.toFixed(2)}</span>
                 </button>
               </div>
               <div className="col-span-3">
                 <button
-                  onClick={() => addToBetSlip({ marketId: market.id, runnerId: runner.id, runnerName: runner.name, eventName: market.event_name, type: 'lay', odds: runner.lay_odds })}
-                  className="btn-lay w-full py-2"
+                  onClick={() => isLive && addToBetSlip({ marketId: market.id, runnerId: runner.id, runnerName: runner.name, eventName: market.event_name, type: 'lay', odds: runner.lay_odds })}
+                  disabled={!isLive}
+                  className={`btn-lay w-full py-2 ${!isLive ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                   <span className="odds-text">{runner.lay_odds.toFixed(2)}</span>
                 </button>
               </div>
             </div>
 
-            {/* Inline Slip */}
-            {slip && (
+            {/* Inline Slip - only for live matches */}
+            {slip && isLive && (
               <div className={`m-2 p-3 rounded border-l-4 shadow-2xl ${slip.type === 'back' ? 'bg-[#e2f2ff] border-[#2b92e4]' : 'bg-[#fff0f3] border-[#ef6e8b]'}`}>
                 <div className="flex items-end gap-3">
                   <div className="flex-1">
