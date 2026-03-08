@@ -3,6 +3,7 @@ import { useApp } from '@/context/AppContext';
 import { RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { MarketData, RunnerData } from '@/hooks/useMarkets';
+import type { BetSlipItem } from '@/types/exchange';
 
 const sportIcon: Record<string, string> = { cricket: '🏏', football: '⚽', tennis: '🎾' };
 
