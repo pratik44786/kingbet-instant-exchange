@@ -37,15 +37,17 @@ export function useWallet() {
     setLoading(false);
   }, []);
 
-  // Optimistic update: deduct exposure immediately on bet placement
-  const optimisticDeduct = useCallback((exposure: number) => {
+  // Optimistic update: deduct stake from balance immediately on bet placement
+  const optimisticDeductStake = useCallback((stake: number) => {
     setWallet(prev => {
       if (!prev) return prev;
-      const newExposure = prev.exposure + exposure;
+      const newBalance = prev.balance - stake;
+      const newExposure = prev.exposure + stake;
       return {
         ...prev,
+        balance: newBalance,
         exposure: newExposure,
-        available: prev.balance - newExposure,
+        available: newBalance - newExposure,
       };
     });
   }, []);
