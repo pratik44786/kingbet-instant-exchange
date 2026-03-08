@@ -6,50 +6,85 @@ import type { MarketData, RunnerData } from '@/hooks/useMarkets';
 
 const sportIcon: Record<string, string> = { cricket: '🏏', football: '⚽', tennis: '🎾' };
 
-// Generate deterministic fancy markets for cricket
-function generateFancyMarkets(market: MarketData) {
+// Generate deterministic secondary markets per sport
+function generateSecondaryMarkets(market: MarketData) {
   const teams = market.event_name.split(' vs ');
   const seed = market.id.charCodeAt(0) + market.id.charCodeAt(5);
-  const fancies = [
-    { label: `${teams[0] || 'Team A'} 1st Inn Runs`, yesOdds: 165 + (seed % 30), noOdds: 165 + (seed % 30) - 2, yesRate: 100, noRate: 100 },
-    { label: `${teams[1] || 'Team B'} 1st Inn Runs`, yesOdds: 155 + (seed % 25), noOdds: 155 + (seed % 25) - 3, yesRate: 100, noRate: 100 },
-    { label: `${teams[0] || 'Team A'} 1st 6 Ovr Runs`, yesOdds: 42 + (seed % 10), noOdds: 42 + (seed % 10) - 1, yesRate: 100, noRate: 100 },
-    { label: `${teams[1] || 'Team B'} 1st 6 Ovr Runs`, yesOdds: 38 + (seed % 12), noOdds: 38 + (seed % 12) - 2, yesRate: 100, noRate: 100 },
-    { label: `Total Match Fours`, yesOdds: 28 + (seed % 8), noOdds: 28 + (seed % 8) - 1, yesRate: 100, noRate: 100 },
-    { label: `Total Match Sixes`, yesOdds: 12 + (seed % 6), noOdds: 12 + (seed % 6) - 1, yesRate: 100, noRate: 100 },
-    { label: `${teams[0] || 'Team A'} Wkts`, yesOdds: 5 + (seed % 4), noOdds: 5 + (seed % 4) - 1, yesRate: 100, noRate: 100 },
-    { label: `1st Wkt Pship Runs`, yesOdds: 22 + (seed % 15), noOdds: 22 + (seed % 15) - 2, yesRate: 100, noRate: 100 },
-  ];
-  return fancies;
+  const t1 = teams[0] || 'Team A';
+  const t2 = teams[1] || 'Team B';
+
+  if (market.sport === 'cricket') {
+    return {
+      title: 'FANCY', icon: '⭐', noLabel: 'NO', yesLabel: 'YES', isCricket: true,
+      items: [
+        { label: `${t1} 1st Inn Runs`, no: 165 + (seed % 30), yes: 165 + (seed % 30) - 2 },
+        { label: `${t2} 1st Inn Runs`, no: 155 + (seed % 25), yes: 155 + (seed % 25) - 3 },
+        { label: `${t1} 1st 6 Ovr Runs`, no: 42 + (seed % 10), yes: 42 + (seed % 10) - 1 },
+        { label: `${t2} 1st 6 Ovr Runs`, no: 38 + (seed % 12), yes: 38 + (seed % 12) - 2 },
+        { label: `Total Match Fours`, no: 28 + (seed % 8), yes: 28 + (seed % 8) - 1 },
+        { label: `Total Match Sixes`, no: 12 + (seed % 6), yes: 12 + (seed % 6) - 1 },
+        { label: `${t1} Wkts`, no: 5 + (seed % 4), yes: 5 + (seed % 4) - 1 },
+        { label: `1st Wkt Pship Runs`, no: 22 + (seed % 15), yes: 22 + (seed % 15) - 2 },
+      ],
+    };
+  }
+
+  if (market.sport === 'football') {
+    return {
+      title: 'GOALS & SPECIALS', icon: '🎯', noLabel: 'UNDER', yesLabel: 'OVER', isCricket: false,
+      items: [
+        { label: `Total Goals O/U 2.5`, no: 1.85 + (seed % 10) * 0.02, yes: 1.95 + (seed % 10) * 0.02 },
+        { label: `Both Teams To Score`, no: 1.70 + (seed % 8) * 0.03, yes: 2.10 + (seed % 8) * 0.03 },
+        { label: `${t1} Goals O/U 1.5`, no: 1.90 + (seed % 6) * 0.02, yes: 1.90 + (seed % 6) * 0.02 },
+        { label: `${t2} Goals O/U 1.5`, no: 2.05 + (seed % 7) * 0.02, yes: 1.75 + (seed % 7) * 0.02 },
+        { label: `Total Corners O/U 9.5`, no: 1.80 + (seed % 5) * 0.03, yes: 2.00 + (seed % 5) * 0.03 },
+        { label: `1st Half Goals O/U 1.5`, no: 2.20 + (seed % 9) * 0.02, yes: 1.60 + (seed % 9) * 0.02 },
+        { label: `${t1} Clean Sheet`, no: 2.50 + (seed % 10) * 0.05, yes: 1.50 + (seed % 10) * 0.05 },
+        { label: `Total Cards O/U 3.5`, no: 1.75 + (seed % 6) * 0.03, yes: 2.05 + (seed % 6) * 0.03 },
+      ],
+    };
+  }
+
+  // tennis
+  return {
+    title: 'SET & GAME MARKETS', icon: '🎾', noLabel: 'UNDER', yesLabel: 'OVER', isCricket: false,
+    items: [
+      { label: `Total Sets O/U 2.5`, no: 1.80 + (seed % 8) * 0.03, yes: 2.00 + (seed % 8) * 0.03 },
+      { label: `${t1} Win 1st Set`, no: 2.10 + (seed % 10) * 0.04, yes: 1.70 + (seed % 10) * 0.04 },
+      { label: `Total Games O/U 22.5`, no: 1.85 + (seed % 7) * 0.02, yes: 1.95 + (seed % 7) * 0.02 },
+      { label: `${t2} Win 1st Set`, no: 1.70 + (seed % 9) * 0.04, yes: 2.10 + (seed % 9) * 0.04 },
+      { label: `1st Set Tiebreak`, no: 3.00 + (seed % 6) * 0.1, yes: 1.33 + (seed % 6) * 0.05 },
+      { label: `${t1} Aces O/U 5.5`, no: 1.90 + (seed % 5) * 0.03, yes: 1.90 + (seed % 5) * 0.03 },
+    ],
+  };
 }
 
-const FancySection: React.FC<{ market: MarketData }> = ({ market }) => {
-  const fancies = generateFancyMarkets(market);
-  
+const SecondaryMarketsSection: React.FC<{ market: MarketData }> = ({ market }) => {
+  const data = generateSecondaryMarkets(market);
+
   return (
     <div className="mt-1">
-      {/* Fancy Header */}
       <div className="grid grid-cols-12 bg-[#121a2d] py-2 px-1 text-[10px] font-bold text-gray-500 border-t border-yellow-500/20">
         <div className="col-span-6 pl-2 flex items-center gap-1">
-          <span className="text-yellow-500">⭐</span> FANCY
+          <span className="text-yellow-500">{data.icon}</span> {data.title}
         </div>
-        <div className="col-span-3 text-center text-[#faa9ba]">NO</div>
-        <div className="col-span-3 text-center text-[#72bbef]">YES</div>
+        <div className="col-span-3 text-center text-[#faa9ba]">{data.noLabel}</div>
+        <div className="col-span-3 text-center text-[#72bbef]">{data.yesLabel}</div>
       </div>
 
-      {fancies.map((f, idx) => (
+      {data.items.map((f, idx) => (
         <div key={idx} className="grid grid-cols-12 items-center p-1 gap-1 bg-[#161d2f] border-b border-white/5">
           <div className="col-span-6 pl-2 text-xs font-bold text-gray-200">{f.label}</div>
           <div className="col-span-3">
             <button className="btn-lay w-full py-2">
-              <span className="odds-text">{f.noOdds}</span>
-              <span className="block text-[8px] opacity-60">{f.noRate}</span>
+              <span className="odds-text">{data.isCricket ? f.no : f.no.toFixed(2)}</span>
+              <span className="block text-[8px] opacity-60">100</span>
             </button>
           </div>
           <div className="col-span-3">
             <button className="btn-back w-full py-2">
-              <span className="odds-text">{f.yesOdds}</span>
-              <span className="block text-[8px] opacity-60">{f.yesRate}</span>
+              <span className="odds-text">{data.isCricket ? f.yes : f.yes.toFixed(2)}</span>
+              <span className="block text-[8px] opacity-60">100</span>
             </button>
           </div>
         </div>
