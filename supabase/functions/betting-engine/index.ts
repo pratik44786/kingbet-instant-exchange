@@ -174,16 +174,23 @@ async function settleBet(client: any, userId: string, data: Record<string, unkno
   const { data: wallet } = await client.from('wallets').select('*').eq('user_id', bet.user_id).single()
   if (!wallet) return jsonResponse({ error: 'Wallet not found' }, 404)
 
+  // Since stake is already deducted at placement:
+  // Won: return stake + profit
+  // Lost: nothing (stake already gone)
+  // Void: return stake (refund)
   let actualProfit = 0
   let newBalance = wallet.balance
   const newExposure = Math.max(0, wallet.exposure - bet.exposure)
 
   if (result === 'won') {
     actualProfit = bet.potential_profit
-    newBalance = wallet.balance + actualProfit
+    newBalance = wallet.balance + bet.stake + actualProfit  // return stake + winnings
   } else if (result === 'lost') {
-    actualProfit = -bet.exposure
-    newBalance = wallet.balance - bet.exposure
+    actualProfit = -bet.stake
+    newBalance = wallet.balance  // stake already deducted, nothing to do
+  } else if (result === 'void') {
+    actualProfit = 0
+    newBalance = wallet.balance + bet.stake  // refund the stake
   }
 
   await client.from('bets').update({
@@ -199,15 +206,19 @@ async function settleBet(client: any, userId: string, data: Record<string, unkno
   }).eq('user_id', bet.user_id)
 
   const txnType = result === 'won' ? 'bet_win' : (result === 'void' ? 'bet_refund' : 'bet_debit')
-  await client.from('transactions').insert({
-    user_id: bet.user_id,
-    type: txnType,
-    amount: Math.abs(actualProfit) || bet.exposure,
-    balance_before: wallet.balance,
-    balance_after: Math.max(0, newBalance),
-    description: `Bet ${result}: ${bet.bet_type} @ ${bet.odds}`,
-    reference_id: bet_id,
-    reference_type: 'settlement',
+  const txnAmount = result === 'won' ? (bet.stake + actualProfit) : (result === 'void' ? bet.stake : 0)
+  if (txnAmount > 0) {
+    await client.from('transactions').insert({
+      user_id: bet.user_id,
+      type: txnType,
+      amount: txnAmount,
+      balance_before: wallet.balance,
+      balance_after: Math.max(0, newBalance),
+      description: `Bet ${result}: ${bet.bet_type} @ ${bet.odds}`,
+      reference_id: bet_id,
+      reference_type: 'settlement',
+    })
+  }
   })
 
   return jsonResponse({ success: true, bet_id, result, actual_profit: actualProfit })
