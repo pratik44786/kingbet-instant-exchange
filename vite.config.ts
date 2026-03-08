@@ -11,6 +11,15 @@ export default defineConfig(({ mode }) => ({
       overlay: false,
     },
   },
+  define: {
+    // Fallback for production builds where .env might not be picked up
+    'import.meta.env.VITE_SUPABASE_URL': JSON.stringify(
+      process.env.VITE_SUPABASE_URL || 'https://fhcwlulkjehfpqslqxdh.supabase.co'
+    ),
+    'import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY': JSON.stringify(
+      process.env.VITE_SUPABASE_PUBLISHABLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZoY3dsdWxramVoZnBxc2xxeGRoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI1Mjc3NTEsImV4cCI6MjA4ODEwMzc1MX0.X6nb7rL7PUgim7FAn8PLBNz6VC3awzsdnYV3EDeWJ38'
+    ),
+  },
   plugins: [
     react(),
   ].filter(Boolean),
