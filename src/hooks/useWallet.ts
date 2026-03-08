@@ -76,5 +76,5 @@ export function useWallet() {
     return () => { supabase.removeChannel(channel); };
   }, [fetchWallet]);
 
-  return { wallet, loading, refetch: fetchWallet, optimisticDeduct };
+  return { wallet, loading, refetch: fetchWallet, optimisticDeductStake };
 }
