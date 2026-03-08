@@ -151,7 +151,7 @@ async function placeBet(client: any, userId: string, data: Record<string, unknow
   return jsonResponse({
     success: true,
     bet,
-    wallet: { balance: wallet.balance, exposure: newExposure, available: wallet.balance - newExposure },
+    wallet: { balance: newBalance, exposure: newExposure, available: newBalance - newExposure },
   })
 }
 
