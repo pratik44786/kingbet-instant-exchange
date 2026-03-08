@@ -8,8 +8,7 @@ const LiveCasinoPage = () => {
   const [search, setSearch] = useState('');
   const [selectedProvider, setSelectedProvider] = useState('all');
   const [selectedType, setSelectedType] = useState('all');
-  const [gameUrl, setGameUrl] = useState<string | null>(null);
-  const [gameName, setGameName] = useState('');
+  const [launchingId, setLaunchingId] = useState<string | null>(null);
   const [launchingId, setLaunchingId] = useState<string | null>(null);
 
   const filteredGames = useMemo(() => {
