@@ -2,43 +2,27 @@ export interface CasinoGame {
   gameId: string;
   name: string;
   provider: string;
-  type: 'live' | 'slots' | 'table' | 'crash' | 'fish';
+  type: 'live' | 'slots' | 'table' | 'crash' | 'instant';
   image: string;
 }
 
-// Popular games from Evolution, Jili, Pragmatic, and other providers
 export const CASINO_GAMES: CasinoGame[] = [
-  // Evolution Live
+  // SPRIBE Games
+  { gameId: 'a04d1f3eb8ccec8a4823bdf18e3f0e84', name: 'Aviator', provider: 'SPRIBE', type: 'crash', image: 'https://cdn.betnex.co/images/spribe/0.png' },
+  { gameId: '8a87aae7a3624d284306e9c6fe1b3e9c', name: 'Dice', provider: 'SPRIBE', type: 'instant', image: 'https://cdn.betnex.co/images/spribe/1.png' },
+  { gameId: 'c68a515f0b3b10eec96cf6d33299f4e2', name: 'Goal', provider: 'SPRIBE', type: 'instant', image: 'https://cdn.betnex.co/images/spribe/2.png' },
+  { gameId: 'a669c993b0e1f1b7da100fcf95516bdf', name: 'Hi Lo', provider: 'SPRIBE', type: 'instant', image: 'https://cdn.betnex.co/images/spribe/3.png' },
+  { gameId: 'b31720b3cd65d917a1a96ef61a72b672', name: 'Hotline', provider: 'SPRIBE', type: 'instant', image: 'https://cdn.betnex.co/images/spribe/4.png' },
+  { gameId: 'c311eb4bbba03b105d150504931f2479', name: 'Keno', provider: 'SPRIBE', type: 'instant', image: 'https://cdn.betnex.co/images/spribe/5.png' },
+  { gameId: '5c4a12fb0a9b296d9b0d5f9e1cd41d65', name: 'Mines', provider: 'SPRIBE', type: 'instant', image: 'https://cdn.betnex.co/images/spribe/6.png' },
+  { gameId: '9dc7ac6155c5a19c1cc204853e426367', name: 'Mini Roulette', provider: 'SPRIBE', type: 'table', image: 'https://cdn.betnex.co/images/spribe/7.png' },
+  { gameId: '6ab7a4fe5161936012d6b06143918223', name: 'Plinko', provider: 'SPRIBE', type: 'instant', image: 'https://cdn.betnex.co/images/spribe/8.png' },
+  { gameId: 'de88f202c5a8beeaccabbd944f8acfbf', name: 'Balloon', provider: 'SPRIBE', type: 'crash', image: 'https://cdn.betnex.co/images/spribe/9.png' },
+  { gameId: '7a762edbe411ebc9be416870a734bd03', name: 'Keno 80', provider: 'SPRIBE', type: 'instant', image: 'https://cdn.betnex.co/images/spribe/10.png' },
+  { gameId: 'ad5973a7625b5d18257e64340fe22ca1', name: 'Trader', provider: 'SPRIBE', type: 'instant', image: 'https://cdn.betnex.co/images/spribe/11.png' },
+
+  // CREEDROOMZ Live
   { gameId: '874c49d5d915de9b82f66088f9794789', name: 'Roulette Arabic B', provider: 'CREEDROOMZ', type: 'live', image: 'https://img.freepik.com/free-vector/realistic-casino-roulette_52683-108.jpg' },
-  { gameId: 'evolution_crazy_time', name: 'Crazy Time', provider: 'Evolution', type: 'live', image: 'https://img.freepik.com/free-vector/wheel-fortune_1284-3036.jpg' },
-  { gameId: 'evolution_lightning_roulette', name: 'Lightning Roulette', provider: 'Evolution', type: 'live', image: 'https://img.freepik.com/free-vector/realistic-casino-roulette_52683-108.jpg' },
-  { gameId: 'evolution_blackjack', name: 'Blackjack Live', provider: 'Evolution', type: 'live', image: 'https://img.freepik.com/free-vector/casino-chips-aces-playing-cards_1441-510.jpg' },
-  { gameId: 'evolution_baccarat', name: 'Baccarat Live', provider: 'Evolution', type: 'live', image: 'https://img.freepik.com/free-vector/casino-chips-aces-playing-cards_1441-510.jpg' },
-  { gameId: 'evolution_dragon_tiger', name: 'Dragon Tiger', provider: 'Evolution', type: 'live', image: 'https://img.freepik.com/free-vector/playing-cards-chips_1441-69.jpg' },
-  { gameId: 'evolution_teen_patti', name: 'Teen Patti Live', provider: 'Evolution', type: 'live', image: 'https://img.freepik.com/free-vector/playing-cards-chips_1441-69.jpg' },
-  { gameId: 'evolution_andar_bahar', name: 'Andar Bahar Live', provider: 'Evolution', type: 'live', image: 'https://img.freepik.com/free-vector/playing-cards-chips_1441-69.jpg' },
-  { gameId: 'evolution_monopoly', name: 'Monopoly Live', provider: 'Evolution', type: 'live', image: 'https://img.freepik.com/free-vector/wheel-fortune_1284-3036.jpg' },
-  { gameId: 'evolution_deal_or_no_deal', name: 'Deal or No Deal', provider: 'Evolution', type: 'live', image: 'https://img.freepik.com/free-vector/wheel-fortune_1284-3036.jpg' },
-  { gameId: 'evolution_funky_time', name: 'Funky Time', provider: 'Evolution', type: 'live', image: 'https://img.freepik.com/free-vector/wheel-fortune_1284-3036.jpg' },
-  { gameId: 'evolution_mega_ball', name: 'Mega Ball', provider: 'Evolution', type: 'live', image: 'https://img.freepik.com/free-vector/lottery-balls_1284-5765.jpg' },
-
-  // Jili Slots
-  { gameId: 'jili_super_ace', name: 'Super Ace', provider: 'Jili', type: 'slots', image: 'https://img.freepik.com/free-vector/slot-machine-realistic_1284-8955.jpg' },
-  { gameId: 'jili_fortune_gems', name: 'Fortune Gems', provider: 'Jili', type: 'slots', image: 'https://img.freepik.com/free-vector/slot-machine-realistic_1284-8955.jpg' },
-  { gameId: 'jili_golden_empire', name: 'Golden Empire', provider: 'Jili', type: 'slots', image: 'https://img.freepik.com/free-vector/slot-machine-realistic_1284-8955.jpg' },
-  { gameId: 'jili_money_coming', name: 'Money Coming', provider: 'Jili', type: 'slots', image: 'https://img.freepik.com/free-vector/slot-machine-realistic_1284-8955.jpg' },
-  { gameId: 'jili_boxing_king', name: 'Boxing King', provider: 'Jili', type: 'slots', image: 'https://img.freepik.com/free-vector/slot-machine-realistic_1284-8955.jpg' },
-
-  // Pragmatic Play
-  { gameId: 'pp_sweet_bonanza', name: 'Sweet Bonanza', provider: 'Pragmatic Play', type: 'slots', image: 'https://img.freepik.com/free-vector/slot-machine-realistic_1284-8955.jpg' },
-  { gameId: 'pp_gates_of_olympus', name: 'Gates of Olympus', provider: 'Pragmatic Play', type: 'slots', image: 'https://img.freepik.com/free-vector/slot-machine-realistic_1284-8955.jpg' },
-  { gameId: 'pp_big_bass_bonanza', name: 'Big Bass Bonanza', provider: 'Pragmatic Play', type: 'slots', image: 'https://img.freepik.com/free-vector/slot-machine-realistic_1284-8955.jpg' },
-  { gameId: 'pp_dog_house', name: 'The Dog House', provider: 'Pragmatic Play', type: 'slots', image: 'https://img.freepik.com/free-vector/slot-machine-realistic_1284-8955.jpg' },
-
-  // Table Games
-  { gameId: 'table_roulette_auto', name: 'Auto Roulette', provider: 'Ezugi', type: 'table', image: 'https://img.freepik.com/free-vector/realistic-casino-roulette_52683-108.jpg' },
-  { gameId: 'table_speed_baccarat', name: 'Speed Baccarat', provider: 'Ezugi', type: 'table', image: 'https://img.freepik.com/free-vector/casino-chips-aces-playing-cards_1441-510.jpg' },
-  { gameId: 'table_sic_bo', name: 'Sic Bo', provider: 'Ezugi', type: 'table', image: 'https://img.freepik.com/free-vector/playing-cards-chips_1441-69.jpg' },
 ];
 
 export const GAME_PROVIDERS = [...new Set(CASINO_GAMES.map(g => g.provider))].sort();
