@@ -6,6 +6,59 @@ import type { MarketData, RunnerData } from '@/hooks/useMarkets';
 
 const sportIcon: Record<string, string> = { cricket: '🏏', football: '⚽', tennis: '🎾' };
 
+// Generate deterministic fancy markets for cricket
+function generateFancyMarkets(market: MarketData) {
+  const teams = market.event_name.split(' vs ');
+  const seed = market.id.charCodeAt(0) + market.id.charCodeAt(5);
+  const fancies = [
+    { label: `${teams[0] || 'Team A'} 1st Inn Runs`, yesOdds: 165 + (seed % 30), noOdds: 165 + (seed % 30) - 2, yesRate: 100, noRate: 100 },
+    { label: `${teams[1] || 'Team B'} 1st Inn Runs`, yesOdds: 155 + (seed % 25), noOdds: 155 + (seed % 25) - 3, yesRate: 100, noRate: 100 },
+    { label: `${teams[0] || 'Team A'} 1st 6 Ovr Runs`, yesOdds: 42 + (seed % 10), noOdds: 42 + (seed % 10) - 1, yesRate: 100, noRate: 100 },
+    { label: `${teams[1] || 'Team B'} 1st 6 Ovr Runs`, yesOdds: 38 + (seed % 12), noOdds: 38 + (seed % 12) - 2, yesRate: 100, noRate: 100 },
+    { label: `Total Match Fours`, yesOdds: 28 + (seed % 8), noOdds: 28 + (seed % 8) - 1, yesRate: 100, noRate: 100 },
+    { label: `Total Match Sixes`, yesOdds: 12 + (seed % 6), noOdds: 12 + (seed % 6) - 1, yesRate: 100, noRate: 100 },
+    { label: `${teams[0] || 'Team A'} Wkts`, yesOdds: 5 + (seed % 4), noOdds: 5 + (seed % 4) - 1, yesRate: 100, noRate: 100 },
+    { label: `1st Wkt Pship Runs`, yesOdds: 22 + (seed % 15), noOdds: 22 + (seed % 15) - 2, yesRate: 100, noRate: 100 },
+  ];
+  return fancies;
+}
+
+const FancySection: React.FC<{ market: MarketData }> = ({ market }) => {
+  const fancies = generateFancyMarkets(market);
+  
+  return (
+    <div className="mt-1">
+      {/* Fancy Header */}
+      <div className="grid grid-cols-12 bg-[#121a2d] py-2 px-1 text-[10px] font-bold text-gray-500 border-t border-yellow-500/20">
+        <div className="col-span-6 pl-2 flex items-center gap-1">
+          <span className="text-yellow-500">⭐</span> FANCY
+        </div>
+        <div className="col-span-3 text-center text-[#faa9ba]">NO</div>
+        <div className="col-span-3 text-center text-[#72bbef]">YES</div>
+      </div>
+
+      {fancies.map((f, idx) => (
+        <div key={idx} className="grid grid-cols-12 items-center p-1 gap-1 bg-[#161d2f] border-b border-white/5">
+          <div className="col-span-6 pl-2 text-xs font-bold text-gray-200">{f.label}</div>
+          <div className="col-span-3">
+            <button className="btn-lay w-full py-2">
+              <span className="odds-text">{f.noOdds}</span>
+              <span className="block text-[8px] opacity-60">{f.noRate}</span>
+            </button>
+          </div>
+          <div className="col-span-3">
+            <button className="btn-back w-full py-2">
+              <span className="odds-text">{f.yesOdds}</span>
+              <span className="block text-[8px] opacity-60">{f.yesRate}</span>
+            </button>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+
 const ExchangePage: React.FC = () => {
   const { markets, marketsLoading, addToBetSlip, betSlip, updateBetSlipStake, placeBets, refreshData } = useApp();
   const [sportFilter, setSportFilter] = useState<string>('all');
@@ -75,7 +128,7 @@ const ExchangePage: React.FC = () => {
               </div>
             </div>
 
-            {/* Inline Slip - only for live matches */}
+            {/* Inline Slip */}
             {slip && isLive && (
               <div className={`m-2 p-3 rounded border-l-4 shadow-2xl ${slip.type === 'back' ? 'bg-[#e2f2ff] border-[#2b92e4]' : 'bg-[#fff0f3] border-[#ef6e8b]'}`}>
                 <div className="flex items-end gap-3">
@@ -91,6 +144,11 @@ const ExchangePage: React.FC = () => {
           </div>
         );
       })}
+
+      {/* Fancy Markets - Cricket Only */}
+      {market.sport === 'cricket' && isLive && (
+        <FancySection market={market} />
+      )}
     </div>
   );
 
