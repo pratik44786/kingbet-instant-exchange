@@ -11,6 +11,10 @@ const SLOTS_BASE = `https://${SLOTS_HOST}`;
 const DIAMOND_HOST = 'diamond-casino-api-no-ggr.p.rapidapi.com';
 const DIAMOND_BASE = `https://${DIAMOND_HOST}`;
 
+// Bigdaddy / GoaGames / Tiranga / 91Club API (5D, Wingo, TRX etc.)
+const BIGDADDY_HOST = 'bigdaddy-goagames-tiranga-91club-trx-api-with-result.p.rapidapi.com';
+const BIGDADDY_BASE = `https://${BIGDADDY_HOST}`;
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -102,6 +106,54 @@ Deno.serve(async (req) => {
           headers: {
             'X-RapidAPI-Key': RAPIDAPI_KEY,
             'X-RapidAPI-Host': DIAMOND_HOST,
+          },
+        });
+        break;
+      }
+
+      // ── Bigdaddy / GoaGames / Tiranga API ──
+      case 'bd_5d_result': {
+        const type = data?.type || '5';
+        apiRes = await fetch(`${BIGDADDY_BASE}/api/v1/5dresult/type/${type}`, {
+          method: 'GET',
+          headers: {
+            'X-RapidAPI-Key': RAPIDAPI_KEY,
+            'X-RapidAPI-Host': BIGDADDY_HOST,
+          },
+        });
+        break;
+      }
+
+      case 'bd_wingo': {
+        const type = data?.type || '1';
+        apiRes = await fetch(`${BIGDADDY_BASE}/api/v1/wingo/type/${type}`, {
+          method: 'GET',
+          headers: {
+            'X-RapidAPI-Key': RAPIDAPI_KEY,
+            'X-RapidAPI-Host': BIGDADDY_HOST,
+          },
+        });
+        break;
+      }
+
+      case 'bd_trx_result': {
+        const type = data?.type || '1';
+        apiRes = await fetch(`${BIGDADDY_BASE}/api/v1/trxresult/type/${type}`, {
+          method: 'GET',
+          headers: {
+            'X-RapidAPI-Key': RAPIDAPI_KEY,
+            'X-RapidAPI-Host': BIGDADDY_HOST,
+          },
+        });
+        break;
+      }
+
+      case 'bd_get_all_id': {
+        apiRes = await fetch(`${BIGDADDY_BASE}/api/v1/getallid`, {
+          method: 'GET',
+          headers: {
+            'X-RapidAPI-Key': RAPIDAPI_KEY,
+            'X-RapidAPI-Host': BIGDADDY_HOST,
           },
         });
         break;
