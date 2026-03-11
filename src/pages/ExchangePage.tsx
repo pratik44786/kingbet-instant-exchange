@@ -163,8 +163,11 @@ const MarketCard = memo<{
           </div>
         </div>
         {isLive ? (
-          <div className="flex items-center gap-1 text-[10px] text-green-500 font-bold">
-            <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" /> LIVE
+          <div className="flex items-center gap-2">
+            <LiveTV marketId={market.id} sport={market.sport} eventName={market.event_name} />
+            <div className="flex items-center gap-1 text-[10px] text-green-500 font-bold">
+              <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" /> LIVE
+            </div>
           </div>
         ) : (
           <div className="text-[10px] text-yellow-500 font-bold">
