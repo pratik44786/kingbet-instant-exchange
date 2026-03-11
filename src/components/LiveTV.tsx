@@ -21,14 +21,7 @@ const LiveTV: React.FC<LiveTVProps> = ({ marketId, sport, eventName }) => {
       // Use the market ID characters to create a gmid-like identifier
       const gmid = marketId.replace(/-/g, '').slice(0, 12);
       
-      const { data, error: fnError } = await supabase.functions.invoke('live-tv', {
-        body: null,
-        headers: { 'Content-Type': 'application/json' },
-      });
-
-      // Build the URL with query params
-      const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
-      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || `https://${projectId}.supabase.co`;
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
       
       const tvResp = await fetch(`${supabaseUrl}/functions/v1/live-tv?gmid=${gmid}&sport=${sport}`, {
         headers: {
