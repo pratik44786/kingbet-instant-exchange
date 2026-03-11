@@ -2,6 +2,7 @@ import React, { useState, useMemo, useCallback, memo } from 'react';
 import { useApp } from '@/context/AppContext';
 import { RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import LiveTV from '@/components/LiveTV';
 import type { MarketData, RunnerData } from '@/hooks/useMarkets';
 import type { BetSlipItem } from '@/types/exchange';
 
