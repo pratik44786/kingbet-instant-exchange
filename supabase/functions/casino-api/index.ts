@@ -111,6 +111,54 @@ Deno.serve(async (req) => {
         break;
       }
 
+      // ── Bigdaddy / GoaGames / Tiranga API ──
+      case 'bd_5d_result': {
+        const type = data?.type || '5';
+        apiRes = await fetch(`${BIGDADDY_BASE}/api/v1/5dresult/type/${type}`, {
+          method: 'GET',
+          headers: {
+            'X-RapidAPI-Key': RAPIDAPI_KEY,
+            'X-RapidAPI-Host': BIGDADDY_HOST,
+          },
+        });
+        break;
+      }
+
+      case 'bd_wingo': {
+        const type = data?.type || '1';
+        apiRes = await fetch(`${BIGDADDY_BASE}/api/v1/wingo/type/${type}`, {
+          method: 'GET',
+          headers: {
+            'X-RapidAPI-Key': RAPIDAPI_KEY,
+            'X-RapidAPI-Host': BIGDADDY_HOST,
+          },
+        });
+        break;
+      }
+
+      case 'bd_trx_result': {
+        const type = data?.type || '1';
+        apiRes = await fetch(`${BIGDADDY_BASE}/api/v1/trxresult/type/${type}`, {
+          method: 'GET',
+          headers: {
+            'X-RapidAPI-Key': RAPIDAPI_KEY,
+            'X-RapidAPI-Host': BIGDADDY_HOST,
+          },
+        });
+        break;
+      }
+
+      case 'bd_get_all_id': {
+        apiRes = await fetch(`${BIGDADDY_BASE}/api/v1/getallid`, {
+          method: 'GET',
+          headers: {
+            'X-RapidAPI-Key': RAPIDAPI_KEY,
+            'X-RapidAPI-Host': BIGDADDY_HOST,
+          },
+        });
+        break;
+      }
+
       default:
         return new Response(JSON.stringify({ error: 'Unknown action' }), {
           status: 400,
