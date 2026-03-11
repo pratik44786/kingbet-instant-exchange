@@ -11,6 +11,10 @@ const SLOTS_BASE = `https://${SLOTS_HOST}`;
 const DIAMOND_HOST = 'diamond-casino-api-no-ggr.p.rapidapi.com';
 const DIAMOND_BASE = `https://${DIAMOND_HOST}`;
 
+// Bigdaddy / GoaGames / Tiranga / 91Club API (5D, Wingo, TRX etc.)
+const BIGDADDY_HOST = 'bigdaddy-goagames-tiranga-91club-trx-api-with-result.p.rapidapi.com';
+const BIGDADDY_BASE = `https://${BIGDADDY_HOST}`;
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
