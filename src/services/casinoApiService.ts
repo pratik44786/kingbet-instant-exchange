@@ -34,4 +34,37 @@ export const casinoApiService = {
     if (error) throw new Error(error.message);
     return data;
   },
+
+  // Bigdaddy / GoaGames / Tiranga APIs
+  get5DResult: async (type: string = '5') => {
+    const { data, error } = await supabase.functions.invoke('casino-api', {
+      body: { action: 'bd_5d_result', data: { type } },
+    });
+    if (error) throw new Error(error.message);
+    return data;
+  },
+
+  getWingoResult: async (type: string = '1') => {
+    const { data, error } = await supabase.functions.invoke('casino-api', {
+      body: { action: 'bd_wingo', data: { type } },
+    });
+    if (error) throw new Error(error.message);
+    return data;
+  },
+
+  getTRXResult: async (type: string = '1') => {
+    const { data, error } = await supabase.functions.invoke('casino-api', {
+      body: { action: 'bd_trx_result', data: { type } },
+    });
+    if (error) throw new Error(error.message);
+    return data;
+  },
+
+  getAllIds: async () => {
+    const { data, error } = await supabase.functions.invoke('casino-api', {
+      body: { action: 'bd_get_all_id', data: {} },
+    });
+    if (error) throw new Error(error.message);
+    return data;
+  },
 };
