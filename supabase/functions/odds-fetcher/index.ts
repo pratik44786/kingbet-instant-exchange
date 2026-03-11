@@ -6,86 +6,80 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-// Convert a hex string (like Odds API event ID) to a valid UUID v4 format
-function toUUID(hex: string): string {
-  // Pad or trim to 32 hex chars
-  const h = hex.replace(/[^a-f0-9]/gi, "").padEnd(32, "0").slice(0, 32);
+// Diamond Sports API config
+const RAPIDAPI_HOST = "diamond-sports-api-d247-sky-exchange-betfair.p.rapidapi.com";
+const BASE_URL = `https://${RAPIDAPI_HOST}`;
+
+// Sport ID mapping for Diamond Sports API
+const SPORT_IDS: Record<string, number> = {
+  cricket: 4,
+  football: 1,
+  tennis: 2,
+};
+
+function toUUID(input: string): string {
+  const h = input.replace(/[^a-f0-9]/gi, "").padEnd(32, "0").slice(0, 32);
   return `${h.slice(0, 8)}-${h.slice(8, 12)}-${h.slice(12, 16)}-${h.slice(16, 20)}-${h.slice(20, 32)}`;
 }
 
-// Sport key mapping for The Odds API
-const SPORT_KEYS: Record<string, string[]> = {
-  cricket: [
-    "cricket_ipl",
-    "cricket_test_match",
-    "cricket_odi",
-    "cricket_t20_intl",
-    "cricket_big_bash",
-    "cricket_psl",
-  ],
-  football: [
-    "soccer_epl",
-    "soccer_spain_la_liga",
-    "soccer_italy_serie_a",
-    "soccer_germany_bundesliga",
-    "soccer_france_ligue_one",
-    "soccer_uefa_champs_league",
-  ],
-  tennis: [
-    "tennis_atp_french_open",
-    "tennis_atp_wimbledon",
-    "tennis_atp_us_open",
-    "tennis_atp_aus_open",
-  ],
-};
-
-interface OddsEvent {
-  id: string;
-  sport_key: string;
-  sport_title: string;
-  commence_time: string;
-  home_team: string;
-  away_team: string;
-  bookmakers: Array<{
-    key: string;
-    title: string;
-    markets: Array<{
-      key: string;
-      outcomes: Array<{
-        name: string;
-        price: number;
-      }>;
-    }>;
-  }>;
-}
-
-function sportFromKey(key: string): "cricket" | "football" | "tennis" {
-  if (key.startsWith("cricket")) return "cricket";
-  if (key.startsWith("soccer")) return "football";
-  if (key.startsWith("tennis")) return "tennis";
+function sportFromId(id: number): "cricket" | "football" | "tennis" {
+  if (id === 4) return "cricket";
+  if (id === 1) return "football";
+  if (id === 2) return "tennis";
   return "cricket";
 }
 
-function competitionFromKey(key: string): string {
-  const map: Record<string, string> = {
-    cricket_ipl: "IPL 2026",
-    cricket_test_match: "Test Series",
-    cricket_odi: "ODI Series",
-    cricket_t20_intl: "T20 International",
-    cricket_big_bash: "Big Bash League",
-    cricket_psl: "PSL",
-    soccer_epl: "Premier League",
-    soccer_spain_la_liga: "La Liga",
-    soccer_italy_serie_a: "Serie A",
-    soccer_germany_bundesliga: "Bundesliga",
-    soccer_france_ligue_one: "Ligue 1",
-    soccer_uefa_champs_league: "Champions League",
-    tennis_atp_french_open: "French Open",
-    tennis_atp_wimbledon: "Wimbledon",
-    tennis_atp_us_open: "US Open",
-    tennis_atp_aus_open: "Australian Open",
-  };
-  return map[key] || key;
+async function fetchFromDiamond(path: string, apiKey: string): Promise<any> {
+  const resp = await fetch(`${BASE_URL}${path}`, {
+    headers: {
+      "X-RapidAPI-Key": apiKey,
+      "X-RapidAPI-Host": RAPIDAPI_HOST,
+    },
+  });
+  if (!resp.ok) {
+    throw new Error(`Diamond API error ${resp.status}: ${await resp.text()}`);
+  }
+  return resp.json();
+}
+
+interface DiamondRunner {
+  selectionId?: string | number;
+  RunnerName?: string;
+  runnerName?: string;
+  runner_name?: string;
+  name?: string;
+  BackPrice1?: number;
+  backPrice1?: number;
+  back_price_1?: number;
+  LayPrice1?: number;
+  layPrice1?: number;
+  lay_price_1?: number;
+  BackSize1?: number;
+  backSize1?: number;
+  back_size_1?: number;
+  LaySize1?: number;
+  laySize1?: number;
+  lay_size_1?: number;
+}
+
+function extractRunnerName(r: DiamondRunner): string {
+  return r.RunnerName || r.runnerName || r.runner_name || r.name || "Unknown";
+}
+
+function extractBackOdds(r: DiamondRunner): number {
+  return r.BackPrice1 || r.backPrice1 || r.back_price_1 || 1.5;
+}
+
+function extractLayOdds(r: DiamondRunner): number {
+  return r.LayPrice1 || r.layPrice1 || r.lay_price_1 || 1.52;
+}
+
+function extractBackSize(r: DiamondRunner): number {
+  return r.BackSize1 || r.backSize1 || r.back_size_1 || 10000;
+}
+
+function extractLaySize(r: DiamondRunner): number {
+  return r.LaySize1 || r.laySize1 || r.lay_size_1 || 10000;
 }
 
 Deno.serve(async (req) => {
@@ -122,73 +116,107 @@ Deno.serve(async (req) => {
       });
     }
 
-    const ODDS_API_KEY = Deno.env.get("ODDS_API_KEY");
-    if (!ODDS_API_KEY) {
+    const RAPIDAPI_KEY = Deno.env.get("RAPIDAPI_KEY");
+    if (!RAPIDAPI_KEY) {
       return new Response(
-        JSON.stringify({ error: "ODDS_API_KEY not configured" }),
+        JSON.stringify({ error: "RAPIDAPI_KEY not configured" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
     const url = new URL(req.url);
     const sportFilter = url.searchParams.get("sport") || "all";
-    const mode = url.searchParams.get("mode") || "sync"; // "sync" = upsert to DB, "fetch" = return directly
+    const mode = url.searchParams.get("mode") || "sync";
 
-    // Determine which sport keys to fetch
-    let sportKeys: string[] = [];
+    // Determine which sport IDs to fetch
+    const sportsToFetch: { sport: string; sportsId: number }[] = [];
     if (sportFilter === "all") {
-      sportKeys = [...SPORT_KEYS.cricket, ...SPORT_KEYS.football, ...SPORT_KEYS.tennis];
-    } else if (SPORT_KEYS[sportFilter]) {
-      sportKeys = SPORT_KEYS[sportFilter];
+      for (const [sport, id] of Object.entries(SPORT_IDS)) {
+        sportsToFetch.push({ sport, sportsId: id });
+      }
+    } else if (SPORT_IDS[sportFilter] !== undefined) {
+      sportsToFetch.push({ sport: sportFilter, sportsId: SPORT_IDS[sportFilter] });
     }
 
-    // Fetch odds from The Odds API (batch by sport key to save credits)
-    // We'll fetch h2h (moneyline) odds
-    const allEvents: OddsEvent[] = [];
-    const uniqueSportGroups = sportFilter === "all"
-      ? ["cricket", "football", "tennis"]
-      : [sportFilter];
+    // Fetch match list from Diamond Sports API
+    interface MatchEvent {
+      gmid?: string | number;
+      gameId?: string | number;
+      game_id?: string | number;
+      eventName?: string;
+      event_name?: string;
+      matchName?: string;
+      match_name?: string;
+      competition?: string;
+      competitionName?: string;
+      competition_name?: string;
+      startTime?: string;
+      start_time?: string;
+      openDate?: string;
+      open_date?: string;
+      runners?: DiamondRunner[];
+      sportsId?: number;
+    }
 
-    for (const group of uniqueSportGroups) {
-      const keys = SPORT_KEYS[group] || [];
-      for (const sportKey of keys) {
-        try {
-          const apiUrl = `https://api.the-odds-api.com/v4/sports/${sportKey}/odds/?apiKey=${ODDS_API_KEY}&regions=uk&markets=h2h&oddsFormat=decimal`;
-          const resp = await fetch(apiUrl);
-          if (resp.ok) {
-            const events: OddsEvent[] = await resp.json();
-            allEvents.push(...events);
+    const allMatches: { match: MatchEvent; sport: string }[] = [];
+
+    for (const { sport, sportsId } of sportsToFetch) {
+      try {
+        // Try fetching match list for this sport
+        const data = await fetchFromDiamond(`/sports/getPriveteData?sportsid=${sportsId}`, RAPIDAPI_KEY);
+
+        // The API may return data in different structures
+        const matches: MatchEvent[] = Array.isArray(data) ? data : (data?.data || data?.matches || data?.events || []);
+
+        for (const match of matches) {
+          allMatches.push({ match, sport });
+        }
+      } catch (err) {
+        console.error(`Failed to fetch ${sport} (sportsId=${sportsId}):`, err);
+      }
+    }
+
+    // For each match, try to get detailed odds if we don't have runners
+    for (const item of allMatches) {
+      const m = item.match;
+      if (!m.runners || m.runners.length === 0) {
+        const gmid = m.gmid || m.gameId || m.game_id;
+        const sportsId = SPORT_IDS[item.sport];
+        if (gmid) {
+          try {
+            const detail = await fetchFromDiamond(`/api/v1/sports/tv?gmid=${gmid}&sportsid=${sportsId}`, RAPIDAPI_KEY);
+            const runners = detail?.runners || detail?.data?.runners || detail?.marketOdds?.runners || [];
+            if (Array.isArray(runners) && runners.length > 0) {
+              m.runners = runners;
+            }
+          } catch {
+            // Skip failed detail fetches
           }
-          // If 404 or no events for this sport, just skip
-        } catch {
-          // Skip failed fetches
         }
       }
     }
 
     if (mode === "fetch") {
-      // Return data directly without DB upsert
-      const formatted = allEvents.map((ev) => ({
-        id: ev.id,
-        event_name: `${ev.home_team} vs ${ev.away_team}`,
-        sport: sportFromKey(ev.sport_key),
-        competition: competitionFromKey(ev.sport_key),
-        start_time: ev.commence_time,
-        status: new Date(ev.commence_time) <= new Date() ? "open" : "open",
-        runners: (() => {
-          const bm = ev.bookmakers?.[0];
-          const h2h = bm?.markets?.find((m) => m.key === "h2h");
-          if (!h2h) return [];
-          return h2h.outcomes.map((o, idx) => ({
-            name: o.name,
-            back_odds: o.price,
-            lay_odds: +(o.price + 0.02).toFixed(2),
-            back_size: Math.floor(Math.random() * 50000) + 10000,
-            lay_size: Math.floor(Math.random() * 50000) + 10000,
+      const formatted = allMatches.map(({ match: m, sport }) => {
+        const eventName = m.eventName || m.event_name || m.matchName || m.match_name || "Unknown Match";
+        const competition = m.competition || m.competitionName || m.competition_name || sport.toUpperCase();
+        return {
+          id: String(m.gmid || m.gameId || m.game_id || ""),
+          event_name: eventName,
+          sport,
+          competition,
+          start_time: m.startTime || m.start_time || m.openDate || m.open_date || new Date().toISOString(),
+          status: "open",
+          runners: (m.runners || []).map((r: DiamondRunner, idx: number) => ({
+            name: extractRunnerName(r),
+            back_odds: extractBackOdds(r),
+            lay_odds: extractLayOdds(r),
+            back_size: extractBackSize(r),
+            lay_size: extractLaySize(r),
             sort_order: idx,
-          }));
-        })(),
-      }));
+          })),
+        };
+      });
 
       return new Response(JSON.stringify({ events: formatted, count: formatted.length }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -197,24 +225,25 @@ Deno.serve(async (req) => {
 
     // Mode: sync — upsert events into markets + runners tables
     let upsertedCount = 0;
-    for (const ev of allEvents) {
-      const sport = sportFromKey(ev.sport_key);
-      const eventName = `${ev.home_team} vs ${ev.away_team}`;
-      const competition = competitionFromKey(ev.sport_key);
+    for (const { match: m, sport } of allMatches) {
+      const gmid = String(m.gmid || m.gameId || m.game_id || "");
+      if (!gmid) continue;
 
-      // Generate deterministic UUID from event ID
-      const marketId = toUUID(ev.id);
+      const eventName = m.eventName || m.event_name || m.matchName || m.match_name || "Unknown Match";
+      const competition = m.competition || m.competitionName || m.competition_name || sport.toUpperCase();
+      const startTime = m.startTime || m.start_time || m.openDate || m.open_date || new Date().toISOString();
 
-      // Upsert market
+      const marketId = toUUID(gmid);
+
       const { data: market, error: mErr } = await supabase
         .from("markets")
         .upsert(
           {
             id: marketId,
             event_name: eventName,
-            sport,
+            sport: sport as "cricket" | "football" | "tennis",
             competition,
-            start_time: ev.commence_time,
+            start_time: startTime,
             status: "open",
           },
           { onConflict: "id" }
@@ -224,30 +253,26 @@ Deno.serve(async (req) => {
 
       if (mErr || !market) continue;
 
-      // Extract runners from first bookmaker's h2h market
-      const bm = ev.bookmakers?.[0];
-      const h2h = bm?.markets?.find((m) => m.key === "h2h");
-      if (!h2h) continue;
+      const runners = m.runners || [];
+      if (runners.length === 0) continue;
 
-      // Generate deterministic runner IDs based on market + outcome name
-      const runnersToUpsert = h2h.outcomes.map((outcome, i) => {
-        // Create deterministic runner ID from market ID + runner name hash
-        const runnerHash = `${market.id}-${outcome.name}`.replace(/[^a-z0-9]/gi, '').padEnd(32, '0').slice(0, 32);
+      const runnersToUpsert = runners.map((r: DiamondRunner, i: number) => {
+        const runnerName = extractRunnerName(r);
+        const runnerHash = `${market.id}-${runnerName}`.replace(/[^a-z0-9]/gi, "").padEnd(32, "0").slice(0, 32);
         const runnerId = `${runnerHash.slice(0, 8)}-${runnerHash.slice(8, 12)}-${runnerHash.slice(12, 16)}-${runnerHash.slice(16, 20)}-${runnerHash.slice(20, 32)}`;
-        
+
         return {
           id: runnerId,
           market_id: market.id,
-          name: outcome.name,
-          back_odds: outcome.price,
-          lay_odds: +(outcome.price + 0.02).toFixed(2),
-          back_size: Math.floor(Math.random() * 50000) + 10000,
-          lay_size: Math.floor(Math.random() * 50000) + 10000,
+          name: runnerName,
+          back_odds: extractBackOdds(r),
+          lay_odds: extractLayOdds(r),
+          back_size: extractBackSize(r),
+          lay_size: extractLaySize(r),
           sort_order: i,
         };
       });
 
-      // Upsert runners with deterministic IDs to avoid duplicates
       const { error: rErr } = await supabase
         .from("runners")
         .upsert(runnersToUpsert, { onConflict: "id" });
@@ -259,7 +284,7 @@ Deno.serve(async (req) => {
       JSON.stringify({
         success: true,
         synced: upsertedCount,
-        totalFetched: allEvents.length,
+        totalFetched: allMatches.length,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
