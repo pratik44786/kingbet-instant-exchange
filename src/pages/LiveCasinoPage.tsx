@@ -130,7 +130,8 @@ const LiveCasinoPage = () => {
                 <button
                   key={game.gameId}
                   onClick={() => launchGame(game)}
-                  className="group relative bg-card border border-border rounded-xl overflow-hidden hover:border-primary/50 transition-all text-left"
+                  disabled={launching}
+                  className="group relative bg-card border border-border rounded-xl overflow-hidden hover:border-primary/50 transition-all text-left disabled:opacity-50"
                 >
                   <div className="aspect-[3/4] bg-muted relative overflow-hidden">
                     <img
