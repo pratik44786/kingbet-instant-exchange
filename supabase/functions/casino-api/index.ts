@@ -109,68 +109,33 @@ Deno.serve(async (req) => {
         break;
       }
 
-      // ── Diamond Casino API ──
+      // ── Diamond Casino API (via TurnkeyXGaming or RapidAPI) ──
       case 'diamond_table_ids': {
-        if (!RAPIDAPI_KEY) throw new Error('RAPIDAPI_KEY required for Diamond Casino');
-        apiRes = await fetch(`${DIAMOND_BASE}/casino/tableid`, {
-          method: 'GET',
-          headers: {
-            'X-RapidAPI-Key': RAPIDAPI_KEY,
-            'X-RapidAPI-Host': DIAMOND_HOST,
-          },
-        });
+        apiRes = await callDiamondEndpoint('/casino/tableid', TURNKEY_KEY, RAPIDAPI_KEY);
         break;
       }
 
       case 'diamond_table_data': {
-        if (!RAPIDAPI_KEY) throw new Error('RAPIDAPI_KEY required for Diamond Casino');
         const tableId = data?.tableId || '';
-        apiRes = await fetch(`${DIAMOND_BASE}/casino/tabledata?id=${tableId}`, {
-          method: 'GET',
-          headers: {
-            'X-RapidAPI-Key': RAPIDAPI_KEY,
-            'X-RapidAPI-Host': DIAMOND_HOST,
-          },
-        });
+        apiRes = await callDiamondEndpoint(`/casino/tabledata?id=${tableId}`, TURNKEY_KEY, RAPIDAPI_KEY);
         break;
       }
 
       case 'diamond_rules': {
-        if (!RAPIDAPI_KEY) throw new Error('RAPIDAPI_KEY required for Diamond Casino');
         const type = data?.type || 'baccarat2';
-        apiRes = await fetch(`${DIAMOND_BASE}/casino/casinorules?type=${type}`, {
-          method: 'GET',
-          headers: {
-            'X-RapidAPI-Key': RAPIDAPI_KEY,
-            'X-RapidAPI-Host': DIAMOND_HOST,
-          },
-        });
+        apiRes = await callDiamondEndpoint(`/casino/casinorules?type=${type}`, TURNKEY_KEY, RAPIDAPI_KEY);
         break;
       }
 
       case 'diamond_table_result': {
-        if (!RAPIDAPI_KEY) throw new Error('RAPIDAPI_KEY required for Diamond Casino');
         const tableId = data?.tableId || '';
-        apiRes = await fetch(`${DIAMOND_BASE}/casino/tableresult?id=${tableId}`, {
-          method: 'GET',
-          headers: {
-            'X-RapidAPI-Key': RAPIDAPI_KEY,
-            'X-RapidAPI-Host': DIAMOND_HOST,
-          },
-        });
+        apiRes = await callDiamondEndpoint(`/casino/tableresult?id=${tableId}`, TURNKEY_KEY, RAPIDAPI_KEY);
         break;
       }
 
       case 'diamond_table_stream': {
-        if (!RAPIDAPI_KEY) throw new Error('RAPIDAPI_KEY required for Diamond Casino');
         const tableId = data?.tableId || '';
-        apiRes = await fetch(`${DIAMOND_BASE}/casino/tabledetailslivestream?id=${tableId}`, {
-          method: 'GET',
-          headers: {
-            'X-RapidAPI-Key': RAPIDAPI_KEY,
-            'X-RapidAPI-Host': DIAMOND_HOST,
-          },
-        });
+        apiRes = await callDiamondEndpoint(`/casino/tabledetailslivestream?id=${tableId}`, TURNKEY_KEY, RAPIDAPI_KEY);
         break;
       }
 
