@@ -1,15 +1,15 @@
 import { useState, useMemo } from 'react';
 import { CASINO_GAMES, GAME_TYPES, type CasinoGame } from '@/data/casinoGames';
-import { Search, Gamepad2, Tv, X, Maximize2, Minimize2 } from 'lucide-react';
+import { Search, Gamepad2, Tv, X, Maximize2, Minimize2, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
-
-const DIAMOND_IFRAME_BASE = 'https://diamondcasino.neogames.cloud';
+import { casinoApiService } from '@/services/casinoApiService';
 
 const LiveCasinoPage = () => {
   const [search, setSearch] = useState('');
   const [selectedType, setSelectedType] = useState('all');
   const [diamondGame, setDiamondGame] = useState<{ url: string; name: string } | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [launching, setLaunching] = useState(false);
 
   const filteredGames = useMemo(() => {
     let filtered = CASINO_GAMES;
@@ -21,12 +21,31 @@ const LiveCasinoPage = () => {
     return filtered;
   }, [search, selectedType]);
 
-  const launchGame = (game: CasinoGame) => {
-    const username = 'kb' + Math.random().toString(36).slice(2, 10);
-    const url = `${DIAMOND_IFRAME_BASE}/?username=${username}`;
-    setDiamondGame({ url, name: game.name });
-    setIsFullscreen(false);
-    toast.success(`${game.name} launched!`);
+  const launchGame = async (game: CasinoGame) => {
+    setLaunching(true);
+    try {
+      const username = 'kb' + Math.random().toString(36).slice(2, 10);
+      const result = await casinoApiService.getGameUrl(game.gameId, username);
+      
+      // Extract URL from various response formats
+      const gameUrl = result?.url || result?.gameUrl || result?.game_url || 
+                      result?.data?.url || result?.data?.gameUrl || result?.iframe ||
+                      (typeof result === 'string' && result.startsWith('http') ? result : null);
+      
+      if (gameUrl) {
+        setDiamondGame({ url: gameUrl, name: game.name });
+        setIsFullscreen(false);
+        toast.success(`${game.name} launched!`);
+      } else {
+        console.error('Game launch response:', result);
+        toast.error('Game URL not received. Try again.');
+      }
+    } catch (err: any) {
+      console.error('Game launch error:', err);
+      toast.error(err.message || 'Failed to launch game');
+    } finally {
+      setLaunching(false);
+    }
   };
 
   if (diamondGame) {
@@ -111,7 +130,8 @@ const LiveCasinoPage = () => {
                 <button
                   key={game.gameId}
                   onClick={() => launchGame(game)}
-                  className="group relative bg-card border border-border rounded-xl overflow-hidden hover:border-primary/50 transition-all text-left"
+                  disabled={launching}
+                  className="group relative bg-card border border-border rounded-xl overflow-hidden hover:border-primary/50 transition-all text-left disabled:opacity-50"
                 >
                   <div className="aspect-[3/4] bg-muted relative overflow-hidden">
                     <img
