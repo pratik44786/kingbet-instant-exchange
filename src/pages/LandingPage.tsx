@@ -225,8 +225,8 @@ const LandingPage = () => (
       { icon: TrendingUp, title: 'Real-Time Odds', desc: 'Live odds updating every 2 seconds. Back & Lay with instant matching.' },  
       { icon: Shield, title: 'Points System', desc: 'No real money involved. Admin-managed points with full transparency.' },  
       { icon: Lock, title: 'Secure Platform', desc: 'Enterprise-grade encryption. Your account is protected 24/7.' },  
-      { icon: Users, title: 'Admin Hierarchy', desc: 'Super Admin → Admin → User system with full control chain.' },  
-    ].map((f, i) => (  
+      { icon: Zap, title: 'Instant Payouts', desc: 'Winning credits instantly to your wallet. No waiting periods.' },  
+    ].map((f, i) => (
       <div key={i} className="bg-[#161d2f] border border-white/5 rounded-lg p-5">  
         <div className="w-10 h-10 rounded-lg bg-yellow-500/10 flex items-center justify-center mb-3">  
           <f.icon className="w-5 h-5 text-yellow-500" />  
