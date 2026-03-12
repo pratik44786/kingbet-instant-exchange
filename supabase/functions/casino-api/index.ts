@@ -28,7 +28,7 @@ async function callBigdaddyEndpoint(
     return fetch(`${TURNKEY_BASE}${path}`, {
       method: 'GET',
       headers: {
-        'Authorization': `Bearer ${turnkeyKey}`,
+        'x-turnkeyxgaming-key': turnkeyKey,
         'Content-Type': 'application/json',
       },
     });
