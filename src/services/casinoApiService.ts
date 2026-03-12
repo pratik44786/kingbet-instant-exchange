@@ -1,22 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 
 export const casinoApiService = {
-  getGameList: async (provider?: string, type?: string) => {
-    const { data, error } = await supabase.functions.invoke('casino-api', {
-      body: { action: 'get_game_list', data: { provider, type } },
-    });
-    if (error) throw new Error(error.message);
-    return data;
-  },
-
-  getProviders: async () => {
-    const { data, error } = await supabase.functions.invoke('casino-api', {
-      body: { action: 'get_providers', data: {} },
-    });
-    if (error) throw new Error(error.message);
-    return data;
-  },
-
   getGameUrl: async (gameId: string, username?: string) => {
     const { data, error } = await supabase.functions.invoke('casino-api', {
       body: {
@@ -35,15 +19,17 @@ export const casinoApiService = {
     return data;
   },
 
-  // Bigdaddy / GoaGames / Tiranga APIs
-  get5DResult: async (type: string = '5') => {
+  // ── Bigdaddy / TurnkeyXGaming APIs ──
+
+  getAllIds: async () => {
     const { data, error } = await supabase.functions.invoke('casino-api', {
-      body: { action: 'bd_5d_result', data: { type } },
+      body: { action: 'bd_get_all_id', data: {} },
     });
     if (error) throw new Error(error.message);
     return data;
   },
 
+  // Wingo
   getWingoResult: async (type: string = '1') => {
     const { data, error } = await supabase.functions.invoke('casino-api', {
       body: { action: 'bd_wingo', data: { type } },
@@ -52,6 +38,15 @@ export const casinoApiService = {
     return data;
   },
 
+  getWingoData: async (type: string = '1') => {
+    const { data, error } = await supabase.functions.invoke('casino-api', {
+      body: { action: 'bd_wingo_data', data: { type } },
+    });
+    if (error) throw new Error(error.message);
+    return data;
+  },
+
+  // TRX
   getTRXResult: async (type: string = '1') => {
     const { data, error } = await supabase.functions.invoke('casino-api', {
       body: { action: 'bd_trx_result', data: { type } },
@@ -60,9 +55,51 @@ export const casinoApiService = {
     return data;
   },
 
-  getAllIds: async () => {
+  getTRXData: async (type: string = '1') => {
     const { data, error } = await supabase.functions.invoke('casino-api', {
-      body: { action: 'bd_get_all_id', data: {} },
+      body: { action: 'bd_trx_data', data: { type } },
+    });
+    if (error) throw new Error(error.message);
+    return data;
+  },
+
+  getTRXWingoResult: async (type: string = '1') => {
+    const { data, error } = await supabase.functions.invoke('casino-api', {
+      body: { action: 'bd_trx_wingo_result', data: { type } },
+    });
+    if (error) throw new Error(error.message);
+    return data;
+  },
+
+  // 5D
+  get5DResult: async (type: string = '5') => {
+    const { data, error } = await supabase.functions.invoke('casino-api', {
+      body: { action: 'bd_5d_result', data: { type } },
+    });
+    if (error) throw new Error(error.message);
+    return data;
+  },
+
+  get5DData: async (type: string = '5') => {
+    const { data, error } = await supabase.functions.invoke('casino-api', {
+      body: { action: 'bd_5d_data', data: { type } },
+    });
+    if (error) throw new Error(error.message);
+    return data;
+  },
+
+  // K3 (NEW)
+  getK3Data: async (id: string = '1') => {
+    const { data, error } = await supabase.functions.invoke('casino-api', {
+      body: { action: 'bd_k3_data', data: { id } },
+    });
+    if (error) throw new Error(error.message);
+    return data;
+  },
+
+  getK3Result: async (type: string = '1') => {
+    const { data, error } = await supabase.functions.invoke('casino-api', {
+      body: { action: 'bd_k3_result', data: { type } },
     });
     if (error) throw new Error(error.message);
     return data;
