@@ -47,10 +47,16 @@ const SuperAdminPage = () => {
 
   const handleAdjust = async (type: 'credit' | 'debit') => {
     if (!selectedUserId || amount <= 0) return;
+    if (!transactionPin || transactionPin.length < 4) {
+      toast.error('Transaction PIN is required (min 4 characters)');
+      return;
+    }
     try {
-      await adminService.adjustBalance(selectedUserId, amount, type);
+      const result = await adminService.adjustBalance(selectedUserId, amount, type, transactionPin);
+      if (result.pin_created) toast.success('Transaction PIN set successfully!');
       toast.success(`${type === 'credit' ? 'Added' : 'Removed'} ${amount} points`);
       setAmount(0);
+      setTransactionPin('');
       fetchUsers(); fetchSummary();
     } catch (err: any) { toast.error(err.message); }
   };
