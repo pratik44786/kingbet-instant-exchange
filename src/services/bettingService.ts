@@ -48,9 +48,9 @@ export const adminService = {
     return data;
   },
 
-  adjustBalance: async (userId: string, amount: number, type: 'credit' | 'debit') => {
+  adjustBalance: async (userId: string, amount: number, type: 'credit' | 'debit', transactionPin: string) => {
     const { data, error } = await supabase.functions.invoke('admin-controls', {
-      body: { action: 'adjust_balance', data: { user_id: userId, amount, type } },
+      body: { action: 'adjust_balance', data: { user_id: userId, amount, type, transaction_pin: transactionPin } },
     });
     if (error) throw new Error(error.message);
     if (data?.error) throw new Error(data.error);
