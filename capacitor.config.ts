@@ -1,7 +1,7 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'app.lovable.kingbet',
+  appId: 'com.kingbet.exchange',
   appName: 'KingBet Exchange',
   webDir: 'dist',
   server: {

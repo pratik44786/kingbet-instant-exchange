@@ -105,7 +105,14 @@ const LoginPage: React.FC = () => {
           <div className="mt-8 pt-6 border-t border-white/5 text-center">
             <p className="text-gray-500 text-sm">
               Don't have an account?{' '}
-              <span className="text-yellow-500 font-bold">Contact your Admin</span>
+              <a
+                href="https://wa.me/919876543210?text=Hi%2C%20I%20want%20to%20get%20my%20KingBet%20ID"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-yellow-500 font-bold hover:text-yellow-400 transition-colors"
+              >
+                Contact Admin on WhatsApp
+              </a>
             </p>
           </div>
         </div>

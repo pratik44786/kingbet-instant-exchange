@@ -33,9 +33,9 @@ export const Layout: React.FC<{ children?: React.ReactNode }> = ({ children }) =
   ];
 
   // Admin Links
-  if (user?.role === 'admin' || user?.role === 'superadmin') {
+  if (user?.role === 'admin' || user?.role === 'master_admin' || user?.role === 'superadmin') {
     menuItems.push({ 
-      name: user.role === 'superadmin' ? 'Super Admin' : 'Admin', 
+      name: user.role === 'superadmin' ? 'Super Admin' : user.role === 'master_admin' ? 'Master Admin' : 'Admin', 
       path: user.role === 'superadmin' ? '/superadmin' : '/admin', 
       icon: ShieldCheck 
     });

@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { clearCachedUserId } from '@/hooks/useAuthSession';
 import type { User, Session } from '@supabase/supabase-js';
 
-export type UserRole = 'user' | 'admin' | 'superadmin';
+export type UserRole = 'user' | 'admin' | 'master_admin' | 'superadmin';
 
 const EMAIL_DOMAIN = 'kingbet.local';
 

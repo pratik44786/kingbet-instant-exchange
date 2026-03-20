@@ -405,7 +405,7 @@ export type Database = {
     }
     Enums: {
       account_status: "active" | "suspended" | "blocked"
-      app_role: "user" | "admin" | "superadmin"
+      app_role: "user" | "admin" | "master_admin" | "superadmin"
       bet_status: "pending" | "matched" | "won" | "lost" | "void" | "cancelled"
       bet_type:
         | "back"
@@ -569,7 +569,7 @@ export const Constants = {
   public: {
     Enums: {
       account_status: ["active", "suspended", "blocked"],
-      app_role: ["user", "admin", "superadmin"],
+      app_role: ["user", "admin", "master_admin", "superadmin"],
       bet_status: ["pending", "matched", "won", "lost", "void", "cancelled"],
       bet_type: [
         "back",
