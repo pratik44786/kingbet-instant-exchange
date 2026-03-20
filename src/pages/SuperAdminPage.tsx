@@ -21,6 +21,7 @@ const SuperAdminPage = () => {
   const [tab, setTab] = useState<'users' | 'create' | 'topup' | 'reports'>('users');
   const [selectedUserId, setSelectedUserId] = useState('');
   const [amount, setAmount] = useState(0);
+  const [transactionPin, setTransactionPin] = useState('');
   const [newUserId, setNewUserId] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [newRole, setNewRole] = useState<'admin' | 'master_admin' | 'user'>('admin');
