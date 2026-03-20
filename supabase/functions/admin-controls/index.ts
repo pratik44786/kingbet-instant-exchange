@@ -189,6 +189,13 @@ async function adjustBalance(client: any, adminId: string, data: any, isSuperAdm
     await logAudit(client, adminId, user_id, 'adjust_balance', Math.abs(Number(amount)), type, 'failed_pin', { reason: 'Invalid transaction PIN' })
     return json({ error: 'Invalid transaction PIN' }, 403)
   }
+
+  // RULE 1: No self-topup
+  if (user_id === adminId) {
+    return json({ error: 'Cannot adjust your own balance. Get points from your upline.' }, 403)
+  }
+
+  // RULE 2: Downline check
   if (!isSuperAdmin && !isMasterAdmin) {
     const { data: profile } = await client.from('profiles').select('parent_id')
       .eq('id', user_id).single()
