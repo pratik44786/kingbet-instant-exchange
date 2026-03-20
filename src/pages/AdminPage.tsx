@@ -63,10 +63,11 @@ const AdminPage = () => {
       return;
     }
     try {
-      await adminService.createUser(newUserId.trim(), newPassword.trim(), newUserId.trim(), 'user');
-      toast.success(`User "${newUserId}" created!`);
+      await adminService.createUser(newUserId.trim(), newPassword.trim(), newUserId.trim(), newRole);
+      toast.success(`${newRole === 'admin' ? 'Admin' : 'User'} "${newUserId}" created!`);
       setNewUserId('');
       setNewPassword('');
+      setNewRole('user');
       fetchUsers();
     } catch (err: any) { toast.error(err.message); }
   };
