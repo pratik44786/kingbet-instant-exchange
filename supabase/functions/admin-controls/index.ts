@@ -144,21 +144,25 @@ async function updateUserStatus(client: any, userId: string, status: string) {
   return json({ success: true, status })
 }
 
-async function createUser(client: any, adminId: string, data: any, isSuperAdmin: boolean) {
+async function createUser(client: any, adminId: string, data: any, isSuperAdmin: boolean, isMasterAdmin: boolean) {
   const { email, password, username, role } = data
-  // Support both userId-based and legacy email-based creation
   const userId = username || email
   if (!userId || !password) return json({ error: 'User ID and password are required' }, 400)
   
-  // Map userId to internal email
   const internalEmail = email?.includes('@') ? email : `${userId.toLowerCase().trim()}@${EMAIL_DOMAIN}`
 
-  // Only superadmin can create admins
-  if (role === 'admin' && !isSuperAdmin) {
-    return json({ error: 'Only SuperAdmin can create admins' }, 403)
-  }
+  // Role creation permissions:
+  // SuperAdmin can create: admin, master_admin, user
+  // MasterAdmin can create: admin, user
+  // Admin can create: user only
   if (role === 'superadmin') {
     return json({ error: 'Cannot create superadmin accounts' }, 403)
+  }
+  if (role === 'master_admin' && !isSuperAdmin) {
+    return json({ error: 'Only SuperAdmin can create Master Admins' }, 403)
+  }
+  if (role === 'admin' && !isSuperAdmin && !isMasterAdmin) {
+    return json({ error: 'Only SuperAdmin or Master Admin can create admins' }, 403)
   }
 
   const { data: newUser, error } = await client.auth.admin.createUser({
@@ -172,9 +176,9 @@ async function createUser(client: any, adminId: string, data: any, isSuperAdmin:
   // Set parent
   await client.from('profiles').update({ parent_id: adminId }).eq('id', newUser.user.id)
 
-  // Set role if admin
-  if (role === 'admin') {
-    await client.from('user_roles').update({ role: 'admin' }).eq('user_id', newUser.user.id)
+  // Set role if not user (default)
+  if (role && role !== 'user') {
+    await client.from('user_roles').update({ role }).eq('user_id', newUser.user.id)
   }
 
   return json({ success: true, user_id: newUser.user.id, username: userId })
