@@ -254,7 +254,13 @@ async function adjustBalance(client: any, adminId: string, data: any, isSuperAdm
       }),
     ])
 
-    return json({ success: true, new_balance: newTargetBalance, admin_balance: newAdminBalance })
+    await logAudit(client, adminId, user_id, 'credit', amtNum, 'admin_credit', 'success', {
+      admin_balance_before: adminWallet.balance, admin_balance_after: newAdminBalance,
+      target_balance_before: targetWallet.balance, target_balance_after: newTargetBalance,
+      pin_first_use: pinResult.isNew,
+    })
+
+    return json({ success: true, new_balance: newTargetBalance, admin_balance: newAdminBalance, pin_created: pinResult.isNew })
 
   } else {
     // Debit: take points from user → return to admin
