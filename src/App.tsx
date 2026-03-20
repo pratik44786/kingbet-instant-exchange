@@ -69,6 +69,15 @@ const RoleGuard: React.FC<{ children: React.ReactNode; allowedRoles: string[] }>
   return <>{children}</>;
 };
 
+// User-only guard (for games/casino)
+const UserOnly: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { user } = useAuth();
+  if (!user || user.role !== 'user') {
+    return <Navigate to="/exchange" replace />;
+  }
+  return <>{children}</>;
+};
+
 // Smart redirect based on auth + role
 const RootRedirect = () => {
   const { isAuthenticated, isLoading, user } = useAuth();
@@ -102,13 +111,13 @@ function App() {
                 }
               >
                 <Route path="/exchange" element={<ExchangePage />} />
-                <Route path="/casino" element={<CasinoPage />} />
-                <Route path="/casino/aviator" element={<AviatorPage />} />
-                <Route path="/casino/crash" element={<CrashPage />} />
-                <Route path="/casino/dice" element={<DicePage />} />
-                <Route path="/casino/mines" element={<MinesPage />} />
-                <Route path="/casino/plinko" element={<PlinkoPage />} />
-                <Route path="/live-casino" element={<LiveCasinoPage />} />
+                <Route path="/casino" element={<UserOnly><CasinoPage /></UserOnly>} />
+                <Route path="/casino/aviator" element={<UserOnly><AviatorPage /></UserOnly>} />
+                <Route path="/casino/crash" element={<UserOnly><CrashPage /></UserOnly>} />
+                <Route path="/casino/dice" element={<UserOnly><DicePage /></UserOnly>} />
+                <Route path="/casino/mines" element={<UserOnly><MinesPage /></UserOnly>} />
+                <Route path="/casino/plinko" element={<UserOnly><PlinkoPage /></UserOnly>} />
+                <Route path="/live-casino" element={<UserOnly><LiveCasinoPage /></UserOnly>} />
                 <Route path="/wallet" element={<WalletPage />} />
                 <Route path="/history" element={<HistoryPage />} />
                 <Route path="/profile" element={<ProfilePage />} />

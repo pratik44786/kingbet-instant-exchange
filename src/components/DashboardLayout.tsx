@@ -36,18 +36,20 @@ const DashboardLayout: React.FC<{ children?: React.ReactNode }> = ({ children })
     navigate('/login');
   };
 
-  const mainNav = [
+  const mainNav: { label: string; path: string; icon: any }[] = [
     { label: 'Exchange', path: '/exchange', icon: BarChart3 },
-    { label: 'Casino', path: '/casino', icon: Gamepad2 },
-    { label: 'Live Casino', path: '/live-casino', icon: Tv },
+    ...(user?.role === 'user' ? [
+      { label: 'Casino', path: '/casino', icon: Gamepad2 },
+      { label: 'Live Casino', path: '/live-casino', icon: Tv },
+    ] : []),
     { label: 'Wallet', path: '/wallet', icon: Wallet },
     { label: 'History', path: '/history', icon: HistoryIcon },
     { label: 'Profile', path: '/profile', icon: User },
   ];
 
-  if (user?.role === 'admin' || user?.role === 'superadmin') {
+  if (user?.role === 'admin' || user?.role === 'master_admin' || user?.role === 'superadmin') {
     mainNav.push({
-      label: user.role === 'superadmin' ? 'Super Admin' : 'Admin',
+      label: user.role === 'superadmin' ? 'Super Admin' : user.role === 'master_admin' ? 'Master Admin' : 'Admin',
       path: user.role === 'superadmin' ? '/superadmin' : '/admin',
       icon: Shield,
     });
@@ -77,7 +79,16 @@ const DashboardLayout: React.FC<{ children?: React.ReactNode }> = ({ children })
 
         {/* Center: Quick Nav Tabs (Desktop) */}
         <nav className="hidden lg:flex items-center gap-0.5 bg-[#1e273e] rounded-lg p-0.5">
-          {topNavTabs.map((t) => (
+          {[
+            { label: 'HOME', path: '/exchange' },
+            { label: 'CRICKET', path: '/exchange?sport=cricket' },
+            { label: 'FOOTBALL', path: '/exchange?sport=football' },
+            { label: 'TENNIS', path: '/exchange?sport=tennis' },
+            ...(user?.role === 'user' ? [
+              { label: 'CASINO', path: '/casino' },
+              { label: 'LIVE CASINO', path: '/live-casino' },
+            ] : []),
+          ].map((t) => (
             <Link
               key={t.label}
               to={t.path}
