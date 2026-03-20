@@ -23,7 +23,7 @@ const SuperAdminPage = () => {
   const [amount, setAmount] = useState(0);
   const [newUserId, setNewUserId] = useState('');
   const [newPassword, setNewPassword] = useState('');
-  const [newRole, setNewRole] = useState<'admin' | 'user'>('admin');
+  const [newRole, setNewRole] = useState<'admin' | 'master_admin' | 'user'>('admin');
   const [summary, setSummary] = useState<any>(null);
   const [pnl, setPnl] = useState<any>(null);
 
