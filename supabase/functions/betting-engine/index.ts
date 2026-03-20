@@ -180,18 +180,25 @@ async function settleBet(client: any, userId: string, data: Record<string, unkno
 
   // Since stake is already deducted at placement:
   // Won: return stake + profit
-  // Lost: nothing (stake already gone)
+  // Lost: nothing (stake already gone); for LAY lost, extra liability is also lost
   // Void: return stake (refund)
+  // extraExposure = bet.exposure - bet.stake (the LAY liability portion tracked in wallet.exposure)
+  const betExtraExposure = Math.max(0, bet.exposure - bet.stake)
   let actualProfit = 0
   let newBalance = wallet.balance
-  const newExposure = Math.max(0, wallet.exposure - bet.exposure)
+  let newExposure = Math.max(0, wallet.exposure - betExtraExposure)
 
   if (result === 'won') {
     actualProfit = bet.potential_profit
     newBalance = wallet.balance + bet.stake + actualProfit  // return stake + winnings
   } else if (result === 'lost') {
     actualProfit = -bet.stake
-    newBalance = wallet.balance  // stake already deducted, nothing to do
+    newBalance = wallet.balance  // stake already deducted
+    // For LAY bets that lost, extra exposure (liability) is also lost
+    if (betExtraExposure > 0) {
+      newBalance = wallet.balance - betExtraExposure
+      actualProfit = -(bet.stake + betExtraExposure)
+    }
   } else if (result === 'void') {
     actualProfit = 0
     newBalance = wallet.balance + bet.stake  // refund the stake
