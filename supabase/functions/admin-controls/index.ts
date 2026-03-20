@@ -50,7 +50,7 @@ Deno.serve(async (req) => {
       case 'suspend_user':
         return await updateUserStatus(adminClient, data.user_id, 'suspended')
       case 'create_user':
-        return await createUser(adminClient, user.id, data, isSuperAdmin)
+        return await createUser(adminClient, user.id, data, isSuperAdmin, isMasterAdmin)
       case 'change_role':
         if (!isSuperAdmin) return json({ error: 'SuperAdmin only' }, 403)
         return await changeRole(adminClient, data)
