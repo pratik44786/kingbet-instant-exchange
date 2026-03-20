@@ -184,10 +184,11 @@ async function createUser(client: any, adminId: string, data: any, isSuperAdmin:
   return json({ success: true, user_id: newUser.user.id, username: userId })
 }
 
-async function changeRole(client: any, data: any) {
+async function changeRole(client: any, data: any, isSuperAdmin: boolean) {
   const { user_id, new_role } = data
   if (!user_id || !new_role) return json({ error: 'Missing params' }, 400)
   if (new_role === 'superadmin') return json({ error: 'Cannot assign superadmin' }, 403)
+  if (new_role === 'master_admin' && !isSuperAdmin) return json({ error: 'Only SuperAdmin can assign Master Admin' }, 403)
 
   const { error } = await client.from('user_roles')
     .update({ role: new_role }).eq('user_id', user_id)
