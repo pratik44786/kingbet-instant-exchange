@@ -296,6 +296,11 @@ async function adjustBalance(client: any, adminId: string, data: any, isSuperAdm
       }),
     ])
 
+    await logAudit(client, adminId, user_id, 'debit', actualDebit, 'admin_debit', 'success', {
+      admin_balance_before: adminWallet.balance, admin_balance_after: newAdminBalance,
+      target_balance_before: targetWallet.balance, target_balance_after: newTargetBalance,
+    })
+
     return json({ success: true, new_balance: newTargetBalance, admin_balance: newAdminBalance })
   }
 }
