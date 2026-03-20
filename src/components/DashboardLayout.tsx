@@ -36,10 +36,12 @@ const DashboardLayout: React.FC<{ children?: React.ReactNode }> = ({ children })
     navigate('/login');
   };
 
-  const mainNav = [
+  const mainNav: { label: string; path: string; icon: any }[] = [
     { label: 'Exchange', path: '/exchange', icon: BarChart3 },
-    { label: 'Casino', path: '/casino', icon: Gamepad2 },
-    { label: 'Live Casino', path: '/live-casino', icon: Tv },
+    ...(user?.role === 'user' ? [
+      { label: 'Casino', path: '/casino', icon: Gamepad2 },
+      { label: 'Live Casino', path: '/live-casino', icon: Tv },
+    ] : []),
     { label: 'Wallet', path: '/wallet', icon: Wallet },
     { label: 'History', path: '/history', icon: HistoryIcon },
     { label: 'Profile', path: '/profile', icon: User },
