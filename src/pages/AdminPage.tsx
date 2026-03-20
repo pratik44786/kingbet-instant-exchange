@@ -161,7 +161,7 @@ const AdminPage = () => {
                 className="flex-1 flex items-center justify-center gap-2 bg-green-600 text-white rounded-lg py-2 text-sm font-semibold disabled:opacity-40">
                 <Plus className="w-4 h-4" /> Add Points
               </button>
-              <button onClick={() => handleAdjust('debit')} disabled={!selectedUserId || amount <= 0}
+              <button onClick={() => handleAdjust('debit')} disabled={!selectedUserId || amount <= 0 || !transactionPin}
                 className="flex-1 flex items-center justify-center gap-2 bg-red-600 text-white rounded-lg py-2 text-sm font-semibold disabled:opacity-40">
                 <Minus className="w-4 h-4" /> Remove Points
               </button>
