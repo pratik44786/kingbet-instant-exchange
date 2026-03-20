@@ -7,6 +7,42 @@ const corsHeaders = {
 
 const EMAIL_DOMAIN = 'kingbet.local'
 
+// Simple hash for transaction PIN (using Web Crypto API available in Deno)
+async function hashPin(pin: string): Promise<string> {
+  const encoder = new TextEncoder()
+  const data = encoder.encode(pin + '_kingbet_salt_2026')
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data)
+  const hashArray = Array.from(new Uint8Array(hashBuffer))
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('')
+}
+
+async function verifyTransactionPin(client: any, adminId: string, pin: string): Promise<{ valid: boolean; isNew: boolean }> {
+  const { data: existing } = await client.from('transaction_pins').select('pin_hash').eq('user_id', adminId).single()
+  
+  if (!existing) {
+    // First time — set the PIN
+    const hashed = await hashPin(pin)
+    await client.from('transaction_pins').insert({ user_id: adminId, pin_hash: hashed })
+    return { valid: true, isNew: true }
+  }
+
+  // Verify existing PIN
+  const hashed = await hashPin(pin)
+  return { valid: hashed === existing.pin_hash, isNew: false }
+}
+
+async function logAudit(client: any, adminId: string, targetUserId: string, action: string, amount: number, type: string, status: string, details?: any) {
+  await client.from('transaction_audit').insert({
+    admin_id: adminId,
+    target_user_id: targetUserId,
+    action,
+    amount,
+    type,
+    status,
+    details: details || {},
+  })
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
@@ -62,6 +98,36 @@ Deno.serve(async (req) => {
         return await platformSummary(adminClient)
       case 'pnl_report':
         return await pnlReport(adminClient, data)
+      case 'check_pin': {
+        const { data: pinRow } = await adminClient.from('transaction_pins').select('id').eq('user_id', user.id).single()
+        return json({ has_pin: !!pinRow })
+      }
+      case 'change_pin': {
+        const { old_pin, new_pin } = data
+        if (!new_pin || new_pin.length < 4) return json({ error: 'PIN must be at least 4 characters' }, 400)
+        const { data: existing } = await adminClient.from('transaction_pins').select('pin_hash').eq('user_id', user.id).single()
+        if (existing) {
+          if (!old_pin) return json({ error: 'Current PIN required' }, 400)
+          const oldHash = await hashPin(old_pin)
+          if (oldHash !== existing.pin_hash) return json({ error: 'Current PIN is incorrect' }, 403)
+        }
+        const newHash = await hashPin(new_pin)
+        if (existing) {
+          await adminClient.from('transaction_pins').update({ pin_hash: newHash, updated_at: new Date().toISOString() }).eq('user_id', user.id)
+        } else {
+          await adminClient.from('transaction_pins').insert({ user_id: user.id, pin_hash: newHash })
+        }
+        return json({ success: true })
+      }
+      case 'audit_log': {
+        const { data: logs, error: logErr } = await adminClient.from('transaction_audit')
+          .select('*')
+          .eq('admin_id', user.id)
+          .order('created_at', { ascending: false })
+          .limit(100)
+        if (logErr) return json({ error: logErr.message }, 500)
+        return json({ logs })
+      }
       default:
         return json({ error: 'Invalid action' }, 400)
     }
@@ -109,15 +175,27 @@ async function listUsers(client: any, adminId: string, isSuperAdmin: boolean, is
 }
 
 async function adjustBalance(client: any, adminId: string, data: any, isSuperAdmin: boolean, isMasterAdmin: boolean) {
-  const { user_id, amount, type } = data
+  const { user_id, amount, type, transaction_pin } = data
   if (!user_id || !amount || !type) return json({ error: 'Missing params' }, 400)
 
-  // RULE 1: No self-topup — nobody can add points to their own account
+  // RULE 0: Transaction PIN required
+  if (!transaction_pin || transaction_pin.length < 4) {
+    return json({ error: 'Transaction PIN is required', need_pin: true }, 400)
+  }
+
+  const pinResult = await verifyTransactionPin(client, adminId, transaction_pin)
+  if (!pinResult.valid) {
+    // Log failed attempt
+    await logAudit(client, adminId, user_id, 'adjust_balance', Math.abs(Number(amount)), type, 'failed_pin', { reason: 'Invalid transaction PIN' })
+    return json({ error: 'Invalid transaction PIN' }, 403)
+  }
+
+  // RULE 1: No self-topup
   if (user_id === adminId) {
     return json({ error: 'Cannot adjust your own balance. Get points from your upline.' }, 403)
   }
 
-  // RULE 2: Downline check — Admin can only adjust their own users
+  // RULE 2: Downline check
   if (!isSuperAdmin && !isMasterAdmin) {
     const { data: profile } = await client.from('profiles').select('parent_id')
       .eq('id', user_id).single()
@@ -176,7 +254,13 @@ async function adjustBalance(client: any, adminId: string, data: any, isSuperAdm
       }),
     ])
 
-    return json({ success: true, new_balance: newTargetBalance, admin_balance: newAdminBalance })
+    await logAudit(client, adminId, user_id, 'credit', amtNum, 'admin_credit', 'success', {
+      admin_balance_before: adminWallet.balance, admin_balance_after: newAdminBalance,
+      target_balance_before: targetWallet.balance, target_balance_after: newTargetBalance,
+      pin_first_use: pinResult.isNew,
+    })
+
+    return json({ success: true, new_balance: newTargetBalance, admin_balance: newAdminBalance, pin_created: pinResult.isNew })
 
   } else {
     // Debit: take points from user → return to admin
@@ -211,6 +295,11 @@ async function adjustBalance(client: any, adminId: string, data: any, isSuperAdm
         reference_type: 'admin_adjustment',
       }),
     ])
+
+    await logAudit(client, adminId, user_id, 'debit', actualDebit, 'admin_debit', 'success', {
+      admin_balance_before: adminWallet.balance, admin_balance_after: newAdminBalance,
+      target_balance_before: targetWallet.balance, target_balance_after: newTargetBalance,
+    })
 
     return json({ success: true, new_balance: newTargetBalance, admin_balance: newAdminBalance })
   }

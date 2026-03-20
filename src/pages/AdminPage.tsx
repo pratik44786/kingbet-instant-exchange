@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Shield, Plus, Minus, Users, UserPlus, Loader2, Ban, Check } from 'lucide-react';
+import { Shield, Plus, Minus, Users, UserPlus, Loader2, Ban, Check, Lock } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
 import { adminService } from '@/services/bettingService';
 import { toast } from 'sonner';
@@ -20,6 +20,7 @@ const AdminPage = () => {
   const [tab, setTab] = useState<'users' | 'points' | 'create'>('users');
   const [selectedUserId, setSelectedUserId] = useState('');
   const [amount, setAmount] = useState(0);
+  const [transactionPin, setTransactionPin] = useState('');
   const [newUserId, setNewUserId] = useState('');
   const [newPassword, setNewPassword] = useState('');
 
@@ -35,10 +36,16 @@ const AdminPage = () => {
 
   const handleAdjust = async (type: 'credit' | 'debit') => {
     if (!selectedUserId || amount <= 0) return;
+    if (!transactionPin || transactionPin.length < 4) {
+      toast.error('Transaction PIN is required (min 4 characters)');
+      return;
+    }
     try {
-      await adminService.adjustBalance(selectedUserId, amount, type);
+      const result = await adminService.adjustBalance(selectedUserId, amount, type, transactionPin);
+      if (result.pin_created) toast.success('Transaction PIN set successfully!');
       toast.success(`${type === 'credit' ? 'Added' : 'Removed'} ${amount} points`);
       setAmount(0);
+      setTransactionPin('');
       fetchUsers();
     } catch (err: any) { toast.error(err.message); }
   };
@@ -144,12 +151,17 @@ const AdminPage = () => {
             </select>
             <input type="number" value={amount || ''} onChange={e => setAmount(Math.max(0, Number(e.target.value)))}
               placeholder="Amount" className="w-full bg-[#1e273e] text-foreground rounded-lg px-3 py-2 text-sm font-mono border border-border" />
+            <div className="relative">
+              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+              <input type="password" value={transactionPin} onChange={e => setTransactionPin(e.target.value)}
+                placeholder="Transaction PIN (first time = set PIN)" className="w-full bg-[#1e273e] text-foreground rounded-lg pl-10 pr-3 py-2 text-sm border border-border" />
+            </div>
             <div className="flex gap-2">
-              <button onClick={() => handleAdjust('credit')} disabled={!selectedUserId || amount <= 0}
+              <button onClick={() => handleAdjust('credit')} disabled={!selectedUserId || amount <= 0 || !transactionPin}
                 className="flex-1 flex items-center justify-center gap-2 bg-green-600 text-white rounded-lg py-2 text-sm font-semibold disabled:opacity-40">
                 <Plus className="w-4 h-4" /> Add Points
               </button>
-              <button onClick={() => handleAdjust('debit')} disabled={!selectedUserId || amount <= 0}
+              <button onClick={() => handleAdjust('debit')} disabled={!selectedUserId || amount <= 0 || !transactionPin}
                 className="flex-1 flex items-center justify-center gap-2 bg-red-600 text-white rounded-lg py-2 text-sm font-semibold disabled:opacity-40">
                 <Minus className="w-4 h-4" /> Remove Points
               </button>
