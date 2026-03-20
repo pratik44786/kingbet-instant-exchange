@@ -9,6 +9,7 @@ export const useAuthUser = () => {
 export const useHasRole = (role: UserRole): boolean => {
   const { user } = useAuth();
   if (!user) return false;
-  if (role === 'admin') return user.role === 'admin' || user.role === 'superadmin';
+  if (role === 'admin') return user.role === 'admin' || user.role === 'master_admin' || user.role === 'superadmin';
+  if (role === 'master_admin') return user.role === 'master_admin' || user.role === 'superadmin';
   return user.role === role;
 };

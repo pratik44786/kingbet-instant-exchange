@@ -115,7 +115,7 @@ function App() {
                 <Route
                   path="/admin"
                   element={
-                    <RoleGuard allowedRoles={['admin', 'superadmin']}>
+                    <RoleGuard allowedRoles={['admin', 'master_admin', 'superadmin']}>
                       <AdminPage />
                     </RoleGuard>
                   }
