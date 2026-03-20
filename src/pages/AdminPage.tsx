@@ -15,6 +15,7 @@ interface UserRow {
 
 const AdminPage = () => {
   const { currentUser } = useApp();
+  const isMasterAdmin = currentUser.role === 'master_admin';
   const [users, setUsers] = useState<UserRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<'users' | 'points' | 'create'>('users');
@@ -23,6 +24,7 @@ const AdminPage = () => {
   const [transactionPin, setTransactionPin] = useState('');
   const [newUserId, setNewUserId] = useState('');
   const [newPassword, setNewPassword] = useState('');
+  const [newRole, setNewRole] = useState<'user' | 'admin'>('user');
 
   const fetchUsers = async () => {
     try {

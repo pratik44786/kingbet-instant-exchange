@@ -77,22 +77,26 @@ async function placeBet(client: any, userId: string, data: Record<string, unknow
 
   const stakeNum = Number(stake)
   const oddsNum = Number(odds)
-  let exposure = stakeNum
   let potentialProfit = 0
+  // For BACK bets: stake is deducted from balance immediately, so no extra exposure needed.
+  // For LAY bets: liability = (stake * odds) - stake; stake is deducted AND extra liability tracked.
+  let extraExposure = 0
 
   if (bet_type === 'back') {
-    exposure = stakeNum
     potentialProfit = (stakeNum * oddsNum) - stakeNum
+    extraExposure = 0 // stake already deducted = no double-count
   } else if (bet_type === 'lay') {
-    exposure = (stakeNum * oddsNum) - stakeNum
     potentialProfit = stakeNum
+    extraExposure = (stakeNum * oddsNum) - stakeNum // additional liability beyond stake
   } else {
-    exposure = stakeNum
     potentialProfit = (stakeNum * oddsNum) - stakeNum
+    extraExposure = 0
   }
 
+  // Check if user can afford: stake (deducted now) + any extra exposure
+  const totalNeeded = stakeNum + extraExposure
   const availableBalance = wallet.balance - wallet.exposure
-  if (exposure > availableBalance) {
+  if (totalNeeded > availableBalance) {
     return jsonResponse({ error: 'Insufficient balance', available: availableBalance }, 400)
   }
 
