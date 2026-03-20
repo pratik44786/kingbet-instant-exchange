@@ -7,6 +7,42 @@ const corsHeaders = {
 
 const EMAIL_DOMAIN = 'kingbet.local'
 
+// Simple hash for transaction PIN (using Web Crypto API available in Deno)
+async function hashPin(pin: string): Promise<string> {
+  const encoder = new TextEncoder()
+  const data = encoder.encode(pin + '_kingbet_salt_2026')
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data)
+  const hashArray = Array.from(new Uint8Array(hashBuffer))
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('')
+}
+
+async function verifyTransactionPin(client: any, adminId: string, pin: string): Promise<{ valid: boolean; isNew: boolean }> {
+  const { data: existing } = await client.from('transaction_pins').select('pin_hash').eq('user_id', adminId).single()
+  
+  if (!existing) {
+    // First time — set the PIN
+    const hashed = await hashPin(pin)
+    await client.from('transaction_pins').insert({ user_id: adminId, pin_hash: hashed })
+    return { valid: true, isNew: true }
+  }
+
+  // Verify existing PIN
+  const hashed = await hashPin(pin)
+  return { valid: hashed === existing.pin_hash, isNew: false }
+}
+
+async function logAudit(client: any, adminId: string, targetUserId: string, action: string, amount: number, type: string, status: string, details?: any) {
+  await client.from('transaction_audit').insert({
+    admin_id: adminId,
+    target_user_id: targetUserId,
+    action,
+    amount,
+    type,
+    status,
+    details: details || {},
+  })
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
