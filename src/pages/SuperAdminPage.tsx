@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Shield, Plus, Minus, Users, UserPlus, BarChart3, Ban, Check, Loader2 } from 'lucide-react';
+import { Shield, Plus, Minus, Users, UserPlus, BarChart3, Ban, Check, Loader2, Lock } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
 import { adminService } from '@/services/bettingService';
 import { toast } from 'sonner';
