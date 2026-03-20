@@ -215,7 +215,6 @@ async function adjustBalance(client: any, adminId: string, data: any, isSuperAdm
     return json({ success: true, new_balance: newTargetBalance, admin_balance: newAdminBalance })
   }
 }
-}
 
 async function updateUserStatus(client: any, userId: string, status: string) {
   if (!userId) return json({ error: 'Missing user_id' }, 400)
