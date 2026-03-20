@@ -108,11 +108,12 @@ async function listUsers(client: any, adminId: string, isSuperAdmin: boolean, is
   return json({ users })
 }
 
-async function adjustBalance(client: any, adminId: string, data: any, isSuperAdmin: boolean) {
+async function adjustBalance(client: any, adminId: string, data: any, isSuperAdmin: boolean, isMasterAdmin: boolean) {
   const { user_id, amount, type } = data
   if (!user_id || !amount || !type) return json({ error: 'Missing params' }, 400)
 
-  if (!isSuperAdmin) {
+  // SuperAdmin and MasterAdmin can adjust anyone, Admin only their downline
+  if (!isSuperAdmin && !isMasterAdmin) {
     const { data: profile } = await client.from('profiles').select('parent_id')
       .eq('id', user_id).single()
     if (!profile || profile.parent_id !== adminId) {
