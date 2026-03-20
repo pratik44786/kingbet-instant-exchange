@@ -71,11 +71,18 @@ Deno.serve(async (req) => {
   }
 })
 
-async function listUsers(client: any, adminId: string, isSuperAdmin: boolean) {
+async function listUsers(client: any, adminId: string, isSuperAdmin: boolean, isMasterAdmin: boolean) {
   let query = client.from('profiles').select('*')
   
-  if (!isSuperAdmin) {
+  // SuperAdmin sees all, MasterAdmin sees their downline (admins + users they created)
+  if (!isSuperAdmin && !isMasterAdmin) {
     query = query.eq('parent_id', adminId)
+  } else if (isMasterAdmin) {
+    // MasterAdmin sees users they created + users created by their admins
+    const { data: directChildren } = await client.from('profiles').select('id').eq('parent_id', adminId)
+    const childIds = directChildren?.map((c: any) => c.id) || []
+    const allIds = [adminId, ...childIds]
+    query = query.or(`parent_id.in.(${allIds.join(',')})`)
   }
 
   const { data: profiles, error } = await query.order('created_at', { ascending: false })
