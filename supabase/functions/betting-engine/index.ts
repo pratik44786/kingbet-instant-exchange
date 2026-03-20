@@ -113,7 +113,7 @@ async function placeBet(client: any, userId: string, data: Record<string, unknow
     odds: oddsNum,
     stake: stakeNum,
     potential_profit: potentialProfit,
-    exposure,
+    exposure: stakeNum + extraExposure,
     status: initialStatus,
   }).select().single()
 
@@ -122,9 +122,9 @@ async function placeBet(client: any, userId: string, data: Record<string, unknow
     return jsonResponse({ error: 'Failed to place bet' }, 500)
   }
 
-  // Deduct stake from balance immediately + track exposure
+  // Deduct stake from balance; only track extra exposure (LAY liability beyond stake)
   const newBalance = wallet.balance - stakeNum
-  const newExposure = wallet.exposure + exposure
+  const newExposure = wallet.exposure + extraExposure
   await client.from('wallets').update({
     balance: newBalance,
     exposure: newExposure,

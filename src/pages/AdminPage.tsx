@@ -175,8 +175,18 @@ const AdminPage = () => {
 
       {tab === 'create' && (
         <div className="surface-card rounded-lg p-6 max-w-md">
-          <h3 className="text-sm font-semibold text-foreground mb-4">Create New User</h3>
+          <h3 className="text-sm font-semibold text-foreground mb-4">Create New {newRole === 'admin' ? 'Admin' : 'User'}</h3>
           <form onSubmit={handleCreate} className="space-y-4">
+            {isMasterAdmin && (
+              <div>
+                <label className="text-xs text-muted-foreground uppercase font-semibold mb-1 block">Account Type</label>
+                <select value={newRole} onChange={e => setNewRole(e.target.value as 'user' | 'admin')}
+                  className="w-full bg-[#1e273e] text-foreground rounded-lg px-3 py-2 text-sm border border-border">
+                  <option value="user">User</option>
+                  <option value="admin">Admin</option>
+                </select>
+              </div>
+            )}
             <div>
               <label className="text-xs text-muted-foreground uppercase font-semibold mb-1 block">User ID</label>
               <input type="text" value={newUserId} onChange={e => setNewUserId(e.target.value)}
@@ -187,7 +197,7 @@ const AdminPage = () => {
               <input type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)}
                 className="w-full bg-[#1e273e] text-foreground rounded-lg px-3 py-2 text-sm border border-border" placeholder="Min 6 characters" required />
             </div>
-            <button type="submit" className="w-full bg-primary text-primary-foreground py-2.5 rounded-lg font-semibold text-sm">Create User</button>
+            <button type="submit" className="w-full bg-primary text-primary-foreground py-2.5 rounded-lg font-semibold text-sm">Create {newRole === 'admin' ? 'Admin' : 'User'}</button>
           </form>
         </div>
       )}
