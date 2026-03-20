@@ -30,12 +30,13 @@ Deno.serve(async (req) => {
     // Verify admin role
     const { data: roleData } = await adminClient.from('user_roles').select('role')
       .eq('user_id', user.id).single()
-    if (!roleData || !['admin', 'superadmin'].includes(roleData.role)) {
+    if (!roleData || !['admin', 'master_admin', 'superadmin'].includes(roleData.role)) {
       return json({ error: 'Admin access required' }, 403)
     }
 
     const { action, data } = await req.json()
     const isSuperAdmin = roleData.role === 'superadmin'
+    const isMasterAdmin = roleData.role === 'master_admin'
 
     switch (action) {
       case 'list_users':
