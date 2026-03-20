@@ -101,7 +101,7 @@ Deno.serve(async (req) => {
             gameId: data.gameId,
             lang: data.lang || 'en',
             money: data.money || 0,
-            home_url: data.home_url || 'https://kingbet-instant-exchange.lovable.app',
+            home_url: data.home_url || 'https://kingbetexchange.com',
             platform: data.platform || 1,
             currency: data.currency || 'INR',
           }),
