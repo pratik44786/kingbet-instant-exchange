@@ -40,9 +40,9 @@ Deno.serve(async (req) => {
 
     switch (action) {
       case 'list_users':
-        return await listUsers(adminClient, user.id, isSuperAdmin)
+        return await listUsers(adminClient, user.id, isSuperAdmin, isMasterAdmin)
       case 'adjust_balance':
-        return await adjustBalance(adminClient, user.id, data, isSuperAdmin)
+        return await adjustBalance(adminClient, user.id, data, isSuperAdmin, isMasterAdmin)
       case 'block_user':
         return await updateUserStatus(adminClient, data.user_id, 'blocked')
       case 'unblock_user':
