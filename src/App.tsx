@@ -69,6 +69,15 @@ const RoleGuard: React.FC<{ children: React.ReactNode; allowedRoles: string[] }>
   return <>{children}</>;
 };
 
+// User-only guard (for games/casino)
+const UserOnly: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { user } = useAuth();
+  if (!user || user.role !== 'user') {
+    return <Navigate to="/exchange" replace />;
+  }
+  return <>{children}</>;
+};
+
 // Smart redirect based on auth + role
 const RootRedirect = () => {
   const { isAuthenticated, isLoading, user } = useAuth();

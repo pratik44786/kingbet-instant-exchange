@@ -45,9 +45,9 @@ const DashboardLayout: React.FC<{ children?: React.ReactNode }> = ({ children })
     { label: 'Profile', path: '/profile', icon: User },
   ];
 
-  if (user?.role === 'admin' || user?.role === 'superadmin') {
+  if (user?.role === 'admin' || user?.role === 'master_admin' || user?.role === 'superadmin') {
     mainNav.push({
-      label: user.role === 'superadmin' ? 'Super Admin' : 'Admin',
+      label: user.role === 'superadmin' ? 'Super Admin' : user.role === 'master_admin' ? 'Master Admin' : 'Admin',
       path: user.role === 'superadmin' ? '/superadmin' : '/admin',
       icon: Shield,
     });
