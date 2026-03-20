@@ -151,8 +151,13 @@ const AdminPage = () => {
             </select>
             <input type="number" value={amount || ''} onChange={e => setAmount(Math.max(0, Number(e.target.value)))}
               placeholder="Amount" className="w-full bg-[#1e273e] text-foreground rounded-lg px-3 py-2 text-sm font-mono border border-border" />
+            <div className="relative">
+              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+              <input type="password" value={transactionPin} onChange={e => setTransactionPin(e.target.value)}
+                placeholder="Transaction PIN (first time = set PIN)" className="w-full bg-[#1e273e] text-foreground rounded-lg pl-10 pr-3 py-2 text-sm border border-border" />
+            </div>
             <div className="flex gap-2">
-              <button onClick={() => handleAdjust('credit')} disabled={!selectedUserId || amount <= 0}
+              <button onClick={() => handleAdjust('credit')} disabled={!selectedUserId || amount <= 0 || !transactionPin}
                 className="flex-1 flex items-center justify-center gap-2 bg-green-600 text-white rounded-lg py-2 text-sm font-semibold disabled:opacity-40">
                 <Plus className="w-4 h-4" /> Add Points
               </button>
