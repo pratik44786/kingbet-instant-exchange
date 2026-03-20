@@ -175,15 +175,20 @@ async function listUsers(client: any, adminId: string, isSuperAdmin: boolean, is
 }
 
 async function adjustBalance(client: any, adminId: string, data: any, isSuperAdmin: boolean, isMasterAdmin: boolean) {
-  const { user_id, amount, type } = data
+  const { user_id, amount, type, transaction_pin } = data
   if (!user_id || !amount || !type) return json({ error: 'Missing params' }, 400)
 
-  // RULE 1: No self-topup — nobody can add points to their own account
-  if (user_id === adminId) {
-    return json({ error: 'Cannot adjust your own balance. Get points from your upline.' }, 403)
+  // RULE 0: Transaction PIN required
+  if (!transaction_pin || transaction_pin.length < 4) {
+    return json({ error: 'Transaction PIN is required', need_pin: true }, 400)
   }
 
-  // RULE 2: Downline check — Admin can only adjust their own users
+  const pinResult = await verifyTransactionPin(client, adminId, transaction_pin)
+  if (!pinResult.valid) {
+    // Log failed attempt
+    await logAudit(client, adminId, user_id, 'adjust_balance', Math.abs(Number(amount)), type, 'failed_pin', { reason: 'Invalid transaction PIN' })
+    return json({ error: 'Invalid transaction PIN' }, 403)
+  }
   if (!isSuperAdmin && !isMasterAdmin) {
     const { data: profile } = await client.from('profiles').select('parent_id')
       .eq('id', user_id).single()
