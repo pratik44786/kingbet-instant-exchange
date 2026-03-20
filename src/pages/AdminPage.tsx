@@ -20,6 +20,7 @@ const AdminPage = () => {
   const [tab, setTab] = useState<'users' | 'points' | 'create'>('users');
   const [selectedUserId, setSelectedUserId] = useState('');
   const [amount, setAmount] = useState(0);
+  const [transactionPin, setTransactionPin] = useState('');
   const [newUserId, setNewUserId] = useState('');
   const [newPassword, setNewPassword] = useState('');
 
