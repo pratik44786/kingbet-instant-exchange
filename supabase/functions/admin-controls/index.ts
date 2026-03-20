@@ -30,18 +30,19 @@ Deno.serve(async (req) => {
     // Verify admin role
     const { data: roleData } = await adminClient.from('user_roles').select('role')
       .eq('user_id', user.id).single()
-    if (!roleData || !['admin', 'superadmin'].includes(roleData.role)) {
+    if (!roleData || !['admin', 'master_admin', 'superadmin'].includes(roleData.role)) {
       return json({ error: 'Admin access required' }, 403)
     }
 
     const { action, data } = await req.json()
     const isSuperAdmin = roleData.role === 'superadmin'
+    const isMasterAdmin = roleData.role === 'master_admin'
 
     switch (action) {
       case 'list_users':
-        return await listUsers(adminClient, user.id, isSuperAdmin)
+        return await listUsers(adminClient, user.id, isSuperAdmin, isMasterAdmin)
       case 'adjust_balance':
-        return await adjustBalance(adminClient, user.id, data, isSuperAdmin)
+        return await adjustBalance(adminClient, user.id, data, isSuperAdmin, isMasterAdmin)
       case 'block_user':
         return await updateUserStatus(adminClient, data.user_id, 'blocked')
       case 'unblock_user':
@@ -49,10 +50,10 @@ Deno.serve(async (req) => {
       case 'suspend_user':
         return await updateUserStatus(adminClient, data.user_id, 'suspended')
       case 'create_user':
-        return await createUser(adminClient, user.id, data, isSuperAdmin)
+        return await createUser(adminClient, user.id, data, isSuperAdmin, isMasterAdmin)
       case 'change_role':
-        if (!isSuperAdmin) return json({ error: 'SuperAdmin only' }, 403)
-        return await changeRole(adminClient, data)
+        if (!isSuperAdmin && !isMasterAdmin) return json({ error: 'SuperAdmin or MasterAdmin only' }, 403)
+        return await changeRole(adminClient, data, isSuperAdmin)
       case 'list_bets':
         return await listBets(adminClient, data)
       case 'force_settle':
@@ -70,11 +71,18 @@ Deno.serve(async (req) => {
   }
 })
 
-async function listUsers(client: any, adminId: string, isSuperAdmin: boolean) {
+async function listUsers(client: any, adminId: string, isSuperAdmin: boolean, isMasterAdmin: boolean) {
   let query = client.from('profiles').select('*')
   
-  if (!isSuperAdmin) {
+  // SuperAdmin sees all, MasterAdmin sees their downline (admins + users they created)
+  if (!isSuperAdmin && !isMasterAdmin) {
     query = query.eq('parent_id', adminId)
+  } else if (isMasterAdmin) {
+    // MasterAdmin sees users they created + users created by their admins
+    const { data: directChildren } = await client.from('profiles').select('id').eq('parent_id', adminId)
+    const childIds = directChildren?.map((c: any) => c.id) || []
+    const allIds = [adminId, ...childIds]
+    query = query.or(`parent_id.in.(${allIds.join(',')})`)
   }
 
   const { data: profiles, error } = await query.order('created_at', { ascending: false })
@@ -100,11 +108,12 @@ async function listUsers(client: any, adminId: string, isSuperAdmin: boolean) {
   return json({ users })
 }
 
-async function adjustBalance(client: any, adminId: string, data: any, isSuperAdmin: boolean) {
+async function adjustBalance(client: any, adminId: string, data: any, isSuperAdmin: boolean, isMasterAdmin: boolean) {
   const { user_id, amount, type } = data
   if (!user_id || !amount || !type) return json({ error: 'Missing params' }, 400)
 
-  if (!isSuperAdmin) {
+  // SuperAdmin and MasterAdmin can adjust anyone, Admin only their downline
+  if (!isSuperAdmin && !isMasterAdmin) {
     const { data: profile } = await client.from('profiles').select('parent_id')
       .eq('id', user_id).single()
     if (!profile || profile.parent_id !== adminId) {
@@ -143,21 +152,25 @@ async function updateUserStatus(client: any, userId: string, status: string) {
   return json({ success: true, status })
 }
 
-async function createUser(client: any, adminId: string, data: any, isSuperAdmin: boolean) {
+async function createUser(client: any, adminId: string, data: any, isSuperAdmin: boolean, isMasterAdmin: boolean) {
   const { email, password, username, role } = data
-  // Support both userId-based and legacy email-based creation
   const userId = username || email
   if (!userId || !password) return json({ error: 'User ID and password are required' }, 400)
   
-  // Map userId to internal email
   const internalEmail = email?.includes('@') ? email : `${userId.toLowerCase().trim()}@${EMAIL_DOMAIN}`
 
-  // Only superadmin can create admins
-  if (role === 'admin' && !isSuperAdmin) {
-    return json({ error: 'Only SuperAdmin can create admins' }, 403)
-  }
+  // Role creation permissions:
+  // SuperAdmin can create: admin, master_admin, user
+  // MasterAdmin can create: admin, user
+  // Admin can create: user only
   if (role === 'superadmin') {
     return json({ error: 'Cannot create superadmin accounts' }, 403)
+  }
+  if (role === 'master_admin' && !isSuperAdmin) {
+    return json({ error: 'Only SuperAdmin can create Master Admins' }, 403)
+  }
+  if (role === 'admin' && !isSuperAdmin && !isMasterAdmin) {
+    return json({ error: 'Only SuperAdmin or Master Admin can create admins' }, 403)
   }
 
   const { data: newUser, error } = await client.auth.admin.createUser({
@@ -171,18 +184,19 @@ async function createUser(client: any, adminId: string, data: any, isSuperAdmin:
   // Set parent
   await client.from('profiles').update({ parent_id: adminId }).eq('id', newUser.user.id)
 
-  // Set role if admin
-  if (role === 'admin') {
-    await client.from('user_roles').update({ role: 'admin' }).eq('user_id', newUser.user.id)
+  // Set role if not user (default)
+  if (role && role !== 'user') {
+    await client.from('user_roles').update({ role }).eq('user_id', newUser.user.id)
   }
 
   return json({ success: true, user_id: newUser.user.id, username: userId })
 }
 
-async function changeRole(client: any, data: any) {
+async function changeRole(client: any, data: any, isSuperAdmin: boolean) {
   const { user_id, new_role } = data
   if (!user_id || !new_role) return json({ error: 'Missing params' }, 400)
   if (new_role === 'superadmin') return json({ error: 'Cannot assign superadmin' }, 403)
+  if (new_role === 'master_admin' && !isSuperAdmin) return json({ error: 'Only SuperAdmin can assign Master Admin' }, 403)
 
   const { error } = await client.from('user_roles')
     .update({ role: new_role }).eq('user_id', user_id)
