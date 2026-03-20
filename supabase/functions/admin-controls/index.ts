@@ -112,7 +112,12 @@ async function adjustBalance(client: any, adminId: string, data: any, isSuperAdm
   const { user_id, amount, type } = data
   if (!user_id || !amount || !type) return json({ error: 'Missing params' }, 400)
 
-  // SuperAdmin and MasterAdmin can adjust anyone, Admin only their downline
+  // RULE 1: No self-topup — nobody can add points to their own account
+  if (user_id === adminId) {
+    return json({ error: 'Cannot adjust your own balance. Get points from your upline.' }, 403)
+  }
+
+  // RULE 2: Downline check — Admin can only adjust their own users
   if (!isSuperAdmin && !isMasterAdmin) {
     const { data: profile } = await client.from('profiles').select('parent_id')
       .eq('id', user_id).single()
@@ -121,28 +126,95 @@ async function adjustBalance(client: any, adminId: string, data: any, isSuperAdm
     }
   }
 
-  const { data: wallet } = await client.from('wallets').select('*')
-    .eq('user_id', user_id).single()
-  if (!wallet) return json({ error: 'Wallet not found' }, 404)
+  // Fetch both wallets in parallel
+  const [targetWalletRes, adminWalletRes] = await Promise.all([
+    client.from('wallets').select('*').eq('user_id', user_id).single(),
+    client.from('wallets').select('*').eq('user_id', adminId).single(),
+  ])
+
+  const targetWallet = targetWalletRes.data
+  const adminWallet = adminWalletRes.data
+  if (!targetWallet) return json({ error: 'Target wallet not found' }, 404)
+  if (!adminWallet) return json({ error: 'Admin wallet not found' }, 404)
 
   const amtNum = Math.abs(Number(amount))
-  const newBalance = type === 'credit' 
-    ? wallet.balance + amtNum 
-    : Math.max(0, wallet.balance - amtNum)
 
-  await client.from('wallets').update({ balance: newBalance }).eq('user_id', user_id)
+  if (type === 'credit') {
+    // RULE 3: Admin must have enough balance to give points
+    if (adminWallet.balance < amtNum) {
+      return json({ error: `Insufficient balance. You have ${adminWallet.balance} points but trying to give ${amtNum}.` }, 400)
+    }
 
-  await client.from('transactions').insert({
-    user_id,
-    type: type === 'credit' ? 'admin_credit' : 'admin_debit',
-    amount: amtNum,
-    balance_before: wallet.balance,
-    balance_after: newBalance,
-    description: `Admin ${type} by ${adminId}`,
-    reference_type: 'admin_adjustment',
-  })
+    const newTargetBalance = targetWallet.balance + amtNum
+    const newAdminBalance = adminWallet.balance - amtNum
 
-  return json({ success: true, new_balance: newBalance })
+    // Update both wallets
+    await Promise.all([
+      client.from('wallets').update({ balance: newTargetBalance }).eq('user_id', user_id),
+      client.from('wallets').update({ balance: newAdminBalance }).eq('user_id', adminId),
+    ])
+
+    // Log transactions for both sides
+    await Promise.all([
+      client.from('transactions').insert({
+        user_id,
+        type: 'admin_credit',
+        amount: amtNum,
+        balance_before: targetWallet.balance,
+        balance_after: newTargetBalance,
+        description: `Points received from ${adminId}`,
+        reference_type: 'admin_adjustment',
+      }),
+      client.from('transactions').insert({
+        user_id: adminId,
+        type: 'admin_debit',
+        amount: amtNum,
+        balance_before: adminWallet.balance,
+        balance_after: newAdminBalance,
+        description: `Points given to ${user_id}`,
+        reference_type: 'admin_adjustment',
+      }),
+    ])
+
+    return json({ success: true, new_balance: newTargetBalance, admin_balance: newAdminBalance })
+
+  } else {
+    // Debit: take points from user → return to admin
+    const actualDebit = Math.min(amtNum, targetWallet.balance)
+    if (actualDebit <= 0) return json({ error: 'User has no balance to debit' }, 400)
+
+    const newTargetBalance = targetWallet.balance - actualDebit
+    const newAdminBalance = adminWallet.balance + actualDebit
+
+    await Promise.all([
+      client.from('wallets').update({ balance: newTargetBalance }).eq('user_id', user_id),
+      client.from('wallets').update({ balance: newAdminBalance }).eq('user_id', adminId),
+    ])
+
+    await Promise.all([
+      client.from('transactions').insert({
+        user_id,
+        type: 'admin_debit',
+        amount: actualDebit,
+        balance_before: targetWallet.balance,
+        balance_after: newTargetBalance,
+        description: `Points withdrawn by ${adminId}`,
+        reference_type: 'admin_adjustment',
+      }),
+      client.from('transactions').insert({
+        user_id: adminId,
+        type: 'admin_credit',
+        amount: actualDebit,
+        balance_before: adminWallet.balance,
+        balance_after: newAdminBalance,
+        description: `Points received from debit of ${user_id}`,
+        reference_type: 'admin_adjustment',
+      }),
+    ])
+
+    return json({ success: true, new_balance: newTargetBalance, admin_balance: newAdminBalance })
+  }
+}
 }
 
 async function updateUserStatus(client: any, userId: string, status: string) {
