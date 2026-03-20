@@ -79,7 +79,16 @@ const DashboardLayout: React.FC<{ children?: React.ReactNode }> = ({ children })
 
         {/* Center: Quick Nav Tabs (Desktop) */}
         <nav className="hidden lg:flex items-center gap-0.5 bg-[#1e273e] rounded-lg p-0.5">
-          {topNavTabs.map((t) => (
+          {[
+            { label: 'HOME', path: '/exchange' },
+            { label: 'CRICKET', path: '/exchange?sport=cricket' },
+            { label: 'FOOTBALL', path: '/exchange?sport=football' },
+            { label: 'TENNIS', path: '/exchange?sport=tennis' },
+            ...(user?.role === 'user' ? [
+              { label: 'CASINO', path: '/casino' },
+              { label: 'LIVE CASINO', path: '/live-casino' },
+            ] : []),
+          ].map((t) => (
             <Link
               key={t.label}
               to={t.path}
