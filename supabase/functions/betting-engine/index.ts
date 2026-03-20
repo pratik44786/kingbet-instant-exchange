@@ -77,22 +77,26 @@ async function placeBet(client: any, userId: string, data: Record<string, unknow
 
   const stakeNum = Number(stake)
   const oddsNum = Number(odds)
-  let exposure = stakeNum
   let potentialProfit = 0
+  // For BACK bets: stake is deducted from balance immediately, so no extra exposure needed.
+  // For LAY bets: liability = (stake * odds) - stake; stake is deducted AND extra liability tracked.
+  let extraExposure = 0
 
   if (bet_type === 'back') {
-    exposure = stakeNum
     potentialProfit = (stakeNum * oddsNum) - stakeNum
+    extraExposure = 0 // stake already deducted = no double-count
   } else if (bet_type === 'lay') {
-    exposure = (stakeNum * oddsNum) - stakeNum
     potentialProfit = stakeNum
+    extraExposure = (stakeNum * oddsNum) - stakeNum // additional liability beyond stake
   } else {
-    exposure = stakeNum
     potentialProfit = (stakeNum * oddsNum) - stakeNum
+    extraExposure = 0
   }
 
+  // Check if user can afford: stake (deducted now) + any extra exposure
+  const totalNeeded = stakeNum + extraExposure
   const availableBalance = wallet.balance - wallet.exposure
-  if (exposure > availableBalance) {
+  if (totalNeeded > availableBalance) {
     return jsonResponse({ error: 'Insufficient balance', available: availableBalance }, 400)
   }
 
@@ -109,7 +113,7 @@ async function placeBet(client: any, userId: string, data: Record<string, unknow
     odds: oddsNum,
     stake: stakeNum,
     potential_profit: potentialProfit,
-    exposure,
+    exposure: stakeNum + extraExposure,
     status: initialStatus,
   }).select().single()
 
@@ -118,9 +122,9 @@ async function placeBet(client: any, userId: string, data: Record<string, unknow
     return jsonResponse({ error: 'Failed to place bet' }, 500)
   }
 
-  // Deduct stake from balance immediately + track exposure
+  // Deduct stake from balance; only track extra exposure (LAY liability beyond stake)
   const newBalance = wallet.balance - stakeNum
-  const newExposure = wallet.exposure + exposure
+  const newExposure = wallet.exposure + extraExposure
   await client.from('wallets').update({
     balance: newBalance,
     exposure: newExposure,
@@ -176,18 +180,25 @@ async function settleBet(client: any, userId: string, data: Record<string, unkno
 
   // Since stake is already deducted at placement:
   // Won: return stake + profit
-  // Lost: nothing (stake already gone)
+  // Lost: nothing (stake already gone); for LAY lost, extra liability is also lost
   // Void: return stake (refund)
+  // extraExposure = bet.exposure - bet.stake (the LAY liability portion tracked in wallet.exposure)
+  const betExtraExposure = Math.max(0, bet.exposure - bet.stake)
   let actualProfit = 0
   let newBalance = wallet.balance
-  const newExposure = Math.max(0, wallet.exposure - bet.exposure)
+  let newExposure = Math.max(0, wallet.exposure - betExtraExposure)
 
   if (result === 'won') {
     actualProfit = bet.potential_profit
     newBalance = wallet.balance + bet.stake + actualProfit  // return stake + winnings
   } else if (result === 'lost') {
     actualProfit = -bet.stake
-    newBalance = wallet.balance  // stake already deducted, nothing to do
+    newBalance = wallet.balance  // stake already deducted
+    // For LAY bets that lost, extra exposure (liability) is also lost
+    if (betExtraExposure > 0) {
+      newBalance = wallet.balance - betExtraExposure
+      actualProfit = -(bet.stake + betExtraExposure)
+    }
   } else if (result === 'void') {
     actualProfit = 0
     newBalance = wallet.balance + bet.stake  // refund the stake
@@ -298,7 +309,8 @@ async function cashOut(client: any, userId: string, data: Record<string, unknown
   if (!wallet) return jsonResponse({ error: 'Wallet not found' }, 404)
 
   const newBalance = wallet.balance + cashOutAmount  // return stake + profit
-  const newExposure = Math.max(0, wallet.exposure - bet.exposure)
+  const betExtraExposure = Math.max(0, bet.exposure - bet.stake)
+  const newExposure = Math.max(0, wallet.exposure - betExtraExposure)
 
   await client.from('bets').update({
     status: 'won',

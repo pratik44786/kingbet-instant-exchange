@@ -43,8 +43,8 @@ export function useWallet() {
     setWallet(prev => {
       if (!prev) return prev;
       const newBalance = prev.balance - stake;
-      const newExposure = prev.exposure + stake;
-      return { ...prev, balance: newBalance, exposure: newExposure, available: newBalance - newExposure };
+      // No extra exposure for BACK bets — stake already deducted from balance
+      return { ...prev, balance: newBalance, available: newBalance - prev.exposure };
     });
   }, []);
 

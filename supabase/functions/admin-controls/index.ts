@@ -390,18 +390,23 @@ async function forceSettle(client: any, data: any) {
 
   // Stake is already deducted at placement, so:
   // Won: return stake + profit
-  // Lost: nothing (stake already gone)
+  // Lost: nothing (stake already gone); LAY extra liability also lost
   // Void: return stake (refund)
+  const betExtraExposure = Math.max(0, bet.exposure - bet.stake)
   let profit = 0
   let newBalance = wallet.balance
-  const newExposure = Math.max(0, wallet.exposure - bet.exposure)
+  let newExposure = Math.max(0, wallet.exposure - betExtraExposure)
 
   if (result === 'won') {
     profit = bet.potential_profit
     newBalance = wallet.balance + bet.stake + profit  // return stake + winnings
   } else if (result === 'lost') {
     profit = -bet.stake
-    newBalance = wallet.balance  // stake already deducted, nothing to do
+    newBalance = wallet.balance  // stake already deducted
+    if (betExtraExposure > 0) {
+      newBalance = wallet.balance - betExtraExposure
+      profit = -(bet.stake + betExtraExposure)
+    }
   } else if (result === 'void') {
     profit = 0
     newBalance = wallet.balance + bet.stake  // refund the stake
