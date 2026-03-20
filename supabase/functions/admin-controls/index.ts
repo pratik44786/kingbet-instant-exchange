@@ -52,8 +52,8 @@ Deno.serve(async (req) => {
       case 'create_user':
         return await createUser(adminClient, user.id, data, isSuperAdmin, isMasterAdmin)
       case 'change_role':
-        if (!isSuperAdmin) return json({ error: 'SuperAdmin only' }, 403)
-        return await changeRole(adminClient, data)
+        if (!isSuperAdmin && !isMasterAdmin) return json({ error: 'SuperAdmin or MasterAdmin only' }, 403)
+        return await changeRole(adminClient, data, isSuperAdmin)
       case 'list_bets':
         return await listBets(adminClient, data)
       case 'force_settle':
