@@ -297,6 +297,69 @@ export type Database = {
           },
         ]
       }
+      transaction_audit: {
+        Row: {
+          action: string
+          admin_id: string
+          amount: number
+          created_at: string
+          details: Json | null
+          id: string
+          ip_address: string | null
+          status: string
+          target_user_id: string
+          type: string
+        }
+        Insert: {
+          action: string
+          admin_id: string
+          amount?: number
+          created_at?: string
+          details?: Json | null
+          id?: string
+          ip_address?: string | null
+          status?: string
+          target_user_id: string
+          type: string
+        }
+        Update: {
+          action?: string
+          admin_id?: string
+          amount?: number
+          created_at?: string
+          details?: Json | null
+          id?: string
+          ip_address?: string | null
+          status?: string
+          target_user_id?: string
+          type?: string
+        }
+        Relationships: []
+      }
+      transaction_pins: {
+        Row: {
+          created_at: string
+          id: string
+          pin_hash: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          pin_hash: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          pin_hash?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       transactions: {
         Row: {
           amount: number
