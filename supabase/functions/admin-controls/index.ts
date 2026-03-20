@@ -98,6 +98,36 @@ Deno.serve(async (req) => {
         return await platformSummary(adminClient)
       case 'pnl_report':
         return await pnlReport(adminClient, data)
+      case 'check_pin': {
+        const { data: pinRow } = await adminClient.from('transaction_pins').select('id').eq('user_id', user.id).single()
+        return json({ has_pin: !!pinRow })
+      }
+      case 'change_pin': {
+        const { old_pin, new_pin } = data
+        if (!new_pin || new_pin.length < 4) return json({ error: 'PIN must be at least 4 characters' }, 400)
+        const { data: existing } = await adminClient.from('transaction_pins').select('pin_hash').eq('user_id', user.id).single()
+        if (existing) {
+          if (!old_pin) return json({ error: 'Current PIN required' }, 400)
+          const oldHash = await hashPin(old_pin)
+          if (oldHash !== existing.pin_hash) return json({ error: 'Current PIN is incorrect' }, 403)
+        }
+        const newHash = await hashPin(new_pin)
+        if (existing) {
+          await adminClient.from('transaction_pins').update({ pin_hash: newHash, updated_at: new Date().toISOString() }).eq('user_id', user.id)
+        } else {
+          await adminClient.from('transaction_pins').insert({ user_id: user.id, pin_hash: newHash })
+        }
+        return json({ success: true })
+      }
+      case 'audit_log': {
+        const { data: logs, error: logErr } = await adminClient.from('transaction_audit')
+          .select('*')
+          .eq('admin_id', user.id)
+          .order('created_at', { ascending: false })
+          .limit(100)
+        if (logErr) return json({ error: logErr.message }, 500)
+        return json({ logs })
+      }
       default:
         return json({ error: 'Invalid action' }, 400)
     }
