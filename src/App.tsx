@@ -75,6 +75,7 @@ const RootRedirect = () => {
   if (isLoading) return <PageLoader />;
   if (!isAuthenticated) return <LandingPage />;
   if (user?.role === 'superadmin') return <Navigate to="/superadmin" replace />;
+  if (user?.role === 'master_admin') return <Navigate to="/admin" replace />;
   if (user?.role === 'admin') return <Navigate to="/admin" replace />;
   return <Navigate to="/exchange" replace />;
 };
