@@ -70,9 +70,11 @@ const MatchDetail: React.FC<{
   placeBets: () => Promise<void>;
 }> = ({ match, onBack, betSlip, addToBetSlip, updateBetSlipStake, placeBets }) => {
   const [odds, setOdds] = useState<MatchItem['runners']>(match.runners);
-  const [score, setScore] = useState<any>(null);
+  const [scoreUrl, setScoreUrl] = useState<string | null>(null);
   const [tvUrl, setTvUrl] = useState<string | null>(null);
+  const [tvError, setTvError] = useState<string | null>(null);
   const [showTV, setShowTV] = useState(false);
+  const [showScore, setShowScore] = useState(true);
   const [loading, setLoading] = useState(false);
   const intervalRef = useRef<ReturnType<typeof setInterval>>();
 
@@ -83,18 +85,24 @@ const MatchDetail: React.FC<{
         sportsDataService.getScore(match.sport, match.gmid).catch(() => null),
       ]);
       if (oddsData) {
-        // Parse odds from same Betnex format
-        const t1 = oddsData?.data?.t1 || oddsData?.t1 || [];
-        if (t1.length > 0) {
-          const parsed = (t1[0]?.section || []).map((s: BetnexRunner) => {
-            const back = s.odds?.find(o => o.otype === 'back') || { odds: 0, size: 0 };
-            const lay = s.odds?.find(o => o.otype === 'lay') || { odds: 0, size: 0 };
+        // Betnex odds format: { data: { odds: { gmid: [ { section: [...] } ] } } }
+        const oddsMap = oddsData?.data?.odds || {};
+        const matchOdds = oddsMap[match.gmid] || [];
+        // Find MATCH_ODDS market (gtype=match, mname=MATCH_ODDS)
+        const matchMarket = matchOdds.find((m: any) => m.mname === 'MATCH_ODDS') || matchOdds[0];
+        if (matchMarket?.section) {
+          const parsed = matchMarket.section.map((s: BetnexRunner) => {
+            const back = s.odds?.find(o => o.otype === 'back' && o.oname === 'back1') || s.odds?.find(o => o.otype === 'back') || { odds: 0, size: 0 };
+            const lay = s.odds?.find(o => o.otype === 'lay' && o.oname === 'lay1') || s.odds?.find(o => o.otype === 'lay') || { odds: 0, size: 0 };
             return { name: s.nat, backOdds: back.odds, backSize: back.size, layOdds: lay.odds, laySize: lay.size, sid: s.sid };
           });
           if (parsed.length > 0) setOdds(parsed);
         }
       }
-      if (scoreData) setScore(scoreData);
+      // Score returns { data: { scoreurl: "https://..." } }
+      if (scoreData?.data?.scoreurl) {
+        setScoreUrl(scoreData.data.scoreurl);
+      }
     } catch { /* ignore */ } finally {
       setLoading(false);
     }
@@ -108,18 +116,26 @@ const MatchDetail: React.FC<{
 
   const loadTV = useCallback(async () => {
     setShowTV(true);
+    setTvError(null);
     try {
       const tvData = await sportsDataService.getTV(match.sport, match.gmid);
-      const url = tvData?.url || tvData?.tvUrl || tvData?.tv_url || tvData?.data?.url || tvData?.iframe || tvData?.streamUrl;
-      if (url) setTvUrl(url);
-      else if (tvData?.html || tvData?.data?.html) {
-        const blob = new Blob([tvData.html || tvData.data.html], { type: 'text/html' });
-        setTvUrl(URL.createObjectURL(blob));
+      // Betnex TV may return { data: { tvurl: "..." } } or { data: { url: "..." } }
+      const url = tvData?.data?.tvurl || tvData?.data?.url || tvData?.data?.tv_url ||
+                  tvData?.url || tvData?.tvUrl || tvData?.tv_url || tvData?.iframe || tvData?.streamUrl;
+      if (url) {
+        setTvUrl(url);
+      } else {
+        setTvError('TV stream is not available for this match');
       }
-    } catch { /* no tv */ }
+    } catch (err: any) {
+      const msg = err?.message || '';
+      if (msg.includes('limit') || msg.includes('exhausted') || msg.includes('upgrade')) {
+        setTvError('TV stream quota exhausted. Please try again later.');
+      } else {
+        setTvError('TV stream not available for this match');
+      }
+    }
   }, [match.sport, match.gmid]);
-
-  const scoreText = score?.data?.score || score?.score || score?.scoreText || null;
 
   return (
     <div className="space-y-3">
