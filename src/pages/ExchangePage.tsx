@@ -148,7 +148,7 @@ const MatchDetail: React.FC<{
           <p className="text-[10px] text-muted-foreground">{match.competition}</p>
         </div>
         <div className="flex gap-2">
-          {!showTV && match.hasTV && (
+          {!showTV && (
             <button onClick={loadTV} className="flex items-center gap-1 px-2 py-1 rounded bg-destructive/20 text-destructive text-[10px] font-bold">
               <Tv className="w-3 h-3" /> LIVE TV
             </button>
