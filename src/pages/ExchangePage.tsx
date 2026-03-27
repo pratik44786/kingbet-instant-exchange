@@ -10,7 +10,7 @@ const sportIcon: Record<string, string> = { cricket: '🏏', football: '⚽', te
 interface BetnexRunner {
   nat: string;
   sid: number;
-  odds: { odds: number; otype: string; size: number }[];
+  odds: { odds: number; otype: string; size: number; oname?: string }[];
   gstatus: string;
 }
 
@@ -70,9 +70,11 @@ const MatchDetail: React.FC<{
   placeBets: () => Promise<void>;
 }> = ({ match, onBack, betSlip, addToBetSlip, updateBetSlipStake, placeBets }) => {
   const [odds, setOdds] = useState<MatchItem['runners']>(match.runners);
-  const [score, setScore] = useState<any>(null);
+  const [scoreUrl, setScoreUrl] = useState<string | null>(null);
   const [tvUrl, setTvUrl] = useState<string | null>(null);
+  const [tvError, setTvError] = useState<string | null>(null);
   const [showTV, setShowTV] = useState(false);
+  const [showScore, setShowScore] = useState(true);
   const [loading, setLoading] = useState(false);
   const intervalRef = useRef<ReturnType<typeof setInterval>>();
 
@@ -83,18 +85,24 @@ const MatchDetail: React.FC<{
         sportsDataService.getScore(match.sport, match.gmid).catch(() => null),
       ]);
       if (oddsData) {
-        // Parse odds from same Betnex format
-        const t1 = oddsData?.data?.t1 || oddsData?.t1 || [];
-        if (t1.length > 0) {
-          const parsed = (t1[0]?.section || []).map((s: BetnexRunner) => {
-            const back = s.odds?.find(o => o.otype === 'back') || { odds: 0, size: 0 };
-            const lay = s.odds?.find(o => o.otype === 'lay') || { odds: 0, size: 0 };
+        // Betnex odds format: { data: { odds: { gmid: [ { section: [...] } ] } } }
+        const oddsMap = oddsData?.data?.odds || {};
+        const matchOdds = oddsMap[match.gmid] || [];
+        // Find MATCH_ODDS market (gtype=match, mname=MATCH_ODDS)
+        const matchMarket = matchOdds.find((m: any) => m.mname === 'MATCH_ODDS') || matchOdds[0];
+        if (matchMarket?.section) {
+          const parsed = matchMarket.section.map((s: BetnexRunner) => {
+            const back = s.odds?.find(o => o.otype === 'back' && o.oname === 'back1') || s.odds?.find(o => o.otype === 'back') || { odds: 0, size: 0 };
+            const lay = s.odds?.find(o => o.otype === 'lay' && o.oname === 'lay1') || s.odds?.find(o => o.otype === 'lay') || { odds: 0, size: 0 };
             return { name: s.nat, backOdds: back.odds, backSize: back.size, layOdds: lay.odds, laySize: lay.size, sid: s.sid };
           });
           if (parsed.length > 0) setOdds(parsed);
         }
       }
-      if (scoreData) setScore(scoreData);
+      // Score returns { data: { scoreurl: "https://..." } }
+      if (scoreData?.data?.scoreurl) {
+        setScoreUrl(scoreData.data.scoreurl);
+      }
     } catch { /* ignore */ } finally {
       setLoading(false);
     }
@@ -108,18 +116,26 @@ const MatchDetail: React.FC<{
 
   const loadTV = useCallback(async () => {
     setShowTV(true);
+    setTvError(null);
     try {
       const tvData = await sportsDataService.getTV(match.sport, match.gmid);
-      const url = tvData?.url || tvData?.tvUrl || tvData?.tv_url || tvData?.data?.url || tvData?.iframe || tvData?.streamUrl;
-      if (url) setTvUrl(url);
-      else if (tvData?.html || tvData?.data?.html) {
-        const blob = new Blob([tvData.html || tvData.data.html], { type: 'text/html' });
-        setTvUrl(URL.createObjectURL(blob));
+      // Betnex TV may return { data: { tvurl: "..." } } or { data: { url: "..." } }
+      const url = tvData?.data?.tvurl || tvData?.data?.url || tvData?.data?.tv_url ||
+                  tvData?.url || tvData?.tvUrl || tvData?.tv_url || tvData?.iframe || tvData?.streamUrl;
+      if (url) {
+        setTvUrl(url);
+      } else {
+        setTvError('TV stream is not available for this match');
       }
-    } catch { /* no tv */ }
+    } catch (err: any) {
+      const msg = err?.message || '';
+      if (msg.includes('limit') || msg.includes('exhausted') || msg.includes('upgrade')) {
+        setTvError('TV stream quota exhausted. Please try again later.');
+      } else {
+        setTvError('TV stream not available for this match');
+      }
+    }
   }, [match.sport, match.gmid]);
-
-  const scoreText = score?.data?.score || score?.score || score?.scoreText || null;
 
   return (
     <div className="space-y-3">
@@ -132,7 +148,7 @@ const MatchDetail: React.FC<{
           <p className="text-[10px] text-muted-foreground">{match.competition}</p>
         </div>
         <div className="flex gap-2">
-          {!showTV && match.hasTV && (
+          {!showTV && (
             <button onClick={loadTV} className="flex items-center gap-1 px-2 py-1 rounded bg-destructive/20 text-destructive text-[10px] font-bold">
               <Tv className="w-3 h-3" /> LIVE TV
             </button>
@@ -145,14 +161,18 @@ const MatchDetail: React.FC<{
         </div>
       </div>
 
-      {scoreText && (
-        <div className="bg-[#1a2236] rounded-lg p-3 border border-yellow-500/20">
-          <div className="flex items-center gap-2 text-[10px] text-yellow-500 font-bold mb-1">
-            <Activity className="w-3 h-3" /> LIVE SCORE
+      {/* Live Score iframe */}
+      {scoreUrl && showScore && (
+        <div className="bg-[#1a2236] rounded-lg overflow-hidden border border-yellow-500/20">
+          <div className="flex items-center justify-between px-3 py-1.5 bg-[#121a2d]">
+            <div className="flex items-center gap-2 text-[10px] text-yellow-500 font-bold">
+              <Activity className="w-3 h-3" /> LIVE SCORE
+            </div>
+            <button onClick={() => setShowScore(false)} className="text-muted-foreground hover:text-foreground">
+              <X className="w-3 h-3" />
+            </button>
           </div>
-          <div className="text-sm text-foreground font-bold">
-            {typeof scoreText === 'string' ? scoreText : JSON.stringify(scoreText)}
-          </div>
+          <iframe src={scoreUrl} className="w-full h-32 bg-black" title="Live Score" sandbox="allow-scripts allow-same-origin" />
         </div>
       )}
 
@@ -169,6 +189,12 @@ const MatchDetail: React.FC<{
           <div className="aspect-video bg-gray-950 flex items-center justify-center">
             {tvUrl ? (
               <iframe src={tvUrl} className="w-full h-full" allowFullScreen allow="autoplay; encrypted-media" sandbox="allow-scripts allow-same-origin allow-popups" title="Live TV" />
+            ) : tvError ? (
+              <div className="flex flex-col items-center gap-2 text-muted-foreground p-4">
+                <Tv className="w-10 h-10 opacity-30" />
+                <span className="text-xs text-center">{tvError}</span>
+                <button onClick={loadTV} className="text-[10px] text-yellow-500 hover:text-yellow-400 font-bold mt-1">Retry</button>
+              </div>
             ) : (
               <Loader2 className="w-6 h-6 animate-spin text-yellow-500" />
             )}
