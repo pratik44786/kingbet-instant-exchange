@@ -8,7 +8,16 @@ const corsHeaders = {
 
 const BETNEX_BASE = "https://stagediamondfeeds.betnex.co:9001/api/v1";
 
-const SPORT_IDS: Record<string, number> = { cricket: 4, football: 1, tennis: 2 };
+async function callBetnex(path: string, apiKey: string): Promise<any> {
+  const resp = await fetch(`${BETNEX_BASE}${path}`, {
+    headers: { "x-betnex-key": apiKey },
+  });
+  if (!resp.ok) {
+    const text = await resp.text();
+    throw new Error(`Betnex API ${resp.status}: ${text}`);
+  }
+  return resp.json();
+}
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -16,6 +25,7 @@ Deno.serve(async (req) => {
   }
 
   try {
+    // Auth: any logged-in user
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const anonKey = Deno.env.get("SUPABASE_ANON_KEY") ?? Deno.env.get("SUPABASE_PUBLISHABLE_KEY") ?? "";
     const authHeader = req.headers.get("Authorization");
@@ -42,34 +52,48 @@ Deno.serve(async (req) => {
     }
 
     const url = new URL(req.url);
-    const gmid = url.searchParams.get("gmid");
-    const sport = url.searchParams.get("sport") || "cricket";
-    const sportsId = SPORT_IDS[sport] ?? 4;
+    const action = url.searchParams.get("action") || "";
+    const sportsid = url.searchParams.get("sportsid") || "4";
+    const gmid = url.searchParams.get("gmid") || "";
 
-    if (!gmid) {
-      return new Response(JSON.stringify({ error: "gmid parameter required" }), {
-        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+    let result: any;
+
+    switch (action) {
+      case "sports":
+        result = await callBetnex("/sports", BETNEX_KEY);
+        break;
+
+      case "matches":
+        result = await callBetnex(`/sports/matches?sportsid=${sportsid}`, BETNEX_KEY);
+        break;
+
+      case "odds":
+        result = await callBetnex(`/sports/odds?sportsid=${sportsid}&gmid=${gmid}`, BETNEX_KEY);
+        break;
+
+      case "tv":
+        result = await callBetnex(`/sports/tv?sportsid=${sportsid}&gmid=${gmid}`, BETNEX_KEY);
+        break;
+
+      case "score":
+        result = await callBetnex(`/sports/score?sportsid=${sportsid}&gmid=${gmid}`, BETNEX_KEY);
+        break;
+
+      case "result":
+        result = await callBetnex(`/posted-market-result?sportsid=${sportsid}&gmid=${gmid}`, BETNEX_KEY);
+        break;
+
+      default:
+        return new Response(JSON.stringify({ error: "Unknown action. Use: sports, matches, odds, tv, score, result" }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
     }
 
-    const resp = await fetch(`${BETNEX_BASE}/sports/tv?sportsid=${sportsId}&gmid=${gmid}`, {
-      headers: { "x-betnex-key": BETNEX_KEY },
-    });
-
-    if (!resp.ok) {
-      const errorText = await resp.text();
-      console.error(`Betnex TV error [${resp.status}]:`, errorText);
-      return new Response(JSON.stringify({ error: "TV data unavailable", status: resp.status }), {
-        status: resp.status, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    const tvData = await resp.json();
-    return new Response(JSON.stringify(tvData), {
+    return new Response(JSON.stringify(result), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (err: any) {
-    console.error("Live TV error:", err);
+    console.error("Sports data error:", err);
     return new Response(JSON.stringify({ error: err.message }), {
       status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
