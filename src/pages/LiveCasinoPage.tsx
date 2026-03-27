@@ -7,7 +7,7 @@ import { casinoApiService } from '@/services/casinoApiService';
 const LiveCasinoPage = () => {
   const [search, setSearch] = useState('');
   const [selectedType, setSelectedType] = useState('all');
-  const [diamondGame, setDiamondGame] = useState<{ url: string; name: string } | null>(null);
+  const [diamondGame, setDiamondGame] = useState<{ url: string; name: string; data?: any } | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [launching, setLaunching] = useState(false);
 
