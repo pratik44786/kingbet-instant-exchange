@@ -33,11 +33,13 @@ function callDiamondEndpoint(
     });
   }
   if (!rapidApiKey) throw new Error('No API key configured for Diamond Casino');
-  return fetch(`${DIAMOND_BASE}${path}`, {
+  const url = `${DIAMOND_BASE}${path}`;
+  console.log('Diamond fetch URL:', url);
+  return fetch(url, {
     method: 'GET',
     headers: {
-      'X-RapidAPI-Key': rapidApiKey,
-      'X-RapidAPI-Host': DIAMOND_HOST,
+      'x-rapidapi-key': rapidApiKey,
+      'x-rapidapi-host': DIAMOND_HOST,
     },
   });
 }
