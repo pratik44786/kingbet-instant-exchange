@@ -17,24 +17,15 @@ const BIGDADDY_HOST = 'bigdaddy-goagames-tiranga-91club-trx-api-with-result.p.ra
 const BIGDADDY_BASE = `https://${BIGDADDY_HOST}`;
 const TURNKEY_BASE = 'http://local.turnkeyxgaming.com:8002';
 
-/** Helper: call Diamond Casino endpoints via TurnkeyXGaming or RapidAPI */
+/** Helper: call Diamond Casino endpoints via RapidAPI (TurnkeyXGaming local server is not accessible from edge functions) */
 function callDiamondEndpoint(
   path: string,
-  turnkeyKey: string | undefined,
+  _turnkeyKey: string | undefined,
   rapidApiKey: string | undefined,
 ): Promise<Response> {
-  if (turnkeyKey) {
-    return fetch(`${TURNKEY_BASE}${path}`, {
-      method: 'GET',
-      headers: {
-        'x-turnkeyxgaming-key': turnkeyKey,
-        'Content-Type': 'application/json',
-      },
-    });
-  }
   if (!rapidApiKey) throw new Error('No API key configured for Diamond Casino');
   const url = `${DIAMOND_BASE}${path}`;
-  console.log('Diamond fetch URL:', url);
+  console.log('Diamond Casino fetch:', url);
   return fetch(url, {
     method: 'GET',
     headers: {
