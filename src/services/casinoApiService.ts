@@ -1,6 +1,39 @@
 import { supabase } from '@/integrations/supabase/client';
 
 export const casinoApiService = {
+  // ── Diamond Casino APIs ──
+  getDiamondTableIds: async () => {
+    const { data, error } = await supabase.functions.invoke('casino-api', {
+      body: { action: 'diamond_table_ids', data: {} },
+    });
+    if (error) throw new Error(error.message);
+    return data;
+  },
+
+  getDiamondTableData: async (tableId: string) => {
+    const { data, error } = await supabase.functions.invoke('casino-api', {
+      body: { action: 'diamond_table_data', data: { tableId } },
+    });
+    if (error) throw new Error(error.message);
+    return data;
+  },
+
+  getDiamondTableStream: async (tableId: string) => {
+    const { data, error } = await supabase.functions.invoke('casino-api', {
+      body: { action: 'diamond_table_stream', data: { tableId } },
+    });
+    if (error) throw new Error(error.message);
+    return data;
+  },
+
+  getDiamondTableResult: async (tableId: string) => {
+    const { data, error } = await supabase.functions.invoke('casino-api', {
+      body: { action: 'diamond_table_result', data: { tableId } },
+    });
+    if (error) throw new Error(error.message);
+    return data;
+  },
+
   getGameUrl: async (gameId: string, username?: string) => {
     const { data, error } = await supabase.functions.invoke('casino-api', {
       body: {
