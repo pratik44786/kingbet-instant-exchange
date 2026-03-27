@@ -34,6 +34,14 @@ export const casinoApiService = {
     return data;
   },
 
+  getDiamondDetailsResult: async (tableId: string) => {
+    const { data, error } = await supabase.functions.invoke('casino-api', {
+      body: { action: 'diamond_details_result', data: { tableId } },
+    });
+    if (error) throw new Error(error.message);
+    return data;
+  },
+
   getGameUrl: async (gameId: string, username?: string) => {
     const { data, error } = await supabase.functions.invoke('casino-api', {
       body: {
