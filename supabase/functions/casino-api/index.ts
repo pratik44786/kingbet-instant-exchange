@@ -76,6 +76,7 @@ Deno.serve(async (req) => {
   try {
     const RAPIDAPI_KEY = Deno.env.get('RAPIDAPI_KEY');
     const TURNKEY_KEY = Deno.env.get('TURNKEY_XGAMING_KEY');
+    console.log('RAPIDAPI_KEY length:', RAPIDAPI_KEY?.length, 'first 10:', RAPIDAPI_KEY?.slice(0, 10));
 
     if (!RAPIDAPI_KEY && !TURNKEY_KEY) {
       throw new Error('Neither TURNKEY_XGAMING_KEY nor RAPIDAPI_KEY configured');
