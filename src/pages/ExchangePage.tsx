@@ -10,7 +10,7 @@ const sportIcon: Record<string, string> = { cricket: '🏏', football: '⚽', te
 interface BetnexRunner {
   nat: string;
   sid: number;
-  odds: { odds: number; otype: string; size: number }[];
+  odds: { odds: number; otype: string; size: number; oname?: string }[];
   gstatus: string;
 }
 
