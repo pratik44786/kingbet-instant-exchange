@@ -24,21 +24,39 @@ const LiveCasinoPage = () => {
   const launchGame = async (game: CasinoGame) => {
     setLaunching(true);
     try {
-      const username = 'kb' + Math.random().toString(36).slice(2, 10);
-      const result = await casinoApiService.getGameUrl(game.gameId, username);
+      // Use Diamond Casino stream endpoint to get live table data
+      const streamData = await casinoApiService.getDiamondTableStream(game.gameId);
       
-      // Extract URL from various response formats
-      const gameUrl = result?.url || result?.gameUrl || result?.game_url || 
-                      result?.data?.url || result?.data?.gameUrl || result?.iframe ||
-                      (typeof result === 'string' && result.startsWith('http') ? result : null);
+      // Extract stream/iframe URL from response
+      const streamUrl = streamData?.url || streamData?.stream_url || streamData?.iframe_url ||
+                        streamData?.data?.url || streamData?.data?.stream_url ||
+                        streamData?.video || streamData?.data?.video ||
+                        (typeof streamData === 'string' && streamData.startsWith('http') ? streamData : null);
       
-      if (gameUrl) {
-        setDiamondGame({ url: gameUrl, name: game.name });
+      if (streamUrl) {
+        setDiamondGame({ url: streamUrl, name: game.name });
         setIsFullscreen(false);
         toast.success(`${game.name} launched!`);
       } else {
-        console.error('Game launch response:', result);
-        toast.error('Game URL not received. Try again.');
+        // If no stream URL, try table data for embedded view
+        console.log('Stream response:', streamData);
+        
+        // Some Diamond Casino responses return the data directly for embedding
+        // Build an embedded view URL if raw data is returned
+        const tableData = await casinoApiService.getDiamondTableData(game.gameId);
+        console.log('Table data response:', tableData);
+        
+        if (tableData) {
+          // Use the table data to show game info - set a data URL or fallback
+          setDiamondGame({ 
+            url: `https://diamondcasino.neogames.cloud/live/${game.gameId}`, 
+            name: game.name 
+          });
+          setIsFullscreen(false);
+          toast.success(`${game.name} launched!`);
+        } else {
+          toast.error('Game stream not available. Try again.');
+        }
       }
     } catch (err: any) {
       console.error('Game launch error:', err);
