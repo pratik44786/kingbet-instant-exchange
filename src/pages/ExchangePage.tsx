@@ -189,6 +189,12 @@ const MatchDetail: React.FC<{
           <div className="aspect-video bg-gray-950 flex items-center justify-center">
             {tvUrl ? (
               <iframe src={tvUrl} className="w-full h-full" allowFullScreen allow="autoplay; encrypted-media" sandbox="allow-scripts allow-same-origin allow-popups" title="Live TV" />
+            ) : tvError ? (
+              <div className="flex flex-col items-center gap-2 text-muted-foreground p-4">
+                <Tv className="w-10 h-10 opacity-30" />
+                <span className="text-xs text-center">{tvError}</span>
+                <button onClick={loadTV} className="text-[10px] text-yellow-500 hover:text-yellow-400 font-bold mt-1">Retry</button>
+              </div>
             ) : (
               <Loader2 className="w-6 h-6 animate-spin text-yellow-500" />
             )}
