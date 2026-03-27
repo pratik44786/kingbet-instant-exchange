@@ -25,7 +25,6 @@ function callDiamondEndpoint(
 ): Promise<Response> {
   if (!rapidApiKey) throw new Error('No API key configured for Diamond Casino');
   const url = `${DIAMOND_BASE}${path}`;
-  console.log('Diamond Casino fetch:', url);
   return fetch(url, {
     method: 'GET',
     headers: {
