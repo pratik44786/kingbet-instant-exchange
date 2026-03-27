@@ -161,14 +161,18 @@ const MatchDetail: React.FC<{
         </div>
       </div>
 
-      {scoreText && (
-        <div className="bg-[#1a2236] rounded-lg p-3 border border-yellow-500/20">
-          <div className="flex items-center gap-2 text-[10px] text-yellow-500 font-bold mb-1">
-            <Activity className="w-3 h-3" /> LIVE SCORE
+      {/* Live Score iframe */}
+      {scoreUrl && showScore && (
+        <div className="bg-[#1a2236] rounded-lg overflow-hidden border border-yellow-500/20">
+          <div className="flex items-center justify-between px-3 py-1.5 bg-[#121a2d]">
+            <div className="flex items-center gap-2 text-[10px] text-yellow-500 font-bold">
+              <Activity className="w-3 h-3" /> LIVE SCORE
+            </div>
+            <button onClick={() => setShowScore(false)} className="text-muted-foreground hover:text-foreground">
+              <X className="w-3 h-3" />
+            </button>
           </div>
-          <div className="text-sm text-foreground font-bold">
-            {typeof scoreText === 'string' ? scoreText : JSON.stringify(scoreText)}
-          </div>
+          <iframe src={scoreUrl} className="w-full h-32 bg-black" title="Live Score" sandbox="allow-scripts allow-same-origin" />
         </div>
       )}
 
