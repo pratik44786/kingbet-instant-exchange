@@ -109,7 +109,19 @@ Deno.serve(async (req) => {
     for (const { sport, sportsId } of sportsToFetch) {
       try {
         const data = await callBetnex(`/sports/matches?sportsid=${sportsId}`, BETNEX_KEY);
-        const matches: MatchEvent[] = Array.isArray(data) ? data : (data?.data || data?.matches || data?.events || []);
+        // Betnex returns { data: { t1: [...] } }
+        const t1 = data?.data?.t1 || data?.t1 || [];
+        const matches: MatchEvent[] = t1.map((m: any) => ({
+          gmid: m.gmid,
+          eventName: m.ename,
+          competition: m.cname,
+          startTime: m.stime ? new Date(m.stime).toISOString() : new Date().toISOString(),
+          runners: (m.section || []).map((s: any) => {
+            const back = s.odds?.find((o: any) => o.otype === 'back') || { odds: 0, size: 0 };
+            const lay = s.odds?.find((o: any) => o.otype === 'lay') || { odds: 0, size: 0 };
+            return { RunnerName: s.nat, BackPrice1: back.odds, LayPrice1: lay.odds, BackSize1: back.size, LaySize1: lay.size };
+          }),
+        }));
         for (const match of matches) {
           allMatches.push({ match, sport });
         }
