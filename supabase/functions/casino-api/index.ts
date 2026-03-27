@@ -122,8 +122,8 @@ Deno.serve(async (req) => {
       }
 
       case 'diamond_rules': {
-        const type = data?.type || 'baccarat2';
-        apiRes = await callDiamondEndpoint(`/api/v1/casino/rules?type=${type}`, TURNKEY_KEY, RAPIDAPI_KEY);
+        const tableId = data?.tableId || data?.type || 'baccarat2';
+        apiRes = await callDiamondEndpoint(`/api/v1/casino/rules?tableid=${tableId}`, TURNKEY_KEY, RAPIDAPI_KEY);
         break;
       }
 
@@ -134,8 +134,9 @@ Deno.serve(async (req) => {
       }
 
       case 'diamond_table_stream': {
+        // Stream endpoint doesn't exist — use data endpoint instead
         const tableId = data?.tableId || '';
-        apiRes = await callDiamondEndpoint(`/api/v1/casino/stream?tableid=${tableId}`, TURNKEY_KEY, RAPIDAPI_KEY);
+        apiRes = await callDiamondEndpoint(`/api/v1/casino/data?tableid=${tableId}`, TURNKEY_KEY, RAPIDAPI_KEY);
         break;
       }
 
