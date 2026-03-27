@@ -24,39 +24,20 @@ const LiveCasinoPage = () => {
   const launchGame = async (game: CasinoGame) => {
     setLaunching(true);
     try {
-      // Use Diamond Casino stream endpoint to get live table data
-      const streamData = await casinoApiService.getDiamondTableStream(game.gameId);
+      // Fetch live table data from Diamond Casino API
+      const tableData = await casinoApiService.getDiamondTableData(game.gameId);
+      console.log('Diamond table data:', tableData);
       
-      // Extract stream/iframe URL from response
-      const streamUrl = streamData?.url || streamData?.stream_url || streamData?.iframe_url ||
-                        streamData?.data?.url || streamData?.data?.stream_url ||
-                        streamData?.video || streamData?.data?.video ||
-                        (typeof streamData === 'string' && streamData.startsWith('http') ? streamData : null);
-      
-      if (streamUrl) {
-        setDiamondGame({ url: streamUrl, name: game.name });
+      if (tableData?.success && tableData?.data) {
+        // Game data received — open in embedded view
+        // The Diamond Casino API returns betting data, not an iframe URL
+        // We'll render it within our own UI
+        setDiamondGame({ url: game.gameId, name: game.name, data: tableData.data });
         setIsFullscreen(false);
         toast.success(`${game.name} launched!`);
       } else {
-        // If no stream URL, try table data for embedded view
-        console.log('Stream response:', streamData);
-        
-        // Some Diamond Casino responses return the data directly for embedding
-        // Build an embedded view URL if raw data is returned
-        const tableData = await casinoApiService.getDiamondTableData(game.gameId);
-        console.log('Table data response:', tableData);
-        
-        if (tableData) {
-          // Use the table data to show game info - set a data URL or fallback
-          setDiamondGame({ 
-            url: `https://diamondcasino.neogames.cloud/live/${game.gameId}`, 
-            name: game.name 
-          });
-          setIsFullscreen(false);
-          toast.success(`${game.name} launched!`);
-        } else {
-          toast.error('Game stream not available. Try again.');
-        }
+        console.error('Table data response:', tableData);
+        toast.error(tableData?.message || 'Game data not available. Try again.');
       }
     } catch (err: any) {
       console.error('Game launch error:', err);
