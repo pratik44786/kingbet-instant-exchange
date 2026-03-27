@@ -103,37 +103,37 @@ Deno.serve(async (req) => {
 
       // ── Diamond Casino API (via TurnkeyXGaming or RapidAPI) ──
       case 'diamond_table_ids': {
-        apiRes = await callDiamondEndpoint('/casino/tableid', TURNKEY_KEY, RAPIDAPI_KEY);
+        apiRes = await callDiamondEndpoint('/api/v1/casino/tables', TURNKEY_KEY, RAPIDAPI_KEY);
         break;
       }
 
       case 'diamond_table_data': {
         const tableId = data?.tableId || '';
-        apiRes = await callDiamondEndpoint(`/casino/data?tableid=${tableId}`, TURNKEY_KEY, RAPIDAPI_KEY);
+        apiRes = await callDiamondEndpoint(`/api/v1/casino/data?tableid=${tableId}`, TURNKEY_KEY, RAPIDAPI_KEY);
         break;
       }
 
       case 'diamond_rules': {
         const tableId = data?.tableId || data?.type || 'baccarat2';
-        apiRes = await callDiamondEndpoint(`/casino/rules?tableid=${tableId}`, TURNKEY_KEY, RAPIDAPI_KEY);
+        apiRes = await callDiamondEndpoint(`/api/v1/casino/rules?tableid=${tableId}`, TURNKEY_KEY, RAPIDAPI_KEY);
         break;
       }
 
       case 'diamond_table_result': {
         const tableId = data?.tableId || '';
-        apiRes = await callDiamondEndpoint(`/casino/result?tableid=${tableId}`, TURNKEY_KEY, RAPIDAPI_KEY);
+        apiRes = await callDiamondEndpoint(`/api/v1/casino/result?tableid=${tableId}`, TURNKEY_KEY, RAPIDAPI_KEY);
         break;
       }
 
       case 'diamond_details_result': {
         const tableId = data?.tableId || '';
-        apiRes = await callDiamondEndpoint(`/casino/detailsresult?tableid=${tableId}`, TURNKEY_KEY, RAPIDAPI_KEY);
+        apiRes = await callDiamondEndpoint(`/api/v1/casino/detailsresult?tableid=${tableId}`, TURNKEY_KEY, RAPIDAPI_KEY);
         break;
       }
 
       case 'diamond_table_stream': {
         const tableId = data?.tableId || '';
-        apiRes = await callDiamondEndpoint(`/casino/stream?tableid=${tableId}`, TURNKEY_KEY, RAPIDAPI_KEY);
+        apiRes = await callDiamondEndpoint(`/api/v1/casino/stream?tableid=${tableId}`, TURNKEY_KEY, RAPIDAPI_KEY);
         break;
       }
 
