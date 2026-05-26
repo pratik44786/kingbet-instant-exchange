@@ -103,7 +103,7 @@ export default function Register() {
   );
 }
 
-function Field({ icon: Icon, label, value, onChange, err, type = 'text', placeholder }: any) {
+function Field({ icon: Icon, label, value, onChange, err, type = 'text', placeholder }: { icon: any; label: string; value: string; onChange: (v: string) => void; err?: string; type?: string; placeholder?: string }) {
   return (
     <div>
       <label className="text-sm font-medium block mb-1.5">{label}</label>
