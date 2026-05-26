@@ -1,78 +1,35 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { getCachedUserId } from './useAuthSession';
+import { useAuth } from '@/context/AuthContext';
 
 export interface WalletData {
   balance: number;
-  bonus_balance: number;
-  exposure: number;
+  active_investment: number;
+  referral_earnings: number;
+  pending_withdrawal: number;
   total_profit_loss: number;
-  available: number;
 }
 
 export function useWallet() {
+  const { user } = useAuth();
   const [wallet, setWallet] = useState<WalletData | null>(null);
   const [loading, setLoading] = useState(true);
-  const userIdRef = useRef<string | null>(null);
-  const mountedRef = useRef(true);
 
-  const fetchWallet = useCallback(async () => {
-    const userId = await getCachedUserId();
-    if (!userId || !mountedRef.current) { setLoading(false); return; }
-    userIdRef.current = userId;
+  const fetch = useCallback(async () => {
+    if (!user) { setWallet(null); setLoading(false); return; }
+    setLoading(true);
+    const { data } = await supabase.from('wallets').select('*').eq('user_id', user.id).maybeSingle();
+    setWallet(data ? {
+      balance: Number(data.balance) || 0,
+      active_investment: Number(data.active_investment) || 0,
+      referral_earnings: Number(data.referral_earnings) || 0,
+      pending_withdrawal: Number(data.pending_withdrawal) || 0,
+      total_profit_loss: Number(data.total_profit_loss) || 0,
+    } : null);
+    setLoading(false);
+  }, [user]);
 
-    const { data, error } = await supabase
-      .from('wallets')
-      .select('*')
-      .eq('user_id', userId)
-      .single();
+  useEffect(() => { fetch(); }, [fetch]);
 
-    if (!error && data && mountedRef.current) {
-      setWallet({
-        balance: Number(data.balance),
-        bonus_balance: Number(data.bonus_balance),
-        exposure: Number(data.exposure),
-        total_profit_loss: Number(data.total_profit_loss),
-        available: Number(data.balance) - Number(data.exposure),
-      });
-    }
-    if (mountedRef.current) setLoading(false);
-  }, []);
-
-  const optimisticDeductStake = useCallback((stake: number) => {
-    setWallet(prev => {
-      if (!prev) return prev;
-      const newBalance = prev.balance - stake;
-      // No extra exposure for BACK bets — stake already deducted from balance
-      return { ...prev, balance: newBalance, available: newBalance - prev.exposure };
-    });
-  }, []);
-
-  useEffect(() => {
-    mountedRef.current = true;
-    fetchWallet();
-
-    const channel = supabase
-      .channel('wallet-changes')
-      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'wallets' }, (payload) => {
-        if (userIdRef.current && payload.new && (payload.new as any).user_id === userIdRef.current) {
-          const d = payload.new as any;
-          setWallet({
-            balance: Number(d.balance),
-            bonus_balance: Number(d.bonus_balance),
-            exposure: Number(d.exposure),
-            total_profit_loss: Number(d.total_profit_loss),
-            available: Number(d.balance) - Number(d.exposure),
-          });
-        }
-      })
-      .subscribe();
-
-    return () => {
-      mountedRef.current = false;
-      supabase.removeChannel(channel);
-    };
-  }, [fetchWallet]);
-
-  return { wallet, loading, refetch: fetchWallet, optimisticDeductStake };
+  return { wallet, loading, refresh: fetch };
 }

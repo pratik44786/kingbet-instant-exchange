@@ -14,194 +14,190 @@ export type Database = {
   }
   public: {
     Tables: {
-      bets: {
+      deposit_addresses: {
         Row: {
-          actual_profit: number | null
-          bet_type: Database["public"]["Enums"]["bet_type"]
           created_at: string
-          exposure: number
-          game_round_id: string | null
-          game_type: Database["public"]["Enums"]["game_type"] | null
+          crypto_name: string
+          crypto_symbol: string
           id: string
-          market_id: string | null
-          odds: number
-          potential_profit: number
-          runner_id: string | null
-          settled_at: string | null
-          stake: number
-          status: Database["public"]["Enums"]["bet_status"]
+          is_active: boolean
+          min_deposit: number
+          network: string
+          qr_image_url: string | null
+          sort_order: number
           updated_at: string
+          wallet_address: string
+        }
+        Insert: {
+          created_at?: string
+          crypto_name: string
+          crypto_symbol: string
+          id?: string
+          is_active?: boolean
+          min_deposit?: number
+          network: string
+          qr_image_url?: string | null
+          sort_order?: number
+          updated_at?: string
+          wallet_address: string
+        }
+        Update: {
+          created_at?: string
+          crypto_name?: string
+          crypto_symbol?: string
+          id?: string
+          is_active?: boolean
+          min_deposit?: number
+          network?: string
+          qr_image_url?: string | null
+          sort_order?: number
+          updated_at?: string
+          wallet_address?: string
+        }
+        Relationships: []
+      }
+      deposits: {
+        Row: {
+          admin_note: string | null
+          amount: number
+          created_at: string
+          crypto_symbol: string
+          id: string
+          network: string
+          proof_image_url: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          transaction_hash: string | null
+          user_id: string
+          wallet_address: string
+        }
+        Insert: {
+          admin_note?: string | null
+          amount: number
+          created_at?: string
+          crypto_symbol: string
+          id?: string
+          network: string
+          proof_image_url?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          transaction_hash?: string | null
+          user_id: string
+          wallet_address: string
+        }
+        Update: {
+          admin_note?: string | null
+          amount?: number
+          created_at?: string
+          crypto_symbol?: string
+          id?: string
+          network?: string
+          proof_image_url?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          transaction_hash?: string | null
+          user_id?: string
+          wallet_address?: string
+        }
+        Relationships: []
+      }
+      investment_plans: {
+        Row: {
+          created_at: string
+          description: string | null
+          duration_days: number
+          id: string
+          is_active: boolean
+          max_deposit: number
+          min_deposit: number
+          monthly_return_percent: number
+          name: string
+          payout_frequency: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          duration_days?: number
+          id?: string
+          is_active?: boolean
+          max_deposit?: number
+          min_deposit?: number
+          monthly_return_percent?: number
+          name: string
+          payout_frequency?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          duration_days?: number
+          id?: string
+          is_active?: boolean
+          max_deposit?: number
+          min_deposit?: number
+          monthly_return_percent?: number
+          name?: string
+          payout_frequency?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      investments: {
+        Row: {
+          amount: number
+          created_at: string
+          end_date: string | null
+          id: string
+          last_payout_at: string | null
+          monthly_return_percent: number
+          plan_id: string
+          start_date: string
+          status: string
+          total_profit_earned: number
           user_id: string
         }
         Insert: {
-          actual_profit?: number | null
-          bet_type: Database["public"]["Enums"]["bet_type"]
+          amount: number
           created_at?: string
-          exposure?: number
-          game_round_id?: string | null
-          game_type?: Database["public"]["Enums"]["game_type"] | null
+          end_date?: string | null
           id?: string
-          market_id?: string | null
-          odds: number
-          potential_profit?: number
-          runner_id?: string | null
-          settled_at?: string | null
-          stake: number
-          status?: Database["public"]["Enums"]["bet_status"]
-          updated_at?: string
+          last_payout_at?: string | null
+          monthly_return_percent: number
+          plan_id: string
+          start_date?: string
+          status?: string
+          total_profit_earned?: number
           user_id: string
         }
         Update: {
-          actual_profit?: number | null
-          bet_type?: Database["public"]["Enums"]["bet_type"]
+          amount?: number
           created_at?: string
-          exposure?: number
-          game_round_id?: string | null
-          game_type?: Database["public"]["Enums"]["game_type"] | null
+          end_date?: string | null
           id?: string
-          market_id?: string | null
-          odds?: number
-          potential_profit?: number
-          runner_id?: string | null
-          settled_at?: string | null
-          stake?: number
-          status?: Database["public"]["Enums"]["bet_status"]
-          updated_at?: string
+          last_payout_at?: string | null
+          monthly_return_percent?: number
+          plan_id?: string
+          start_date?: string
+          status?: string
+          total_profit_earned?: number
           user_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "bets_market_id_fkey"
-            columns: ["market_id"]
+            foreignKeyName: "investments_plan_id_fkey"
+            columns: ["plan_id"]
             isOneToOne: false
-            referencedRelation: "markets"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "bets_runner_id_fkey"
-            columns: ["runner_id"]
-            isOneToOne: false
-            referencedRelation: "runners"
+            referencedRelation: "investment_plans"
             referencedColumns: ["id"]
           },
         ]
-      }
-      game_logs: {
-        Row: {
-          action: string
-          bet_id: string | null
-          created_at: string
-          details: Json | null
-          game: Database["public"]["Enums"]["game_type"]
-          id: string
-          round_id: string | null
-          user_id: string
-        }
-        Insert: {
-          action: string
-          bet_id?: string | null
-          created_at?: string
-          details?: Json | null
-          game: Database["public"]["Enums"]["game_type"]
-          id?: string
-          round_id?: string | null
-          user_id: string
-        }
-        Update: {
-          action?: string
-          bet_id?: string | null
-          created_at?: string
-          details?: Json | null
-          game?: Database["public"]["Enums"]["game_type"]
-          id?: string
-          round_id?: string | null
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "game_logs_bet_id_fkey"
-            columns: ["bet_id"]
-            isOneToOne: false
-            referencedRelation: "bets"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "game_logs_round_id_fkey"
-            columns: ["round_id"]
-            isOneToOne: false
-            referencedRelation: "game_rounds"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      game_rounds: {
-        Row: {
-          created_at: string
-          ended_at: string | null
-          game: Database["public"]["Enums"]["game_type"]
-          id: string
-          multiplier: number | null
-          result: Json | null
-          round_data: Json
-          started_at: string
-        }
-        Insert: {
-          created_at?: string
-          ended_at?: string | null
-          game: Database["public"]["Enums"]["game_type"]
-          id?: string
-          multiplier?: number | null
-          result?: Json | null
-          round_data?: Json
-          started_at?: string
-        }
-        Update: {
-          created_at?: string
-          ended_at?: string | null
-          game?: Database["public"]["Enums"]["game_type"]
-          id?: string
-          multiplier?: number | null
-          result?: Json | null
-          round_data?: Json
-          started_at?: string
-        }
-        Relationships: []
-      }
-      markets: {
-        Row: {
-          competition: string
-          created_at: string
-          event_name: string
-          id: string
-          metadata: Json | null
-          sport: Database["public"]["Enums"]["sport_type"]
-          start_time: string
-          status: Database["public"]["Enums"]["market_status"]
-          updated_at: string
-        }
-        Insert: {
-          competition: string
-          created_at?: string
-          event_name: string
-          id?: string
-          metadata?: Json | null
-          sport: Database["public"]["Enums"]["sport_type"]
-          start_time: string
-          status?: Database["public"]["Enums"]["market_status"]
-          updated_at?: string
-        }
-        Update: {
-          competition?: string
-          created_at?: string
-          event_name?: string
-          id?: string
-          metadata?: Json | null
-          sport?: Database["public"]["Enums"]["sport_type"]
-          start_time?: string
-          status?: Database["public"]["Enums"]["market_status"]
-          updated_at?: string
-        }
-        Relationships: []
       }
       profiles: {
         Row: {
@@ -209,10 +205,15 @@ export type Database = {
           created_at: string
           display_name: string | null
           email: string | null
+          full_name: string | null
           id: string
+          kyc_status: string
           parent_id: string | null
           phone: string | null
+          referral_code: string | null
+          referred_by: string | null
           status: Database["public"]["Enums"]["account_status"]
+          two_fa_enabled: boolean
           updated_at: string
           username: string
         }
@@ -221,10 +222,15 @@ export type Database = {
           created_at?: string
           display_name?: string | null
           email?: string | null
+          full_name?: string | null
           id: string
+          kyc_status?: string
           parent_id?: string | null
           phone?: string | null
+          referral_code?: string | null
+          referred_by?: string | null
           status?: Database["public"]["Enums"]["account_status"]
+          two_fa_enabled?: boolean
           updated_at?: string
           username: string
         }
@@ -233,10 +239,15 @@ export type Database = {
           created_at?: string
           display_name?: string | null
           email?: string | null
+          full_name?: string | null
           id?: string
+          kyc_status?: string
           parent_id?: string | null
           phone?: string | null
+          referral_code?: string | null
+          referred_by?: string | null
           status?: Database["public"]["Enums"]["account_status"]
+          two_fa_enabled?: boolean
           updated_at?: string
           username?: string
         }
@@ -248,115 +259,39 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
-        ]
-      }
-      runners: {
-        Row: {
-          back_odds: number
-          back_size: number
-          created_at: string
-          id: string
-          is_winner: boolean | null
-          lay_odds: number
-          lay_size: number
-          market_id: string
-          name: string
-          sort_order: number
-        }
-        Insert: {
-          back_odds?: number
-          back_size?: number
-          created_at?: string
-          id?: string
-          is_winner?: boolean | null
-          lay_odds?: number
-          lay_size?: number
-          market_id: string
-          name: string
-          sort_order?: number
-        }
-        Update: {
-          back_odds?: number
-          back_size?: number
-          created_at?: string
-          id?: string
-          is_winner?: boolean | null
-          lay_odds?: number
-          lay_size?: number
-          market_id?: string
-          name?: string
-          sort_order?: number
-        }
-        Relationships: [
           {
-            foreignKeyName: "runners_market_id_fkey"
-            columns: ["market_id"]
+            foreignKeyName: "profiles_referred_by_fkey"
+            columns: ["referred_by"]
             isOneToOne: false
-            referencedRelation: "markets"
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
       }
-      transaction_audit: {
-        Row: {
-          action: string
-          admin_id: string
-          amount: number
-          created_at: string
-          details: Json | null
-          id: string
-          ip_address: string | null
-          status: string
-          target_user_id: string
-          type: string
-        }
-        Insert: {
-          action: string
-          admin_id: string
-          amount?: number
-          created_at?: string
-          details?: Json | null
-          id?: string
-          ip_address?: string | null
-          status?: string
-          target_user_id: string
-          type: string
-        }
-        Update: {
-          action?: string
-          admin_id?: string
-          amount?: number
-          created_at?: string
-          details?: Json | null
-          id?: string
-          ip_address?: string | null
-          status?: string
-          target_user_id?: string
-          type?: string
-        }
-        Relationships: []
-      }
-      transaction_pins: {
+      referrals: {
         Row: {
           created_at: string
           id: string
-          pin_hash: string
-          updated_at: string
-          user_id: string
+          level: number
+          referred_user_id: string
+          referrer_id: string
+          total_commission: number
         }
         Insert: {
           created_at?: string
           id?: string
-          pin_hash: string
-          updated_at?: string
-          user_id: string
+          level?: number
+          referred_user_id: string
+          referrer_id: string
+          total_commission?: number
         }
         Update: {
           created_at?: string
           id?: string
-          pin_hash?: string
-          updated_at?: string
-          user_id?: string
+          level?: number
+          referred_user_id?: string
+          referrer_id?: string
+          total_commission?: number
         }
         Relationships: []
       }
@@ -370,19 +305,19 @@ export type Database = {
           id: string
           reference_id: string | null
           reference_type: string | null
-          type: Database["public"]["Enums"]["txn_type"]
+          type: Database["public"]["Enums"]["transaction_type"]
           user_id: string
         }
         Insert: {
           amount: number
-          balance_after: number
-          balance_before: number
+          balance_after?: number
+          balance_before?: number
           created_at?: string
           description?: string | null
           id?: string
           reference_id?: string | null
           reference_type?: string | null
-          type: Database["public"]["Enums"]["txn_type"]
+          type: Database["public"]["Enums"]["transaction_type"]
           user_id: string
         }
         Update: {
@@ -394,7 +329,7 @@ export type Database = {
           id?: string
           reference_id?: string | null
           reference_type?: string | null
-          type?: Database["public"]["Enums"]["txn_type"]
+          type?: Database["public"]["Enums"]["transaction_type"]
           user_id?: string
         }
         Relationships: []
@@ -419,31 +354,79 @@ export type Database = {
       }
       wallets: {
         Row: {
+          active_investment: number
           balance: number
-          bonus_balance: number
-          exposure: number
           id: string
+          pending_withdrawal: number
+          referral_earnings: number
           total_profit_loss: number
           updated_at: string
           user_id: string
         }
         Insert: {
+          active_investment?: number
           balance?: number
-          bonus_balance?: number
-          exposure?: number
           id?: string
+          pending_withdrawal?: number
+          referral_earnings?: number
           total_profit_loss?: number
           updated_at?: string
           user_id: string
         }
         Update: {
+          active_investment?: number
           balance?: number
-          bonus_balance?: number
-          exposure?: number
           id?: string
+          pending_withdrawal?: number
+          referral_earnings?: number
           total_profit_loss?: number
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      withdrawals: {
+        Row: {
+          admin_note: string | null
+          amount: number
+          created_at: string
+          crypto_symbol: string
+          id: string
+          network: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          transaction_hash: string | null
+          user_id: string
+          wallet_address: string
+        }
+        Insert: {
+          admin_note?: string | null
+          amount: number
+          created_at?: string
+          crypto_symbol: string
+          id?: string
+          network: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          transaction_hash?: string | null
+          user_id: string
+          wallet_address: string
+        }
+        Update: {
+          admin_note?: string | null
+          amount?: number
+          created_at?: string
+          crypto_symbol?: string
+          id?: string
+          network?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          transaction_hash?: string | null
+          user_id?: string
+          wallet_address?: string
         }
         Relationships: []
       }
@@ -469,31 +452,13 @@ export type Database = {
     Enums: {
       account_status: "active" | "suspended" | "blocked"
       app_role: "user" | "admin" | "master_admin" | "superadmin"
-      bet_status: "pending" | "matched" | "won" | "lost" | "void" | "cancelled"
-      bet_type:
-        | "back"
-        | "lay"
-        | "fancy_yes"
-        | "fancy_no"
-        | "session_over"
-        | "session_under"
-        | "casino"
-        | "crash"
-        | "dice"
-        | "mines"
-        | "plinko"
-        | "aviator"
-        | "teen_patti"
-      game_type:
-        | "aviator"
-        | "plinko"
-        | "crash"
-        | "dice"
-        | "mines"
-        | "teen_patti"
-        | "casino"
-      market_status: "open" | "suspended" | "closed" | "settled"
-      sport_type: "cricket" | "football" | "tennis"
+      transaction_type:
+        | "deposit"
+        | "withdrawal"
+        | "investment"
+        | "profit"
+        | "referral_commission"
+        | "admin_adjustment"
       txn_type:
         | "deposit"
         | "withdrawal"
@@ -633,33 +598,14 @@ export const Constants = {
     Enums: {
       account_status: ["active", "suspended", "blocked"],
       app_role: ["user", "admin", "master_admin", "superadmin"],
-      bet_status: ["pending", "matched", "won", "lost", "void", "cancelled"],
-      bet_type: [
-        "back",
-        "lay",
-        "fancy_yes",
-        "fancy_no",
-        "session_over",
-        "session_under",
-        "casino",
-        "crash",
-        "dice",
-        "mines",
-        "plinko",
-        "aviator",
-        "teen_patti",
+      transaction_type: [
+        "deposit",
+        "withdrawal",
+        "investment",
+        "profit",
+        "referral_commission",
+        "admin_adjustment",
       ],
-      game_type: [
-        "aviator",
-        "plinko",
-        "crash",
-        "dice",
-        "mines",
-        "teen_patti",
-        "casino",
-      ],
-      market_status: ["open", "suspended", "closed", "settled"],
-      sport_type: ["cricket", "football", "tennis"],
       txn_type: [
         "deposit",
         "withdrawal",
