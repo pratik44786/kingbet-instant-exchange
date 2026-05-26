@@ -1,24 +1,24 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { clearCachedUserId } from '@/hooks/useAuthSession';
 import type { User, Session } from '@supabase/supabase-js';
 
 export type UserRole = 'user' | 'admin' | 'master_admin' | 'superadmin';
 
-const EMAIL_DOMAIN = 'kingbet.local';
-
-/** Map a plain userId string to the internal email used by Supabase Auth */
-function toInternalEmail(userId: string): string {
-  if (userId.includes('@')) return userId; // already an email (legacy compat)
-  return `${userId.toLowerCase().trim()}@${EMAIL_DOMAIN}`;
-}
-
 export interface AuthUser {
   id: string;
+  email: string;
   username: string;
-  email?: string;
+  fullName?: string;
+  referralCode?: string;
   role: UserRole;
-  balance?: number;
+}
+
+interface RegisterPayload {
+  email: string;
+  password: string;
+  fullName: string;
+  phone?: string;
+  referralCode?: string;
 }
 
 interface AuthContextType {
@@ -27,11 +27,11 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
-  login: (userId: string, password: string) => Promise<void>;
-  register: (userId: string, password: string, username?: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<void>;
+  register: (payload: RegisterPayload) => Promise<void>;
   logout: () => Promise<void>;
   clearError: () => void;
-  getUserRole: () => UserRole | null;
+  refreshProfile: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -44,158 +44,96 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const fetchUserProfile = useCallback(async (authUser: User) => {
     try {
-      // Parallel fetch all user data at once — reduces 3 sequential calls to 1 round-trip
-      const [profileRes, roleRes, walletRes] = await Promise.all([
-        supabase.from('profiles').select('username, display_name, email, status').eq('id', authUser.id).single(),
-        supabase.from('user_roles').select('role').eq('user_id', authUser.id).single(),
-        supabase.from('wallets').select('balance').eq('user_id', authUser.id).single(),
+      const [profileRes, roleRes] = await Promise.all([
+        supabase.from('profiles').select('username, full_name, email, referral_code').eq('id', authUser.id).maybeSingle(),
+        supabase.from('user_roles').select('role').eq('user_id', authUser.id).maybeSingle(),
       ]);
-
       const profile = profileRes.data;
-      const roleData = roleRes.data;
-      const wallet = walletRes.data;
-
-      if (profile?.status === 'blocked' || profile?.status === 'suspended') {
-        await supabase.auth.signOut();
-        setError('Your account has been ' + profile.status + '. Contact your admin.');
-        setUser(null);
-        return;
-      }
-
       setUser({
         id: authUser.id,
-        username: profile?.username || authUser.user_metadata?.username || 'User',
-        email: profile?.email || authUser.email,
-        role: (roleData?.role as UserRole) || 'user',
-        balance: wallet ? Number(wallet.balance) : 0,
+        email: profile?.email || authUser.email || '',
+        username: profile?.username || authUser.email?.split('@')[0] || 'User',
+        fullName: profile?.full_name || undefined,
+        referralCode: profile?.referral_code || undefined,
+        role: (roleRes.data?.role as UserRole) || 'user',
       });
     } catch (err) {
-      console.error('Error fetching profile:', err);
+      console.error('Profile fetch error:', err);
       setUser({
         id: authUser.id,
-        username: authUser.user_metadata?.username || 'User',
-        email: authUser.email,
+        email: authUser.email || '',
+        username: authUser.email?.split('@')[0] || 'User',
         role: 'user',
-        balance: 0,
       });
     }
   }, []);
 
   useEffect(() => {
     let mounted = true;
-    let loadingTimeout: ReturnType<typeof setTimeout>;
 
-    const initAuth = async () => {
-      try {
-        const { data: { session: existingSession } } = await supabase.auth.getSession();
-        if (!mounted) return;
-        setSession(existingSession);
-        if (existingSession?.user) {
-          await fetchUserProfile(existingSession.user);
-        } else {
-          setUser(null);
-        }
-      } catch (err) {
-        console.error('Session init error:', err);
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, newSession) => {
+      if (!mounted) return;
+      setSession(newSession);
+      if (newSession?.user) {
+        setTimeout(() => mounted && fetchUserProfile(newSession.user), 0);
+      } else {
         setUser(null);
-      } finally {
-        if (mounted) setIsLoading(false);
       }
-    };
+      setIsLoading(false);
+    });
 
-    initAuth();
+    supabase.auth.getSession().then(({ data: { session: existing } }) => {
+      if (!mounted) return;
+      setSession(existing);
+      if (existing?.user) fetchUserProfile(existing.user).finally(() => mounted && setIsLoading(false));
+      else setIsLoading(false);
+    });
 
-    // Safety timeout: never stay loading for more than 8 seconds
-    loadingTimeout = setTimeout(() => {
-      if (mounted) {
-        console.warn('Auth loading timeout — forcing ready state');
-        setIsLoading(false);
-      }
-    }, 8000);
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, newSession) => {
-        if (!mounted) return;
-        setSession(newSession);
-        if (newSession?.user) {
-          // Fire-and-forget to avoid deadlock — never await inside onAuthStateChange
-          fetchUserProfile(newSession.user).finally(() => {
-            if (mounted) setIsLoading(false);
-          });
-        } else {
-          setUser(null);
-          if (mounted) setIsLoading(false);
-        }
-      }
-    );
-
-    return () => {
-      mounted = false;
-      clearTimeout(loadingTimeout);
-      subscription.unsubscribe();
-    };
+    return () => { mounted = false; subscription.unsubscribe(); };
   }, [fetchUserProfile]);
 
-  const login = useCallback(async (userId: string, password: string) => {
+  const login = useCallback(async (email: string, password: string) => {
     setError(null);
-    const email = toInternalEmail(userId);
-    const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
-    if (signInError) {
-      setError('Invalid User ID or password');
-      throw signInError;
-    }
+    const { error: err } = await supabase.auth.signInWithPassword({ email: email.trim().toLowerCase(), password });
+    if (err) { setError(err.message); throw err; }
   }, []);
 
-  const register = useCallback(async (userId: string, password: string, username?: string) => {
+  const register = useCallback(async ({ email, password, fullName, phone, referralCode }: RegisterPayload) => {
     setError(null);
-    const email = toInternalEmail(userId);
-    const { error: signUpError } = await supabase.auth.signUp({
-      email,
+    const { error: err } = await supabase.auth.signUp({
+      email: email.trim().toLowerCase(),
       password,
-      options: { data: { username: username || userId } },
+      options: {
+        emailRedirectTo: `${window.location.origin}/dashboard`,
+        data: {
+          full_name: fullName,
+          username: email.split('@')[0],
+          phone: phone || null,
+          referral_code: referralCode?.toUpperCase() || null,
+        },
+      },
     });
-    if (signUpError) {
-      setError(signUpError.message);
-      throw signUpError;
-    }
+    if (err) { setError(err.message); throw err; }
   }, []);
 
   const logout = useCallback(async () => {
-    clearCachedUserId();
     await supabase.auth.signOut();
-    setUser(null);
-    setSession(null);
-    setError(null);
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('authUser');
-    localStorage.removeItem('userIdLogin');
+    setUser(null); setSession(null); setError(null);
   }, []);
 
-  const getUserRole = useCallback(() => user?.role || null, [user?.role]);
-  const clearError = useCallback(() => setError(null), []);
+  const refreshProfile = useCallback(async () => {
+    if (session?.user) await fetchUserProfile(session.user);
+  }, [session, fetchUserProfile]);
 
   return (
-    <AuthContext.Provider value={{
-      user,
-      session,
-      isAuthenticated: !!user,
-      isLoading,
-      error,
-      login,
-      register,
-      logout,
-      clearError,
-      getUserRole,
-    }}>
+    <AuthContext.Provider value={{ user, session, isAuthenticated: !!user, isLoading, error, login, register, logout, clearError: () => setError(null), refreshProfile }}>
       {children}
     </AuthContext.Provider>
   );
 };
 
-export const useAuth = (): AuthContextType => {
-  const context = useContext(AuthContext);
-  if (!context) throw new Error('useAuth must be used within an AuthProvider');
-  return context;
+export const useAuth = () => {
+  const ctx = useContext(AuthContext);
+  if (!ctx) throw new Error('useAuth must be used within AuthProvider');
+  return ctx;
 };
-
-export default AuthContext;
