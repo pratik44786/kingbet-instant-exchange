@@ -199,6 +199,60 @@ export type Database = {
           },
         ]
       }
+      kyc_submissions: {
+        Row: {
+          admin_note: string | null
+          back_image_url: string | null
+          country: string | null
+          created_at: string
+          document_number: string
+          document_type: string
+          front_image_url: string
+          full_name: string
+          id: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          selfie_image_url: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          admin_note?: string | null
+          back_image_url?: string | null
+          country?: string | null
+          created_at?: string
+          document_number: string
+          document_type: string
+          front_image_url: string
+          full_name: string
+          id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          selfie_image_url: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          admin_note?: string | null
+          back_image_url?: string | null
+          country?: string | null
+          created_at?: string
+          document_number?: string
+          document_type?: string
+          front_image_url?: string
+          full_name?: string
+          id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          selfie_image_url?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -435,6 +489,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      distribute_profit_to_investment: {
+        Args: { _investment_id: string; _profit: number }
+        Returns: undefined
+      }
       get_user_role: {
         Args: { uid: string }
         Returns: Database["public"]["Enums"]["app_role"]
