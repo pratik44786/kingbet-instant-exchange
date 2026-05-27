@@ -59,9 +59,11 @@ export default function Footer() {
           </p>
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-2 mt-4">
             <p>© {new Date().getFullYear()} KINGBET EXCHANGE. All Rights Reserved.</p>
-            <div className="flex gap-4">
-              <a href="#" className="hover:text-gold transition-colors">Terms & Conditions</a>
-              <a href="#" className="hover:text-gold transition-colors">Privacy Policy</a>
+            <div className="flex gap-4 flex-wrap">
+              <Link to="/terms" className="hover:text-gold transition-colors">Terms</Link>
+              <Link to="/privacy" className="hover:text-gold transition-colors">Privacy</Link>
+              <Link to="/aml" className="hover:text-gold transition-colors">AML</Link>
+              <Link to="/risk" className="hover:text-gold transition-colors">Risk</Link>
             </div>
           </div>
         </div>

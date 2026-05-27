@@ -14,6 +14,10 @@ const ForgotPassword = lazy(() => import('./pages/ForgotPassword'));
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const Deposit = lazy(() => import('./pages/Deposit'));
 const Withdraw = lazy(() => import('./pages/Withdraw'));
+const KYC = lazy(() => import('./pages/KYC'));
+const Security = lazy(() => import('./pages/Security'));
+const Admin = lazy(() => import('./pages/Admin'));
+const Legal = lazy(() => import('./pages/Legal'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 
 const Loader = () => (
@@ -53,6 +57,13 @@ function App() {
               <Route path="/dashboard" element={<Protected><Dashboard /></Protected>} />
               <Route path="/deposit" element={<Protected><Deposit /></Protected>} />
               <Route path="/withdraw" element={<Protected><Withdraw /></Protected>} />
+              <Route path="/kyc" element={<Protected><KYC /></Protected>} />
+              <Route path="/security" element={<Protected><Security /></Protected>} />
+              <Route path="/admin" element={<Protected><Admin /></Protected>} />
+              <Route path="/terms" element={<Legal doc="terms" />} />
+              <Route path="/privacy" element={<Legal doc="privacy" />} />
+              <Route path="/aml" element={<Legal doc="aml" />} />
+              <Route path="/risk" element={<Legal doc="risk" />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Suspense>

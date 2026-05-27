@@ -83,6 +83,18 @@
   .section-heading {
     @apply font-display text-3xl md:text-5xl font-bold tracking-tight;
   }
+  .input {
+    @apply w-full px-4 py-2.5 rounded-lg bg-input border border-border text-sm
+           focus:border-gold focus:outline-none focus:ring-2 focus:ring-gold/20 transition;
+  }
+  .btn-icon-success {
+    @apply inline-flex items-center justify-center h-9 w-9 rounded-lg
+           bg-success/10 text-success border border-success/30 hover:bg-success/20 transition;
+  }
+  .btn-icon-danger {
+    @apply inline-flex items-center justify-center h-9 w-9 rounded-lg
+           bg-destructive/10 text-destructive border border-destructive/30 hover:bg-destructive/20 transition;
+  }
 }
 
 ::-webkit-scrollbar { @apply w-1.5 h-1.5; }

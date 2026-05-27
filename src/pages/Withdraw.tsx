@@ -43,16 +43,11 @@ export default function Withdraw() {
     if (!address.trim()) return toast.error('Enter wallet address');
 
     setLoading(true);
-    const { error } = await supabase.from('withdrawals').insert({
-      user_id: user.id,
-      amount: amt,
-      crypto_symbol: sym,
-      network,
-      wallet_address: address.trim(),
-      status: 'pending',
+    const { data, error } = await supabase.functions.invoke('create-withdrawal', {
+      body: { amount: amt, crypto_symbol: sym, network, wallet_address: address.trim() },
     });
     setLoading(false);
-    if (error) toast.error(error.message);
+    if (error || (data as any)?.error) toast.error((data as any)?.error || error?.message || 'Failed');
     else {
       toast.success('Withdrawal requested — awaiting approval');
       setAmount(''); setAddress('');
