@@ -161,6 +161,26 @@ export default function Plans() {
           ))}
         </div>
       </section>
+
+      {investPlan && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur" onClick={() => setInvestPlan(null)}>
+          <div className="card-premium max-w-md w-full" onClick={e => e.stopPropagation()}>
+            <h3 className="font-display text-xl font-bold mb-1">Invest in {investPlan.name}</h3>
+            <p className="text-sm text-muted-foreground mb-4">{investPlan.monthly_return_percent}% monthly · {investPlan.duration_days} days</p>
+            <div className="p-3 rounded-lg bg-gold/10 border border-gold/20 mb-4 text-sm">
+              Available balance: <span className="text-gold font-bold font-mono">${Number(wallet?.balance || 0).toFixed(2)}</span>
+            </div>
+            <label className="text-sm font-medium block mb-1.5">Amount (USD)</label>
+            <input type="number" step="any" value={investAmount} onChange={e => setInvestAmount(e.target.value)}
+              className="w-full px-4 py-3 rounded-lg bg-input border border-border focus:border-gold focus:outline-none mb-2" />
+            <p className="text-xs text-muted-foreground mb-4">Min ${investPlan.min_deposit} · Max ${investPlan.max_deposit}</p>
+            <div className="flex gap-2">
+              <button disabled={busy} onClick={confirmInvest} className="btn-gold flex-1 justify-center">{busy ? 'Processing…' : 'Confirm investment'}</button>
+              <button onClick={() => setInvestPlan(null)} className="btn-outline-gold flex-1 justify-center">Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
     </SiteLayout>
   );
 }
