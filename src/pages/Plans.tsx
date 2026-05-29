@@ -92,9 +92,15 @@ export default function Plans() {
                   <li key={f} className="flex items-center gap-2"><Check className="h-4 w-4 text-success shrink-0" /> {f}</li>
                 ))}
               </ul>
-              <Link to="/register" className="btn-gold w-full justify-center mt-6">
-                Start with {p.name} <ArrowRight className="h-4 w-4" />
-              </Link>
+              {isAuthenticated ? (
+                <button onClick={() => { setInvestPlan(p); setInvestAmount(String(p.min_deposit)); }} className="btn-gold w-full justify-center mt-6">
+                  Invest in {p.name} <ArrowRight className="h-4 w-4" />
+                </button>
+              ) : (
+                <Link to="/register" className="btn-gold w-full justify-center mt-6">
+                  Start with {p.name} <ArrowRight className="h-4 w-4" />
+                </Link>
+              )}
             </div>
           ))}
         </div>
