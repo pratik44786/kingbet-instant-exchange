@@ -77,7 +77,7 @@ export default function Footer() {
             <strong className="text-foreground/80">Risk Disclaimer:</strong> Cryptocurrency investments carry inherent risks. Past performance does not guarantee future returns. Invest only what you can afford to lose.
           </p>
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-2 mt-4">
-            <p>© {new Date().getFullYear()} KINGBET EXCHANGE. All Rights Reserved.</p>
+            <p>© {new Date().getFullYear()} {companyName}. All Rights Reserved.</p>
             <div className="flex gap-4 flex-wrap">
               <Link to="/terms" className="hover:text-gold transition-colors">Terms</Link>
               <Link to="/privacy" className="hover:text-gold transition-colors">Privacy</Link>
