@@ -21,6 +21,12 @@ Deno.serve(async (req) => {
     if (!amount || amount <= 0 || !crypto_symbol || !network || !wallet_address) return j({ error: 'invalid input' }, 400);
 
     const admin = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
+
+    const { data: profile } = await admin.from('profiles').select('kyc_status').eq('id', u.id).single();
+    if (profile?.kyc_status !== 'approved') {
+      return j({ error: 'KYC verification is required before withdrawals can be processed.' }, 403);
+    }
+
     const { data: w } = await admin.from('wallets').select('balance, pending_withdrawal').eq('user_id', u.id).single();
     if (!w || Number(w.balance) < amount) return j({ error: 'Insufficient balance' }, 400);
 
