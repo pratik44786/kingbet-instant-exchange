@@ -12,16 +12,32 @@ export default function Dashboard() {
   const { user } = useAuth();
   const { wallet, loading } = useWallet();
   const [txns, setTxns] = useState<Txn[]>([]);
+  const [totals, setTotals] = useState({ deposits: 0, withdrawals: 0 });
 
   useEffect(() => {
     if (!user) return;
     supabase.from('transactions').select('id,type,amount,description,created_at').eq('user_id', user.id)
       .order('created_at', { ascending: false }).limit(8).then(({ data }) => setTxns((data as Txn[]) || []));
+
+    Promise.all([
+      supabase.from('deposits').select('amount').eq('user_id', user.id).eq('status', 'approved'),
+      supabase.from('withdrawals').select('amount').eq('user_id', user.id).eq('status', 'approved'),
+    ]).then(([dep, wd]) => {
+      setTotals({
+        deposits: (dep.data || []).reduce((s, r: any) => s + Number(r.amount), 0),
+        withdrawals: (wd.data || []).reduce((s, r: any) => s + Number(r.amount), 0),
+      });
+    });
   }, [user]);
+
+  const available = Math.max(0, (wallet?.balance ?? 0) - (wallet?.pending_withdrawal ?? 0));
 
   const stats = [
     { label: 'Total Balance', value: wallet?.balance ?? 0, icon: Wallet, accent: true },
+    { label: 'Available Balance', value: available, icon: Wallet },
     { label: 'Active Investments', value: wallet?.active_investment ?? 0, icon: TrendingUp },
+    { label: 'Total Deposits', value: totals.deposits, icon: ArrowDownToLine },
+    { label: 'Total Withdrawals', value: totals.withdrawals, icon: ArrowUpFromLine },
     { label: 'Pending Withdrawal', value: wallet?.pending_withdrawal ?? 0, icon: Clock },
     { label: 'Referral Earnings', value: wallet?.referral_earnings ?? 0, icon: Users },
   ];
