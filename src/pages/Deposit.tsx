@@ -2,8 +2,9 @@ import DashboardLayout from '@/components/layout/DashboardLayout';
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
-import { Copy, Check, Upload, AlertCircle } from 'lucide-react';
+import { Copy, Check, Upload, AlertCircle, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
+import { QRCodeSVG } from 'qrcode.react';
 
 interface Addr {
   id: string; crypto_symbol: string; crypto_name: string; network: string;
@@ -101,13 +102,11 @@ export default function Deposit() {
             {selected && (
               <>
                 <h3 className="font-medium text-sm mb-3">2. Scan QR or copy address</h3>
-                <div className="rounded-lg overflow-hidden bg-white p-4 mb-3 max-w-[220px] mx-auto">
+                <div className="rounded-lg overflow-hidden bg-white p-4 mb-3 max-w-[220px] mx-auto flex items-center justify-center">
                   {selected.qr_image_url ? (
                     <img src={selected.qr_image_url} alt="QR" className="w-full h-auto" />
                   ) : (
-                    <div className="aspect-square flex items-center justify-center text-xs text-gray-500 text-center">
-                      QR code will appear here once admin uploads it
-                    </div>
+                    <QRCodeSVG value={selected.wallet_address} size={180} level="M" includeMargin className="w-full h-auto" />
                   )}
                 </div>
                 <div className="flex gap-2">
@@ -120,6 +119,12 @@ export default function Deposit() {
                 <p className="text-xs text-muted-foreground mt-3">
                   Network: <span className="text-foreground">{selected.network}</span> · Min: <span className="text-foreground">{selected.min_deposit} {selected.crypto_symbol}</span>
                 </p>
+                <div className="mt-4 flex items-start gap-2 rounded-lg border border-yellow-500/30 bg-yellow-500/10 p-3">
+                  <AlertTriangle className="h-4 w-4 text-yellow-400 shrink-0 mt-0.5" />
+                  <p className="text-xs text-yellow-200/90">
+                    Send funds only on the <span className="font-semibold">{selected.network}</span> network. Wrong network transfers may result in permanent loss of funds.
+                  </p>
+                </div>
               </>
             )}
           </div>
