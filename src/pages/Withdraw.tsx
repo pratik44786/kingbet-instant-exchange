@@ -38,6 +38,7 @@ export default function Withdraw() {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
+    if (!kycApproved) return toast.error('KYC verification is required before withdrawals can be processed.');
     const amt = parseFloat(amount);
     if (!amt || amt <= 0) return toast.error('Enter a valid amount');
     if (amt > (wallet?.balance || 0)) return toast.error('Insufficient balance');
