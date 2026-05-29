@@ -2,7 +2,10 @@ import SiteLayout from '@/components/layout/SiteLayout';
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Check, Calculator, ArrowRight, TrendingUp } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '@/context/AuthContext';
+import { useWallet } from '@/hooks/useWallet';
+import { toast } from 'sonner';
 
 interface Plan {
   id: string; name: string; description: string;
@@ -11,9 +14,15 @@ interface Plan {
 }
 
 export default function Plans() {
+  const { isAuthenticated } = useAuth();
+  const { wallet, refresh } = useWallet();
+  const navigate = useNavigate();
   const [plans, setPlans] = useState<Plan[]>([]);
   const [amount, setAmount] = useState(1000);
   const [months, setMonths] = useState(6);
+  const [investPlan, setInvestPlan] = useState<Plan | null>(null);
+  const [investAmount, setInvestAmount] = useState('');
+  const [busy, setBusy] = useState(false);
 
   useEffect(() => {
     supabase.from('investment_plans').select('*').eq('is_active', true).order('sort_order').then(({ data }) => {
@@ -24,6 +33,26 @@ export default function Plans() {
   const monthlyProfit = amount * 0.05;
   const totalProfit = monthlyProfit * months;
   const finalValue = amount + totalProfit;
+
+  const confirmInvest = async () => {
+    if (!investPlan) return;
+    const amt = parseFloat(investAmount);
+    if (!amt || amt < investPlan.min_deposit || amt > investPlan.max_deposit) {
+      return toast.error(`Amount must be between $${investPlan.min_deposit} and $${investPlan.max_deposit}`);
+    }
+    if (amt > (wallet?.balance ?? 0)) return toast.error('Insufficient balance. Please deposit first.');
+    setBusy(true);
+    const { data, error } = await supabase.functions.invoke('create-investment', {
+      body: { plan_id: investPlan.id, amount: amt },
+    });
+    setBusy(false);
+    if (error || (data as any)?.error) return toast.error((data as any)?.error || error?.message || 'Failed');
+    toast.success(`Invested in ${investPlan.name}`);
+    setInvestPlan(null); setInvestAmount('');
+    refresh();
+    navigate('/dashboard');
+  };
+
 
   return (
     <SiteLayout>
@@ -63,9 +92,15 @@ export default function Plans() {
                   <li key={f} className="flex items-center gap-2"><Check className="h-4 w-4 text-success shrink-0" /> {f}</li>
                 ))}
               </ul>
-              <Link to="/register" className="btn-gold w-full justify-center mt-6">
-                Start with {p.name} <ArrowRight className="h-4 w-4" />
-              </Link>
+              {isAuthenticated ? (
+                <button onClick={() => { setInvestPlan(p); setInvestAmount(String(p.min_deposit)); }} className="btn-gold w-full justify-center mt-6">
+                  Invest in {p.name} <ArrowRight className="h-4 w-4" />
+                </button>
+              ) : (
+                <Link to="/register" className="btn-gold w-full justify-center mt-6">
+                  Start with {p.name} <ArrowRight className="h-4 w-4" />
+                </Link>
+              )}
             </div>
           ))}
         </div>
@@ -126,6 +161,26 @@ export default function Plans() {
           ))}
         </div>
       </section>
+
+      {investPlan && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur" onClick={() => setInvestPlan(null)}>
+          <div className="card-premium max-w-md w-full" onClick={e => e.stopPropagation()}>
+            <h3 className="font-display text-xl font-bold mb-1">Invest in {investPlan.name}</h3>
+            <p className="text-sm text-muted-foreground mb-4">{investPlan.monthly_return_percent}% monthly · {investPlan.duration_days} days</p>
+            <div className="p-3 rounded-lg bg-gold/10 border border-gold/20 mb-4 text-sm">
+              Available balance: <span className="text-gold font-bold font-mono">${Number(wallet?.balance || 0).toFixed(2)}</span>
+            </div>
+            <label className="text-sm font-medium block mb-1.5">Amount (USD)</label>
+            <input type="number" step="any" value={investAmount} onChange={e => setInvestAmount(e.target.value)}
+              className="w-full px-4 py-3 rounded-lg bg-input border border-border focus:border-gold focus:outline-none mb-2" />
+            <p className="text-xs text-muted-foreground mb-4">Min ${investPlan.min_deposit} · Max ${investPlan.max_deposit}</p>
+            <div className="flex gap-2">
+              <button disabled={busy} onClick={confirmInvest} className="btn-gold flex-1 justify-center">{busy ? 'Processing…' : 'Confirm investment'}</button>
+              <button onClick={() => setInvestPlan(null)} className="btn-outline-gold flex-1 justify-center">Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
     </SiteLayout>
   );
 }

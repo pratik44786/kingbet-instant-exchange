@@ -3,7 +3,8 @@ import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
 import { useWallet } from '@/hooks/useWallet';
-import { Shield, AlertCircle } from 'lucide-react';
+import { Shield, AlertCircle, FileCheck } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
 
 interface Wd { id: string; amount: number; crypto_symbol: string; wallet_address: string; status: string; created_at: string; }
@@ -37,6 +38,7 @@ export default function Withdraw() {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
+    if (!kycApproved) return toast.error('KYC verification is required before withdrawals can be processed.');
     const amt = parseFloat(amount);
     if (!amt || amt <= 0) return toast.error('Enter a valid amount');
     if (amt > (wallet?.balance || 0)) return toast.error('Insufficient balance');
@@ -55,10 +57,23 @@ export default function Withdraw() {
     }
   };
 
+  const kycApproved = user?.kycStatus === 'approved';
+
   return (
     <DashboardLayout>
       <h1 className="font-display text-2xl md:text-3xl font-bold mb-2">Withdraw funds</h1>
       <p className="text-sm text-muted-foreground mb-8">Withdraw your available balance to any supported crypto wallet.</p>
+
+      {!kycApproved && (
+        <div className="card-premium mb-5 flex items-start gap-3 border-yellow-500/40">
+          <FileCheck className="h-6 w-6 text-yellow-400 shrink-0" />
+          <div>
+            <p className="font-semibold">KYC verification required</p>
+            <p className="text-sm text-muted-foreground">KYC verification is required before withdrawals can be processed. <Link to="/kyc" className="text-gold hover:underline">Complete KYC</Link></p>
+          </div>
+        </div>
+      )}
+
 
       <div className="grid lg:grid-cols-[1fr_1fr] gap-5">
         <div className="card-premium">
@@ -103,8 +118,8 @@ export default function Withdraw() {
               <p>Double-check the wallet address. Crypto transactions are irreversible. Withdrawals are processed within 24 hours after security review.</p>
             </div>
 
-            <button disabled={loading} className="btn-gold w-full justify-center">
-              {loading ? 'Requesting...' : 'Request withdrawal'}
+            <button disabled={loading || !kycApproved} className="btn-gold w-full justify-center disabled:opacity-50">
+              {loading ? 'Requesting...' : kycApproved ? 'Request withdrawal' : 'KYC required'}
             </button>
           </form>
         </div>
