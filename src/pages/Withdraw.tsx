@@ -56,10 +56,23 @@ export default function Withdraw() {
     }
   };
 
+  const kycApproved = user?.kycStatus === 'approved';
+
   return (
     <DashboardLayout>
       <h1 className="font-display text-2xl md:text-3xl font-bold mb-2">Withdraw funds</h1>
       <p className="text-sm text-muted-foreground mb-8">Withdraw your available balance to any supported crypto wallet.</p>
+
+      {!kycApproved && (
+        <div className="card-premium mb-5 flex items-start gap-3 border-yellow-500/40">
+          <FileCheck className="h-6 w-6 text-yellow-400 shrink-0" />
+          <div>
+            <p className="font-semibold">KYC verification required</p>
+            <p className="text-sm text-muted-foreground">KYC verification is required before withdrawals can be processed. <Link to="/kyc" className="text-gold hover:underline">Complete KYC</Link></p>
+          </div>
+        </div>
+      )}
+
 
       <div className="grid lg:grid-cols-[1fr_1fr] gap-5">
         <div className="card-premium">
