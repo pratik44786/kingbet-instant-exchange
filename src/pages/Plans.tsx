@@ -2,7 +2,10 @@ import SiteLayout from '@/components/layout/SiteLayout';
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Check, Calculator, ArrowRight, TrendingUp } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '@/context/AuthContext';
+import { useWallet } from '@/hooks/useWallet';
+import { toast } from 'sonner';
 
 interface Plan {
   id: string; name: string; description: string;
@@ -11,9 +14,15 @@ interface Plan {
 }
 
 export default function Plans() {
+  const { isAuthenticated } = useAuth();
+  const { wallet, refresh } = useWallet();
+  const navigate = useNavigate();
   const [plans, setPlans] = useState<Plan[]>([]);
   const [amount, setAmount] = useState(1000);
   const [months, setMonths] = useState(6);
+  const [investPlan, setInvestPlan] = useState<Plan | null>(null);
+  const [investAmount, setInvestAmount] = useState('');
+  const [busy, setBusy] = useState(false);
 
   useEffect(() => {
     supabase.from('investment_plans').select('*').eq('is_active', true).order('sort_order').then(({ data }) => {
@@ -24,6 +33,26 @@ export default function Plans() {
   const monthlyProfit = amount * 0.05;
   const totalProfit = monthlyProfit * months;
   const finalValue = amount + totalProfit;
+
+  const confirmInvest = async () => {
+    if (!investPlan) return;
+    const amt = parseFloat(investAmount);
+    if (!amt || amt < investPlan.min_deposit || amt > investPlan.max_deposit) {
+      return toast.error(`Amount must be between $${investPlan.min_deposit} and $${investPlan.max_deposit}`);
+    }
+    if (amt > (wallet?.balance ?? 0)) return toast.error('Insufficient balance. Please deposit first.');
+    setBusy(true);
+    const { data, error } = await supabase.functions.invoke('create-investment', {
+      body: { plan_id: investPlan.id, amount: amt },
+    });
+    setBusy(false);
+    if (error || (data as any)?.error) return toast.error((data as any)?.error || error?.message || 'Failed');
+    toast.success(`Invested in ${investPlan.name}`);
+    setInvestPlan(null); setInvestAmount('');
+    refresh();
+    navigate('/dashboard');
+  };
+
 
   return (
     <SiteLayout>
