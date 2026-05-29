@@ -118,8 +118,8 @@ export default function Withdraw() {
               <p>Double-check the wallet address. Crypto transactions are irreversible. Withdrawals are processed within 24 hours after security review.</p>
             </div>
 
-            <button disabled={loading} className="btn-gold w-full justify-center">
-              {loading ? 'Requesting...' : 'Request withdrawal'}
+            <button disabled={loading || !kycApproved} className="btn-gold w-full justify-center disabled:opacity-50">
+              {loading ? 'Requesting...' : kycApproved ? 'Request withdrawal' : 'KYC required'}
             </button>
           </form>
         </div>
