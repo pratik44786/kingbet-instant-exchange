@@ -3,7 +3,8 @@ import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
 import { useWallet } from '@/hooks/useWallet';
-import { Shield, AlertCircle } from 'lucide-react';
+import { Shield, AlertCircle, FileCheck } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
 
 interface Wd { id: string; amount: number; crypto_symbol: string; wallet_address: string; status: string; created_at: string; }
