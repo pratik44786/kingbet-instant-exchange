@@ -261,6 +261,53 @@ function AddressesPanel() {
   );
 }
 
+function CompanyPanel() {
+  const [data, setData] = useState<any>(null);
+  const [saving, setSaving] = useState(false);
+  const load = async () => {
+    const { data: row } = await supabase.from('company_settings').select('*').order('created_at').limit(1).maybeSingle();
+    setData(row || { company_name: 'KINGBET EXCHANGE' });
+  };
+  useEffect(() => { load(); }, []);
+
+  const save = async () => {
+    if (!data) return;
+    setSaving(true);
+    const payload = { ...data }; delete payload.created_at; delete payload.updated_at;
+    const { error } = data.id
+      ? await supabase.from('company_settings').update(payload).eq('id', data.id)
+      : await supabase.from('company_settings').insert(payload);
+    setSaving(false);
+    if (error) toast.error(error.message); else { toast.success('Company settings saved'); load(); }
+  };
+
+  if (!data) return <div className="card-premium"><p className="text-sm text-muted-foreground py-6 text-center">Loading…</p></div>;
+
+  const fields: [string, string][] = [
+    ['company_name', 'Company name'], ['tagline', 'Tagline'],
+    ['ceo_name', 'CEO name'], ['founder_name', 'Founder name'],
+    ['support_email', 'Support email'], ['support_phone', 'Support phone'],
+    ['office_address', 'Office address'],
+    ['twitter_url', 'Twitter URL'], ['facebook_url', 'Facebook URL'],
+    ['instagram_url', 'Instagram URL'], ['telegram_url', 'Telegram URL'],
+    ['logo_url', 'Logo URL'], ['favicon_url', 'Favicon URL'],
+  ];
+
+  return (
+    <div className="card-premium">
+      <h2 className="font-display text-lg font-semibold mb-4">Company management</h2>
+      <FormGrid>
+        {fields.map(([key, label]) => (
+          <Field key={key} label={label}>
+            <input className="input" value={data[key] || ''} onChange={e => setData({ ...data, [key]: e.target.value })} />
+          </Field>
+        ))}
+      </FormGrid>
+      <button onClick={save} disabled={saving} className="btn-gold mt-4">{saving ? 'Saving…' : 'Save settings'}</button>
+    </div>
+  );
+}
+
 /* ---------- shared bits ---------- */
 function Panel({ title, children, onRefresh, loading, empty, header }: any) {
   return (
