@@ -4,9 +4,9 @@ import DashboardLayout from '@/components/layout/DashboardLayout';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { Check, X, RefreshCw, Shield, ArrowDownToLine, ArrowUpFromLine, FileCheck, Settings2, Wallet2 } from 'lucide-react';
+import { Check, X, RefreshCw, Shield, ArrowDownToLine, ArrowUpFromLine, FileCheck, Settings2, Wallet2, Building2 } from 'lucide-react';
 
-type Tab = 'deposits' | 'withdrawals' | 'kyc' | 'plans' | 'addresses';
+type Tab = 'deposits' | 'withdrawals' | 'kyc' | 'plans' | 'addresses' | 'company';
 
 const TABS: { id: Tab; label: string; icon: any }[] = [
   { id: 'deposits', label: 'Deposits', icon: ArrowDownToLine },
@@ -14,6 +14,7 @@ const TABS: { id: Tab; label: string; icon: any }[] = [
   { id: 'kyc', label: 'KYC', icon: FileCheck },
   { id: 'plans', label: 'Plans', icon: Settings2 },
   { id: 'addresses', label: 'Addresses', icon: Wallet2 },
+  { id: 'company', label: 'Company', icon: Building2 },
 ];
 
 export default function Admin() {
