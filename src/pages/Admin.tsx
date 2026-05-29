@@ -49,6 +49,7 @@ export default function Admin() {
       {tab === 'kyc' && <KycPanel />}
       {tab === 'plans' && <PlansPanel />}
       {tab === 'addresses' && <AddressesPanel />}
+      {tab === 'company' && <CompanyPanel />}
     </DashboardLayout>
   );
 }
