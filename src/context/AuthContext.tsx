@@ -11,6 +11,7 @@ export interface AuthUser {
   fullName?: string;
   referralCode?: string;
   role: UserRole;
+  kycStatus: string;
 }
 
 interface RegisterPayload {
