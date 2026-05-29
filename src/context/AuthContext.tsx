@@ -46,7 +46,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const fetchUserProfile = useCallback(async (authUser: User) => {
     try {
       const [profileRes, roleRes] = await Promise.all([
-        supabase.from('profiles').select('username, full_name, email, referral_code').eq('id', authUser.id).maybeSingle(),
+        supabase.from('profiles').select('username, full_name, email, referral_code, kyc_status').eq('id', authUser.id).maybeSingle(),
         supabase.from('user_roles').select('role').eq('user_id', authUser.id).maybeSingle(),
       ]);
       const profile = profileRes.data;
@@ -57,6 +57,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         fullName: profile?.full_name || undefined,
         referralCode: profile?.referral_code || undefined,
         role: (roleRes.data?.role as UserRole) || 'user',
+        kycStatus: profile?.kyc_status || 'pending',
       });
     } catch (err) {
       console.error('Profile fetch error:', err);
@@ -65,6 +66,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         email: authUser.email || '',
         username: authUser.email?.split('@')[0] || 'User',
         role: 'user',
+        kycStatus: 'pending',
       });
     }
   }, []);
