@@ -2,8 +2,9 @@ import DashboardLayout from '@/components/layout/DashboardLayout';
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
-import { Copy, Check, Upload, AlertCircle } from 'lucide-react';
+import { Copy, Check, Upload, AlertCircle, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
+import { QRCodeSVG } from 'qrcode.react';
 
 interface Addr {
   id: string; crypto_symbol: string; crypto_name: string; network: string;
