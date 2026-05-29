@@ -58,11 +58,19 @@ export default function Footer() {
           <div>
             <h4 className="font-display font-semibold mb-4 text-foreground">Contact</h4>
             <ul className="space-y-3 text-sm text-muted-foreground">
-              <li className="flex items-start gap-2"><Mail className="h-4 w-4 mt-0.5 text-gold" /> support@kingbetexchange.live</li>
+              <li className="flex items-start gap-2"><Mail className="h-4 w-4 mt-0.5 text-gold" /> {settings?.support_email || 'support@kingbetexchange.live'}</li>
+              {settings?.support_phone && <li className="flex items-start gap-2"><Phone className="h-4 w-4 mt-0.5 text-gold" /> {settings.support_phone}</li>}
+              {settings?.office_address && <li className="flex items-start gap-2"><MapPin className="h-4 w-4 mt-0.5 text-gold" /> {settings.office_address}</li>}
               <li className="flex items-start gap-2"><Shield className="h-4 w-4 mt-0.5 text-gold" /> 24/7 Secured Support</li>
             </ul>
           </div>
         </div>
+        {(settings?.ceo_name || settings?.founder_name) && (
+          <div className="mt-10 text-xs text-muted-foreground flex flex-wrap gap-x-6 gap-y-1">
+            {settings?.founder_name && <span>Founder: <span className="text-foreground/80">{settings.founder_name}</span></span>}
+            {settings?.ceo_name && <span>CEO: <span className="text-foreground/80">{settings.ceo_name}</span></span>}
+          </div>
+        )}
 
         <div className="mt-12 pt-6 border-t border-white/5 text-xs text-muted-foreground">
           <p className="mb-2">
