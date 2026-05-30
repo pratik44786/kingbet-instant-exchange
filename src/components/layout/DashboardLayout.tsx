@@ -78,7 +78,10 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
 
       <div className="lg:hidden sticky top-0 z-40 flex items-center justify-between p-4 bg-background/80 backdrop-blur-xl border-b border-white/5">
         <Link to="/" className="flex items-center gap-2"><Logo className="h-7 w-7" /><span className="font-display font-bold text-sm text-gradient-gold">KINGBET</span></Link>
-        <button onClick={() => setOpen(true)} className="p-2"><Menu className="h-5 w-5" /></button>
+        <div className="flex items-center gap-1">
+          <NotificationBell />
+          <button onClick={() => setOpen(true)} className="p-2"><Menu className="h-5 w-5" /></button>
+        </div>
       </div>
 
       {open && (
@@ -92,8 +95,13 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
       )}
 
       <main className="min-h-screen">
-        <div className="container mx-auto px-4 py-6 lg:px-8 lg:py-10">{children}</div>
+        <div className="hidden lg:flex items-center justify-end gap-2 px-8 pt-6">
+          <NotificationBell />
+          <Link to="/profile" className="p-2 rounded-lg hover:bg-white/5 transition-colors"><UserCircle className="h-5 w-5" /></Link>
+        </div>
+        <div className="container mx-auto px-4 py-6 lg:px-8 lg:py-6">{children}</div>
       </main>
+
     </div>
   );
 }
