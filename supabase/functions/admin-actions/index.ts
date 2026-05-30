@@ -55,11 +55,14 @@ Deno.serve(async (req) => {
         balance_before: before, balance_after: after,
         description: `Deposit approved (${d.crypto_symbol})`, reference_id: d.id, reference_type: 'deposit',
       });
+      await notify(d.user_id, 'Deposit approved', `Your deposit of ${d.amount} ${d.crypto_symbol} has been credited.`, 'success', '/dashboard');
       return j({ ok: true });
     }
 
     if (body.action === 'reject_deposit') {
+      const { data: d } = await admin.from('deposits').select('user_id, amount, crypto_symbol').eq('id', body.id).single();
       await admin.from('deposits').update({ status: 'rejected', ...reviewer }).eq('id', body.id);
+      if (d) await notify(d.user_id, 'Deposit rejected', `Your deposit of ${d.amount} ${d.crypto_symbol} was rejected.${body.note ? ' Note: ' + body.note : ''}`, 'error', '/deposit');
       return j({ ok: true });
     }
 
