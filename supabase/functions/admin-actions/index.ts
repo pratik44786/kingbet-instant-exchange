@@ -79,6 +79,7 @@ Deno.serve(async (req) => {
         balance_before: before, balance_after: before,
         description: `Withdrawal approved (${wd.crypto_symbol})`, reference_id: wd.id, reference_type: 'withdrawal',
       });
+      await notify(wd.user_id, 'Withdrawal approved', `Your withdrawal of ${wd.amount} ${wd.crypto_symbol} has been processed.`, 'success', '/dashboard');
       return j({ ok: true });
     }
 
