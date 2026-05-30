@@ -16,6 +16,7 @@ const Deposit = lazy(() => import('./pages/Deposit'));
 const Withdraw = lazy(() => import('./pages/Withdraw'));
 const KYC = lazy(() => import('./pages/KYC'));
 const Security = lazy(() => import('./pages/Security'));
+const Profile = lazy(() => import('./pages/Profile'));
 const Admin = lazy(() => import('./pages/Admin'));
 const Legal = lazy(() => import('./pages/Legal'));
 const NotFound = lazy(() => import('./pages/NotFound'));
@@ -59,6 +60,7 @@ function App() {
               <Route path="/withdraw" element={<Protected><Withdraw /></Protected>} />
               <Route path="/kyc" element={<Protected><KYC /></Protected>} />
               <Route path="/security" element={<Protected><Security /></Protected>} />
+              <Route path="/profile" element={<Protected><Profile /></Protected>} />
               <Route path="/admin" element={<Protected><Admin /></Protected>} />
               <Route path="/terms" element={<Legal doc="terms" />} />
               <Route path="/privacy" element={<Legal doc="privacy" />} />
