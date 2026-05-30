@@ -60,6 +60,7 @@ function App() {
               <Route path="/withdraw" element={<Protected><Withdraw /></Protected>} />
               <Route path="/kyc" element={<Protected><KYC /></Protected>} />
               <Route path="/security" element={<Protected><Security /></Protected>} />
+              <Route path="/profile" element={<Protected><Profile /></Protected>} />
               <Route path="/admin" element={<Protected><Admin /></Protected>} />
               <Route path="/terms" element={<Legal doc="terms" />} />
               <Route path="/privacy" element={<Legal doc="privacy" />} />
