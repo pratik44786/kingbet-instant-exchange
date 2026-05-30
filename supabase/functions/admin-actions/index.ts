@@ -39,6 +39,9 @@ Deno.serve(async (req) => {
     const now = new Date().toISOString();
     const reviewer = { reviewed_at: now, reviewed_by: user.id, admin_note: body.note ?? null };
 
+    const notify = (uid: string, title: string, bdy: string, type: string, link: string) =>
+      admin.from('notifications').insert({ user_id: uid, title, body: bdy, type, link });
+
     if (body.action === 'approve_deposit') {
       const { data: d } = await admin.from('deposits').select('*').eq('id', body.id).single();
       if (!d || d.status !== 'pending') return j({ error: 'invalid state' }, 400);
