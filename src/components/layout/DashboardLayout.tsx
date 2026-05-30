@@ -1,9 +1,10 @@
 import { ReactNode } from 'react';
 import { NavLink, Link, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, ArrowDownToLine, ArrowUpFromLine, Users, LogOut, TrendingUp, Menu, X, FileCheck, ShieldCheck, Shield } from 'lucide-react';
+import { LayoutDashboard, ArrowDownToLine, ArrowUpFromLine, Users, LogOut, TrendingUp, Menu, X, FileCheck, ShieldCheck, Shield, UserCircle } from 'lucide-react';
 import { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import Logo from './Logo';
+import NotificationBell from './NotificationBell';
 
 const items = [
   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -12,6 +13,7 @@ const items = [
   { to: '/plans', label: 'Plans', icon: TrendingUp },
   { to: '/referral', label: 'Referral', icon: Users },
   { to: '/kyc', label: 'KYC', icon: FileCheck },
+  { to: '/profile', label: 'Profile', icon: UserCircle },
   { to: '/security', label: 'Security', icon: ShieldCheck },
 ];
 const adminItem = { to: '/admin', label: 'Admin', icon: Shield };
