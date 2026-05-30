@@ -97,13 +97,19 @@ Deno.serve(async (req) => {
         balance_before: refundedBefore, balance_after: refundedAfter,
         description: `Withdrawal rejected — refund`, reference_id: wd.id, reference_type: 'withdrawal',
       });
+      await notify(wd.user_id, 'Withdrawal rejected', `Your withdrawal of ${wd.amount} ${wd.crypto_symbol} was rejected and refunded.${body.note ? ' Note: ' + body.note : ''}`, 'warning', '/dashboard');
       return j({ ok: true });
     }
 
     if (body.action === 'approve_kyc' || body.action === 'reject_kyc') {
       const status = body.action === 'approve_kyc' ? 'approved' : 'rejected';
       const { data: k } = await admin.from('kyc_submissions').update({ status, ...reviewer }).eq('id', body.id).select().single();
-      if (k) await admin.from('profiles').update({ kyc_status: status }).eq('id', k.user_id);
+      if (k) {
+        await admin.from('profiles').update({ kyc_status: status }).eq('id', k.user_id);
+        await notify(k.user_id, status === 'approved' ? 'KYC approved' : 'KYC rejected',
+          status === 'approved' ? 'Your identity has been verified. You can now withdraw.' : `Your KYC was rejected.${body.note ? ' Note: ' + body.note : ''}`,
+          status === 'approved' ? 'success' : 'error', '/kyc');
+      }
       return j({ ok: true });
     }
 
