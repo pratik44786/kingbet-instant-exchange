@@ -9,6 +9,7 @@ const nav = [
   { to: '/about', label: 'About' },
   { to: '/plans', label: 'Plans' },
   { to: '/referral', label: 'Referral' },
+  { to: '/blog', label: 'Blog' },
 ];
 
 export default function Header() {

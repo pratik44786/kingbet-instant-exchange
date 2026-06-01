@@ -1,4 +1,5 @@
 import SiteLayout from '@/components/layout/SiteLayout';
+import Seo, { SITE_URL } from '@/components/Seo';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Shield, Brain, Zap, Users, TrendingUp, Lock, BarChart3, Wallet, Check, Star } from 'lucide-react';
 
@@ -35,8 +36,31 @@ const faqs = [
 ];
 
 export default function Home() {
+  const faqSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faqs.map((f) => ({
+      '@type': 'Question',
+      name: f.q,
+      acceptedAnswer: { '@type': 'Answer', text: f.a },
+    })),
+  };
+  const orgSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: 'KingBet Exchange',
+    url: SITE_URL,
+    logo: `${SITE_URL}/og-image.jpg`,
+    description: 'Smart, secure, AI-driven crypto investment platform with fortnightly payouts and instant withdrawals.',
+  };
   return (
     <SiteLayout>
+      <Seo
+        title="KingBet Exchange — Smart Crypto Investing with 5% Monthly Returns"
+        description="Grow your crypto wealth with KingBet Exchange. AI-powered portfolios, 5% monthly returns, fortnightly payouts, instant withdrawals and lifetime referral earnings."
+        path="/"
+        schema={[orgSchema, faqSchema]}
+      />
       {/* Hero */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-radial opacity-60" />

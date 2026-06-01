@@ -1,4 +1,5 @@
 import SiteLayout from '@/components/layout/SiteLayout';
+import Seo from '@/components/Seo';
 import { Users, Link2, TrendingUp, Award, Copy, Check } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
@@ -22,6 +23,11 @@ export default function Referral() {
 
   return (
     <SiteLayout>
+      <Seo
+        title="Referral Program — Earn Lifetime Crypto Commissions | KingBet Exchange"
+        description="Refer friends to KingBet Exchange and earn lifetime commissions on every investment they make. Share your link and grow passive crypto income."
+        path="/referral"
+      />
       <section className="container mx-auto px-4 pt-16 pb-10 text-center">
         <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full glass text-xs text-gold mb-6">
           <Award className="h-3.5 w-3.5" /> Lifetime Commissions
