@@ -8,6 +8,8 @@ const Home = lazy(() => import('./pages/Home'));
 const About = lazy(() => import('./pages/About'));
 const Plans = lazy(() => import('./pages/Plans'));
 const Referral = lazy(() => import('./pages/Referral'));
+const Blog = lazy(() => import('./pages/Blog'));
+const BlogPost = lazy(() => import('./pages/BlogPost'));
 const Login = lazy(() => import('./pages/Login'));
 const Register = lazy(() => import('./pages/Register'));
 const ForgotPassword = lazy(() => import('./pages/ForgotPassword'));
@@ -52,6 +54,8 @@ function App() {
               <Route path="/about" element={<About />} />
               <Route path="/plans" element={<Plans />} />
               <Route path="/referral" element={<Referral />} />
+              <Route path="/blog" element={<Blog />} />
+              <Route path="/blog/:slug" element={<BlogPost />} />
               <Route path="/login" element={<PublicOnly><Login /></PublicOnly>} />
               <Route path="/register" element={<PublicOnly><Register /></PublicOnly>} />
               <Route path="/forgot-password" element={<ForgotPassword />} />
