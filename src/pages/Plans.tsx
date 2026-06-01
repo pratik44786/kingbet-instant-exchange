@@ -1,4 +1,5 @@
 import SiteLayout from '@/components/layout/SiteLayout';
+import Seo from '@/components/Seo';
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Check, Calculator, ArrowRight, TrendingUp } from 'lucide-react';
@@ -56,6 +57,11 @@ export default function Plans() {
 
   return (
     <SiteLayout>
+      <Seo
+        title="Investment Plans — Starter, Premium & Elite | KingBet Exchange"
+        description="Compare KingBet Exchange investment plans. Start from $100 and earn up to 5% monthly returns with fortnightly payouts and instant withdrawals."
+        path="/plans"
+      />
       <section className="container mx-auto px-4 pt-16 pb-10 text-center">
         <h1 className="font-display text-4xl md:text-6xl font-extrabold">
           Choose your <span className="text-gradient-gold">investment plan</span>
