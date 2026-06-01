@@ -14,10 +14,10 @@ const trust = [
 ];
 
 const team = [
-  { name: 'Arjun Mehta', role: 'CEO & Co-Founder', initials: 'AM' },
-  { name: 'Sara Lin', role: 'Chief Technology Officer', initials: 'SL' },
-  { name: 'David Okafor', role: 'Head of Trading', initials: 'DO' },
-  { name: 'Mei Tanaka', role: 'Head of Security', initials: 'MT' },
+  { name: 'Alexander Reed', role: 'CEO & Co-Founder', initials: 'AR' },
+  { name: 'Sarah Mitchell', role: 'Chief Technology Officer', initials: 'SM' },
+  { name: 'James Harrison', role: 'Head of Trading', initials: 'JH' },
+  { name: 'Emily Chen', role: 'Head of Security', initials: 'EC' },
 ];
 
 export default function About() {
