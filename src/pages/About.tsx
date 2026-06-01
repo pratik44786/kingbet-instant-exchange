@@ -1,4 +1,5 @@
 import SiteLayout from '@/components/layout/SiteLayout';
+import Seo from '@/components/Seo';
 import { Shield, Target, Eye, Lock, BarChart3, Users } from 'lucide-react';
 
 const values = [
@@ -23,6 +24,11 @@ const team = [
 export default function About() {
   return (
     <SiteLayout>
+      <Seo
+        title="About KingBet Exchange — Secure, AI-Driven Crypto Investing"
+        description="Learn about KingBet Exchange: our mission to make institutional-grade crypto investing accessible, secure, and transparent for everyone worldwide."
+        path="/about"
+      />
       <section className="container mx-auto px-4 pt-16 pb-12 text-center">
         <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full glass text-xs text-gold mb-6">About KINGBET EXCHANGE</div>
         <h1 className="font-display text-4xl md:text-6xl font-extrabold tracking-tight">
