@@ -21,9 +21,9 @@ const features = [
 const cryptos = ['BTC', 'ETH', 'USDT', 'BNB', 'SOL', 'XRP', 'ADA', 'DOGE', 'TRX', 'MATIC'];
 
 const testimonials = [
-  { name: 'Rohan M.', role: 'Investor • 2 yrs', text: 'I have earned consistent fortnightly payouts since day one. KINGBET feels institutional-grade.', rating: 5 },
-  { name: 'Priya S.', role: 'Investor • 14 mo', text: 'Withdrawals are truly instant. Customer support actually responds. Rare combo in crypto.', rating: 5 },
-  { name: 'Aman K.', role: 'Investor • 8 mo', text: 'The 5% monthly return is real. My portfolio compounded faster than any bank FD.', rating: 5 },
+  { name: 'Michael T.', role: 'Investor • 2 yrs', text: 'I have earned consistent fortnightly payouts since day one. KINGBET feels institutional-grade.', rating: 5 },
+  { name: 'Jessica L.', role: 'Investor • 14 mo', text: 'Withdrawals are truly instant. Customer support actually responds. Rare combo in crypto.', rating: 5 },
+  { name: 'Daniel R.', role: 'Investor • 8 mo', text: 'The 5% monthly return is real. My portfolio compounded faster than any traditional savings.', rating: 5 },
 ];
 
 const faqs = [
