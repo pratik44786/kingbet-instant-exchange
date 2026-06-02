@@ -109,13 +109,17 @@ Deno.serve(async (req) => {
 
     if (body.action === 'approve_kyc' || body.action === 'reject_kyc') {
       const status = body.action === 'approve_kyc' ? 'approved' : 'rejected';
-      const { data: k } = await admin.from('kyc_submissions').update({ status, ...reviewer }).eq('id', body.id).select().single();
-      if (k) {
-        await admin.from('profiles').update({ kyc_status: status }).eq('id', k.user_id);
-        await notify(k.user_id, status === 'approved' ? 'KYC approved' : 'KYC rejected',
-          status === 'approved' ? 'Your identity has been verified. You can now withdraw.' : `Your KYC was rejected.${body.note ? ' Note: ' + body.note : ''}`,
-          status === 'approved' ? 'success' : 'error', '/kyc');
-      }
+      const { data: result, error } = await admin.rpc('process_kyc_review', {
+        _kyc_id: body.id, _admin_id: user.id, _status: status, _note: body.note ?? null,
+      });
+      if (error) throw error;
+      const handled = alreadyProcessed(result as ProcessResult);
+      if (handled) return handled;
+      const r = result as ProcessResult;
+      if (r.reason === 'invalid_status') return j({ error: 'invalid status' }, 400);
+      await notify(r.user_id!, status === 'approved' ? 'KYC approved' : 'KYC rejected',
+        status === 'approved' ? 'Your identity has been verified. You can now withdraw.' : `Your KYC was rejected.${body.note ? ' Note: ' + body.note : ''}`,
+        status === 'approved' ? 'success' : 'error', '/kyc');
       return j({ ok: true });
     }
 
