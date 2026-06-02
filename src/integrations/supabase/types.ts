@@ -609,6 +609,15 @@ export type Database = {
         Args: { _admin_id: string; _deposit_id: string; _note?: string }
         Returns: Json
       }
+      process_kyc_review: {
+        Args: {
+          _admin_id: string
+          _kyc_id: string
+          _note?: string
+          _status: string
+        }
+        Returns: Json
+      }
       process_withdrawal_approval: {
         Args: {
           _admin_id: string
