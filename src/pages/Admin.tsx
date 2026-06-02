@@ -71,11 +71,18 @@ function useRows<T>(table: string, filter?: (q: any) => any) {
 async function callAdmin(action: string, id: string, extra: Record<string, any> = {}) {
   const { data, error } = await supabase.functions.invoke('admin-actions', { body: { action, id, ...extra } });
   if (error || (data as any)?.error) { toast.error((data as any)?.error || error?.message || 'Action failed'); return false; }
-  toast.success('Done'); return true;
+  toast.success((data as any)?.already_processed ? 'Already processed' : 'Done'); return true;
 }
 
 function DepositsPanel() {
   const { rows, loading, reload } = useRows<any>('deposits');
+  const [processingId, setProcessingId] = useState<string | null>(null);
+  const run = async (action: string, id: string, extra: Record<string, any> = {}) => {
+    if (processingId) return;
+    setProcessingId(id);
+    try { if (await callAdmin(action, id, extra)) await reload(); }
+    finally { setProcessingId(null); }
+  };
   return (
     <Panel title="Deposit requests" onRefresh={reload} loading={loading} empty={rows.length === 0}>
       {rows.map((d) => (
@@ -88,8 +95,8 @@ function DepositsPanel() {
           amount={`$${Number(d.amount).toFixed(2)}`}
           actions={d.status === 'pending' && (
             <>
-              <button onClick={async () => { if (await callAdmin('approve_deposit', d.id)) reload(); }} className="btn-icon-success"><Check className="h-4 w-4" /></button>
-              <button onClick={async () => { const note = prompt('Reason?') || ''; if (await callAdmin('reject_deposit', d.id, { note })) reload(); }} className="btn-icon-danger"><X className="h-4 w-4" /></button>
+              <button disabled={processingId === d.id} onClick={() => run('approve_deposit', d.id)} className="btn-icon-success disabled:opacity-50"><Check className="h-4 w-4" /></button>
+              <button disabled={processingId === d.id} onClick={() => { const note = prompt('Reason?') || ''; run('reject_deposit', d.id, { note }); }} className="btn-icon-danger disabled:opacity-50"><X className="h-4 w-4" /></button>
             </>
           )} />
       ))}
@@ -99,6 +106,13 @@ function DepositsPanel() {
 
 function WithdrawalsPanel() {
   const { rows, loading, reload } = useRows<any>('withdrawals');
+  const [processingId, setProcessingId] = useState<string | null>(null);
+  const run = async (action: string, id: string, extra: Record<string, any> = {}) => {
+    if (processingId) return;
+    setProcessingId(id);
+    try { if (await callAdmin(action, id, extra)) await reload(); }
+    finally { setProcessingId(null); }
+  };
   return (
     <Panel title="Withdrawal requests" onRefresh={reload} loading={loading} empty={rows.length === 0}>
       {rows.map((w) => (
@@ -111,8 +125,8 @@ function WithdrawalsPanel() {
           amount={`$${Number(w.amount).toFixed(2)}`}
           actions={w.status === 'pending' && (
             <>
-              <button onClick={async () => { const tx = prompt('Transaction hash:') || ''; if (await callAdmin('approve_withdrawal', w.id, { tx_hash: tx })) reload(); }} className="btn-icon-success"><Check className="h-4 w-4" /></button>
-              <button onClick={async () => { const note = prompt('Reason?') || ''; if (await callAdmin('reject_withdrawal', w.id, { note })) reload(); }} className="btn-icon-danger"><X className="h-4 w-4" /></button>
+              <button disabled={processingId === w.id} onClick={() => { const tx = prompt('Transaction hash:') || ''; run('approve_withdrawal', w.id, { tx_hash: tx }); }} className="btn-icon-success disabled:opacity-50"><Check className="h-4 w-4" /></button>
+              <button disabled={processingId === w.id} onClick={() => { const note = prompt('Reason?') || ''; run('reject_withdrawal', w.id, { note }); }} className="btn-icon-danger disabled:opacity-50"><X className="h-4 w-4" /></button>
             </>
           )} />
       ))}
