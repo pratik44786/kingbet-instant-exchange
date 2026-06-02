@@ -4,6 +4,7 @@ import { useAuth } from '@/context/AuthContext';
 import { toast } from 'sonner';
 import { ArrowLeft, Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import Logo from '@/components/layout/Logo';
+import Seo from '@/components/Seo';
 
 export default function Login() {
   const { login, error } = useAuth();
@@ -26,6 +27,7 @@ export default function Login() {
 
   return (
     <div className="min-h-screen flex flex-col">
+      <Seo title="Sign in | KingBet Exchange" description="Sign in to your KingBet Exchange account securely." path="/login" noindex />
       <header className="p-5">
         <Link to="/" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-gold transition-colors">
           <ArrowLeft className="h-4 w-4" /> Back to home
