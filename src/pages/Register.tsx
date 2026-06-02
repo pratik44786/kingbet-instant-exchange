@@ -5,6 +5,7 @@ import { toast } from 'sonner';
 import { ArrowLeft, Mail, Lock, User, Phone, Tag, Eye, EyeOff } from 'lucide-react';
 import Logo from '@/components/layout/Logo';
 import { z } from 'zod';
+import Seo from '@/components/Seo';
 
 const schema = z.object({
   fullName: z.string().trim().min(2, 'Name is too short').max(80),
@@ -53,6 +54,7 @@ export default function Register() {
 
   return (
     <div className="min-h-screen flex flex-col">
+      <Seo title="Create account | KingBet Exchange" description="Create a secure KingBet Exchange account." path="/register" noindex />
       <header className="p-5">
         <Link to="/" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-gold transition-colors">
           <ArrowLeft className="h-4 w-4" /> Back to home
