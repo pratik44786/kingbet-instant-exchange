@@ -18,6 +18,15 @@ interface Body {
   tx_hash?: string;
 }
 
+interface ProcessResult {
+  ok?: boolean;
+  reason?: string;
+  status?: string;
+  user_id?: string;
+  amount?: number | string;
+  crypto_symbol?: string;
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
   try {
@@ -36,80 +45,78 @@ Deno.serve(async (req) => {
     const body = await req.json() as Body;
     if (!body?.action || !body?.id) return j({ error: 'bad request' }, 400);
 
-    const now = new Date().toISOString();
-    const reviewer = { reviewed_at: now, reviewed_by: user.id, admin_note: body.note ?? null };
-
     const notify = (uid: string, title: string, bdy: string, type: string, link: string) =>
       admin.from('notifications').insert({ user_id: uid, title, body: bdy, type, link });
 
+    const alreadyProcessed = (result: ProcessResult) => {
+      if (result?.reason === 'already_processed') {
+        return j({ ok: true, already_processed: true, status: result.status });
+      }
+      if (result?.reason === 'not_found') return j({ error: 'not found' }, 404);
+      return null;
+    };
+
     if (body.action === 'approve_deposit') {
-      const { data: d } = await admin.from('deposits').select('*').eq('id', body.id).single();
-      if (!d || d.status !== 'pending') return j({ error: 'invalid state' }, 400);
-      const { data: w } = await admin.from('wallets').select('balance').eq('user_id', d.user_id).single();
-      const before = Number(w?.balance ?? 0);
-      const after = before + Number(d.amount);
-      await admin.from('wallets').update({ balance: after, updated_at: now }).eq('user_id', d.user_id);
-      await admin.from('deposits').update({ status: 'approved', transaction_hash: body.tx_hash ?? d.transaction_hash, ...reviewer }).eq('id', body.id);
-      await admin.from('transactions').insert({
-        user_id: d.user_id, type: 'deposit', amount: Number(d.amount),
-        balance_before: before, balance_after: after,
-        description: `Deposit approved (${d.crypto_symbol})`, reference_id: d.id, reference_type: 'deposit',
+      const { data: result, error } = await admin.rpc('process_deposit_approval', {
+        _deposit_id: body.id, _admin_id: user.id, _tx_hash: body.tx_hash ?? null, _note: body.note ?? null,
       });
-      await notify(d.user_id, 'Deposit approved', `Your deposit of ${d.amount} ${d.crypto_symbol} has been credited.`, 'success', '/dashboard');
+      if (error) throw error;
+      const handled = alreadyProcessed(result as ProcessResult);
+      if (handled) return handled;
+      const r = result as ProcessResult;
+      await notify(r.user_id!, 'Deposit approved', `Your deposit of ${r.amount} ${r.crypto_symbol} has been credited.`, 'success', '/dashboard');
       return j({ ok: true });
     }
 
     if (body.action === 'reject_deposit') {
-      const { data: d } = await admin.from('deposits').select('user_id, amount, crypto_symbol').eq('id', body.id).single();
-      await admin.from('deposits').update({ status: 'rejected', ...reviewer }).eq('id', body.id);
-      if (d) await notify(d.user_id, 'Deposit rejected', `Your deposit of ${d.amount} ${d.crypto_symbol} was rejected.${body.note ? ' Note: ' + body.note : ''}`, 'error', '/deposit');
+      const { data: result, error } = await admin.rpc('process_deposit_rejection', {
+        _deposit_id: body.id, _admin_id: user.id, _note: body.note ?? null,
+      });
+      if (error) throw error;
+      const handled = alreadyProcessed(result as ProcessResult);
+      if (handled) return handled;
+      const r = result as ProcessResult;
+      await notify(r.user_id!, 'Deposit rejected', `Your deposit of ${r.amount} ${r.crypto_symbol} was rejected.${body.note ? ' Note: ' + body.note : ''}`, 'error', '/deposit');
       return j({ ok: true });
     }
 
     if (body.action === 'approve_withdrawal') {
-      const { data: wd } = await admin.from('withdrawals').select('*').eq('id', body.id).single();
-      if (!wd || wd.status !== 'pending') return j({ error: 'invalid state' }, 400);
-      const { data: w } = await admin.from('wallets').select('balance, pending_withdrawal').eq('user_id', wd.user_id).single();
-      const before = Number(w?.balance ?? 0);
-      const pending = Math.max(0, Number(w?.pending_withdrawal ?? 0) - Number(wd.amount));
-      await admin.from('wallets').update({ pending_withdrawal: pending, updated_at: now }).eq('user_id', wd.user_id);
-      await admin.from('withdrawals').update({ status: 'approved', transaction_hash: body.tx_hash ?? wd.transaction_hash, ...reviewer }).eq('id', body.id);
-      await admin.from('transactions').insert({
-        user_id: wd.user_id, type: 'withdrawal', amount: -Number(wd.amount),
-        balance_before: before, balance_after: before,
-        description: `Withdrawal approved (${wd.crypto_symbol})`, reference_id: wd.id, reference_type: 'withdrawal',
+      const { data: result, error } = await admin.rpc('process_withdrawal_approval', {
+        _withdrawal_id: body.id, _admin_id: user.id, _tx_hash: body.tx_hash ?? null, _note: body.note ?? null,
       });
-      await notify(wd.user_id, 'Withdrawal approved', `Your withdrawal of ${wd.amount} ${wd.crypto_symbol} has been processed.`, 'success', '/dashboard');
+      if (error) throw error;
+      const handled = alreadyProcessed(result as ProcessResult);
+      if (handled) return handled;
+      const r = result as ProcessResult;
+      await notify(r.user_id!, 'Withdrawal approved', `Your withdrawal of ${r.amount} ${r.crypto_symbol} has been processed.`, 'success', '/dashboard');
       return j({ ok: true });
     }
 
     if (body.action === 'reject_withdrawal') {
-      const { data: wd } = await admin.from('withdrawals').select('*').eq('id', body.id).single();
-      if (!wd || wd.status !== 'pending') return j({ error: 'invalid state' }, 400);
-      const { data: w } = await admin.from('wallets').select('balance, pending_withdrawal').eq('user_id', wd.user_id).single();
-      const refundedBefore = Number(w?.balance ?? 0);
-      const refundedAfter = refundedBefore + Number(wd.amount);
-      const pending = Math.max(0, Number(w?.pending_withdrawal ?? 0) - Number(wd.amount));
-      await admin.from('wallets').update({ balance: refundedAfter, pending_withdrawal: pending, updated_at: now }).eq('user_id', wd.user_id);
-      await admin.from('withdrawals').update({ status: 'rejected', ...reviewer }).eq('id', body.id);
-      await admin.from('transactions').insert({
-        user_id: wd.user_id, type: 'admin_adjustment', amount: Number(wd.amount),
-        balance_before: refundedBefore, balance_after: refundedAfter,
-        description: `Withdrawal rejected — refund`, reference_id: wd.id, reference_type: 'withdrawal',
+      const { data: result, error } = await admin.rpc('process_withdrawal_rejection', {
+        _withdrawal_id: body.id, _admin_id: user.id, _note: body.note ?? null,
       });
-      await notify(wd.user_id, 'Withdrawal rejected', `Your withdrawal of ${wd.amount} ${wd.crypto_symbol} was rejected and refunded.${body.note ? ' Note: ' + body.note : ''}`, 'warning', '/dashboard');
+      if (error) throw error;
+      const handled = alreadyProcessed(result as ProcessResult);
+      if (handled) return handled;
+      const r = result as ProcessResult;
+      await notify(r.user_id!, 'Withdrawal rejected', `Your withdrawal of ${r.amount} ${r.crypto_symbol} was rejected and refunded.${body.note ? ' Note: ' + body.note : ''}`, 'warning', '/dashboard');
       return j({ ok: true });
     }
 
     if (body.action === 'approve_kyc' || body.action === 'reject_kyc') {
       const status = body.action === 'approve_kyc' ? 'approved' : 'rejected';
-      const { data: k } = await admin.from('kyc_submissions').update({ status, ...reviewer }).eq('id', body.id).select().single();
-      if (k) {
-        await admin.from('profiles').update({ kyc_status: status }).eq('id', k.user_id);
-        await notify(k.user_id, status === 'approved' ? 'KYC approved' : 'KYC rejected',
-          status === 'approved' ? 'Your identity has been verified. You can now withdraw.' : `Your KYC was rejected.${body.note ? ' Note: ' + body.note : ''}`,
-          status === 'approved' ? 'success' : 'error', '/kyc');
-      }
+      const { data: result, error } = await admin.rpc('process_kyc_review', {
+        _kyc_id: body.id, _admin_id: user.id, _status: status, _note: body.note ?? null,
+      });
+      if (error) throw error;
+      const handled = alreadyProcessed(result as ProcessResult);
+      if (handled) return handled;
+      const r = result as ProcessResult;
+      if (r.reason === 'invalid_status') return j({ error: 'invalid status' }, 400);
+      await notify(r.user_id!, status === 'approved' ? 'KYC approved' : 'KYC rejected',
+        status === 'approved' ? 'Your identity has been verified. You can now withdraw.' : `Your KYC was rejected.${body.note ? ' Note: ' + body.note : ''}`,
+        status === 'approved' ? 'success' : 'error', '/kyc');
       return j({ ok: true });
     }
 

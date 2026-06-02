@@ -41,14 +41,19 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://kingbetexchange.live/login</loc>
-    <changefreq>yearly</changefreq>
-    <priority>0.5</priority>
+    <loc>https://kingbetexchange.live/blog/usdc-deposit-networks-erc20-solana-bep20</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://kingbetexchange.live/register</loc>
-    <changefreq>yearly</changefreq>
-    <priority>0.5</priority>
+    <loc>https://kingbetexchange.live/blog/kyc-and-aml-crypto-platform-guide</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://kingbetexchange.live/blog/crypto-investment-risk-management-checklist</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
   </url>
   <url>
     <loc>https://kingbetexchange.live/terms</loc>
