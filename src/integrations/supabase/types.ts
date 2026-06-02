@@ -596,6 +596,28 @@ export type Database = {
         Args: { admin_uid: string; target_uid: string }
         Returns: boolean
       }
+      process_deposit_approval: {
+        Args: {
+          _admin_id: string
+          _deposit_id: string
+          _note?: string
+          _tx_hash?: string
+        }
+        Returns: Json
+      }
+      process_withdrawal_approval: {
+        Args: {
+          _admin_id: string
+          _note?: string
+          _tx_hash?: string
+          _withdrawal_id: string
+        }
+        Returns: Json
+      }
+      process_withdrawal_rejection: {
+        Args: { _admin_id: string; _note?: string; _withdrawal_id: string }
+        Returns: Json
+      }
     }
     Enums: {
       account_status: "active" | "suspended" | "blocked"
