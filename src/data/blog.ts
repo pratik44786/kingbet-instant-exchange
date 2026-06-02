@@ -83,6 +83,80 @@ export const blogPosts: BlogPost[] = [
       { q: 'Should I use cold storage?', a: 'For long-term or large holdings, yes. Cold, multi-signature storage keeps funds offline and far harder to steal.' },
     ],
   },
+  {
+    slug: 'usdc-deposit-networks-erc20-solana-bep20',
+    title: 'USDC Deposit Networks Explained: ERC-20 vs Solana vs BEP-20',
+    excerpt:
+      'Compare USDC on Ethereum, Solana, and BNB Smart Chain so you can choose the right network, avoid transfer mistakes, and deposit crypto safely.',
+    date: '2026-06-02',
+    readingTime: '7 min read',
+    category: 'Wallets',
+    content: [
+      'USDC is available on multiple blockchains, but every network has its own wallet address format, transaction fees, and confirmation speed. Choosing the correct network matters because crypto transfers cannot usually be reversed after they are sent.',
+      '## ERC-20 USDC on Ethereum',
+      'ERC-20 is the Ethereum version of USDC. It is widely supported and highly secure, but network fees can be higher during busy market periods. Use ERC-20 only when the receiving platform specifically shows an Ethereum or ERC-20 deposit address.',
+      '## USDC on Solana',
+      'Solana USDC is popular for fast confirmations and low transfer costs. Solana addresses look different from Ethereum-style addresses, so always verify the selected network before sending funds.',
+      '## BEP-20 USDC on BNB Smart Chain',
+      'BEP-20 USDC uses BNB Smart Chain. Its addresses often look similar to Ethereum addresses, which makes network selection especially important. A matching-looking address does not mean the network is correct.',
+      '## Deposit checklist before sending',
+      'Confirm the coin, network, full address, and minimum deposit amount before sending. Start with a small test transfer if you are using a wallet or network for the first time.',
+    ],
+    faqs: [
+      { q: 'Can I send ERC-20 USDC to a Solana USDC address?', a: 'No. Only send USDC on the exact network shown on the deposit page. Sending on the wrong network can permanently lose funds.' },
+      { q: 'Which USDC network is cheapest?', a: 'Fees change over time, but Solana and BNB Smart Chain are often cheaper than Ethereum during busy periods.' },
+    ],
+  },
+  {
+    slug: 'kyc-and-aml-crypto-platform-guide',
+    title: 'KYC and AML in Crypto: Why Verification Protects Investors',
+    excerpt:
+      'Understand why crypto platforms use KYC and AML checks, what documents are usually required, and how verification improves account safety.',
+    date: '2026-06-02',
+    readingTime: '6 min read',
+    category: 'Compliance',
+    content: [
+      'KYC and AML checks are common across financial platforms because they help reduce fraud, account abuse, and suspicious fund movement. For users, verification creates a safer environment for deposits, withdrawals, and long-term account access.',
+      '## What KYC means',
+      'KYC stands for Know Your Customer. It usually asks for basic identity information, a valid document, and sometimes a selfie check to confirm the account owner is real.',
+      '## What AML means',
+      'AML stands for Anti-Money Laundering. AML controls help platforms detect suspicious activity and protect legitimate users from high-risk transactions.',
+      '## Why verification can affect withdrawals',
+      'Many platforms require approved KYC before withdrawals. This helps prevent stolen accounts from quickly moving funds out and gives support teams a verified identity trail when disputes happen.',
+      '## How to pass verification faster',
+      'Upload clear images, use matching names, avoid cropped documents, and submit details exactly as they appear on your ID. Blurry or mismatched information is the most common reason for delays.',
+    ],
+    faqs: [
+      { q: 'Is KYC required for every crypto platform?', a: 'Requirements vary by platform and region, but KYC is common for platforms that handle deposits, withdrawals, and investment products.' },
+      { q: 'How can I keep my documents safe?', a: 'Use platforms with secure uploads, avoid sharing documents over public chat, and keep your account protected with 2FA.' },
+    ],
+  },
+  {
+    slug: 'crypto-investment-risk-management-checklist',
+    title: 'Crypto Investment Risk Management Checklist for New Investors',
+    excerpt:
+      'A practical checklist for sizing positions, planning withdrawals, protecting wallets, and avoiding emotional decisions in crypto investing.',
+    date: '2026-06-02',
+    readingTime: '8 min read',
+    category: 'Risk Management',
+    content: [
+      'Crypto investing rewards discipline more than excitement. A clear risk checklist helps you make repeatable decisions, protect your wallet, and avoid overexposure during volatile market cycles.',
+      '## Define your maximum allocation',
+      'Decide in advance how much of your overall savings can be exposed to crypto. This number should be small enough that market drops do not affect rent, bills, emergency savings, or family obligations.',
+      '## Split deposits into stages',
+      'Instead of depositing everything at once, many investors use staged deposits. This gives time to understand platform workflows, payout timing, and withdrawal processing before increasing exposure.',
+      '## Track realised profit separately',
+      'When payouts arrive, decide how much to withdraw and how much to reinvest. Tracking realised profit separately helps you avoid mistaking paper growth for money already secured.',
+      '## Protect account access',
+      'Use unique passwords, enable 2FA, verify every withdrawal address, and keep backup codes offline. Security is part of risk management, not a separate task.',
+      '## Review your plan monthly',
+      'Markets, personal goals, and income needs change. A monthly review keeps your investment plan aligned with your real financial situation.',
+    ],
+    faqs: [
+      { q: 'What is the biggest mistake new crypto investors make?', a: 'Overcommitting funds too quickly. Start small, learn the process, and increase exposure only if the strategy still fits your risk tolerance.' },
+      { q: 'Should I reinvest every payout?', a: 'Not always. Many users split payouts between reinvestment and withdrawals to balance growth with realised profit.' },
+    ],
+  },
 ];
 
 export const getPost = (slug: string) => blogPosts.find((p) => p.slug === slug);
