@@ -605,6 +605,10 @@ export type Database = {
         }
         Returns: Json
       }
+      process_deposit_rejection: {
+        Args: { _admin_id: string; _deposit_id: string; _note?: string }
+        Returns: Json
+      }
       process_withdrawal_approval: {
         Args: {
           _admin_id: string
