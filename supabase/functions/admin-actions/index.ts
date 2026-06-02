@@ -45,9 +45,6 @@ Deno.serve(async (req) => {
     const body = await req.json() as Body;
     if (!body?.action || !body?.id) return j({ error: 'bad request' }, 400);
 
-    const now = new Date().toISOString();
-    const reviewer = { reviewed_at: now, reviewed_by: user.id, admin_note: body.note ?? null };
-
     const notify = (uid: string, title: string, bdy: string, type: string, link: string) =>
       admin.from('notifications').insert({ user_id: uid, title, body: bdy, type, link });
 
