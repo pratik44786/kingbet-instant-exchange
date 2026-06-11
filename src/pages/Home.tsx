@@ -56,8 +56,8 @@ export default function Home() {
   return (
     <SiteLayout>
       <Seo
-        title="KingBet Exchange — Smart Crypto Investing with 5% Monthly Returns"
-        description="Grow your crypto wealth with KingBet Exchange. AI-powered portfolios, 5% monthly returns, fortnightly payouts, instant withdrawals and lifetime referral earnings."
+        title="KingBet Exchange — Smart Crypto Investing Platform"
+        description="Grow your crypto wealth with KingBet Exchange. AI-powered portfolios, 5% monthly returns, fortnightly payouts, instant withdrawals and referral earnings."
         path="/"
         schema={[orgSchema, faqSchema]}
       />
