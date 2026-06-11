@@ -1,0 +1,18 @@
+# KingBet Exchange
+
+> Smart, secure, AI-driven crypto investment platform offering up to 5% monthly returns, fortnightly payouts, instant withdrawals and lifetime referral earnings.
+
+## Pages
+
+- [Home](/): Overview of KingBet Exchange, returns, security and supported assets.
+- [About](/about): Who we are and how the platform works.
+- [Plans](/plans): Investment plans and pricing tiers.
+- [Referral](/referral): Lifetime referral commission program.
+- [Blog](/blog): Guides on crypto investing, wallet security and payouts.
+
+## Legal
+
+- [Terms of Service](/terms): Platform terms and conditions.
+- [Privacy Policy](/privacy): How we handle your data.
+- [AML & KYC Policy](/aml): Identity verification and compliance.
+- [Risk Disclosure](/risk): Investment risks to understand.
