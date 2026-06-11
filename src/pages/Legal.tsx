@@ -58,9 +58,10 @@ const SECTIONS = {
 
 export default function LegalPage({ doc }: { doc: keyof typeof SECTIONS }) {
   const s = SECTIONS[doc];
+  const m = META[doc];
   return (
     <SiteLayout>
-      <section className="container mx-auto px-4 py-16 max-w-4xl">
+      {m && <Seo title={m.title} description={m.description} path={m.path} />}
         <p className="text-xs text-gold uppercase tracking-widest mb-2">Last updated · {s.updated}</p>
         <h1 className="section-heading mb-6"><span className="text-gradient-gold">{s.title}</span></h1>
         <div className="card-premium space-y-6">
