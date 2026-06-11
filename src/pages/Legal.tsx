@@ -1,4 +1,12 @@
 import SiteLayout from '@/components/layout/SiteLayout';
+import Seo from '@/components/Seo';
+
+const META: Record<string, { title: string; description: string; path: string }> = {
+  terms: { title: 'Terms of Service | KingBet Exchange', description: 'Read the KingBet Exchange Terms of Service covering eligibility, account responsibilities, investment risk and limitation of liability.', path: '/terms' },
+  privacy: { title: 'Privacy Policy | KingBet Exchange', description: 'How KingBet Exchange collects, uses, shares and retains your personal and KYC data, plus your privacy rights.', path: '/privacy' },
+  aml: { title: 'AML & KYC Policy | KingBet Exchange', description: 'KingBet Exchange anti-money-laundering and KYC policy: identity verification, transaction monitoring and restricted jurisdictions.', path: '/aml' },
+  risk: { title: 'Risk Disclosure | KingBet Exchange', description: 'Understand the market, liquidity, cyber and regulatory risks of crypto investing on KingBet Exchange.', path: '/risk' },
+};
 
 const SECTIONS = {
   terms: {
@@ -50,8 +58,10 @@ const SECTIONS = {
 
 export default function LegalPage({ doc }: { doc: keyof typeof SECTIONS }) {
   const s = SECTIONS[doc];
+  const m = META[doc];
   return (
     <SiteLayout>
+      {m && <Seo title={m.title} description={m.description} path={m.path} />}
       <section className="container mx-auto px-4 py-16 max-w-4xl">
         <p className="text-xs text-gold uppercase tracking-widest mb-2">Last updated · {s.updated}</p>
         <h1 className="section-heading mb-6"><span className="text-gradient-gold">{s.title}</span></h1>

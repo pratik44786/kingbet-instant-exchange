@@ -22,7 +22,7 @@ export default function Blog() {
   return (
     <SiteLayout>
       <Seo
-        title="Crypto Investing Blog — Guides, Security & Strategy | KingBet Exchange"
+        title="Crypto Investing Blog — Guides & Strategy | KingBet"
         description="Practical guides on how to invest in crypto safely, wallet security best practices, payouts, and compounding strategies from KingBet Exchange."
         path="/blog"
         schema={schema}
