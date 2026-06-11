@@ -1,4 +1,12 @@
 import SiteLayout from '@/components/layout/SiteLayout';
+import Seo from '@/components/Seo';
+
+const META: Record<string, { title: string; description: string; path: string }> = {
+  terms: { title: 'Terms of Service | KingBet Exchange', description: 'Read the KingBet Exchange Terms of Service covering eligibility, account responsibilities, investment risk and limitation of liability.', path: '/terms' },
+  privacy: { title: 'Privacy Policy | KingBet Exchange', description: 'How KingBet Exchange collects, uses, shares and retains your personal and KYC data, plus your privacy rights.', path: '/privacy' },
+  aml: { title: 'AML & KYC Policy | KingBet Exchange', description: 'KingBet Exchange anti-money-laundering and KYC policy: identity verification, transaction monitoring and restricted jurisdictions.', path: '/aml' },
+  risk: { title: 'Risk Disclosure | KingBet Exchange', description: 'Understand the market, liquidity, cyber and regulatory risks of crypto investing on KingBet Exchange.', path: '/risk' },
+};
 
 const SECTIONS = {
   terms: {
