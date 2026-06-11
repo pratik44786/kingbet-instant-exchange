@@ -62,6 +62,7 @@ export default function LegalPage({ doc }: { doc: keyof typeof SECTIONS }) {
   return (
     <SiteLayout>
       {m && <Seo title={m.title} description={m.description} path={m.path} />}
+      <section className="container mx-auto px-4 py-16 max-w-4xl">
         <p className="text-xs text-gold uppercase tracking-widest mb-2">Last updated · {s.updated}</p>
         <h1 className="section-heading mb-6"><span className="text-gradient-gold">{s.title}</span></h1>
         <div className="card-premium space-y-6">
