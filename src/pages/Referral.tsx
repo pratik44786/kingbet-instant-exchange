@@ -1,14 +1,41 @@
 import SiteLayout from '@/components/layout/SiteLayout';
 import Seo from '@/components/Seo';
-import { Users, Link2, TrendingUp, Award, Copy, Check } from 'lucide-react';
+import { Users, Link2, TrendingUp, Award, Copy, Check, Gift } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
+import { useWallet } from '@/hooks/useWallet';
+
+interface ReferralRow {
+  referred_user_id: string;
+  username: string;
+  full_name: string | null;
+  level: number;
+  total_commission: number;
+  kyc_status: string;
+  joined_at: string;
+}
 
 export default function Referral() {
   const { user, isAuthenticated } = useAuth();
+  const { wallet } = useWallet();
   const [copied, setCopied] = useState(false);
+  const [refs, setRefs] = useState<ReferralRow[]>([]);
+  const [loadingRefs, setLoadingRefs] = useState(false);
+
+  useEffect(() => {
+    if (!isAuthenticated) { setRefs([]); return; }
+    setLoadingRefs(true);
+    supabase.rpc('get_my_referrals').then(({ data, error }) => {
+      if (error) console.error('Referrals fetch error:', error);
+      setRefs((data as ReferralRow[]) || []);
+      setLoadingRefs(false);
+    });
+  }, [isAuthenticated, user?.id]);
+
+  const totalEarned = wallet?.referral_earnings ?? 0;
 
   const link = isAuthenticated && user?.referralCode
     ? `${window.location.origin}/register?ref=${user.referralCode}`
