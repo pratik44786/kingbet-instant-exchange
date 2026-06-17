@@ -583,6 +583,18 @@ export type Database = {
         Args: { _investment_id: string; _profit: number }
         Returns: undefined
       }
+      get_my_referrals: {
+        Args: never
+        Returns: {
+          full_name: string
+          joined_at: string
+          kyc_status: string
+          level: number
+          referred_user_id: string
+          total_commission: number
+          username: string
+        }[]
+      }
       get_user_role: {
         Args: { uid: string }
         Returns: Database["public"]["Enums"]["app_role"]

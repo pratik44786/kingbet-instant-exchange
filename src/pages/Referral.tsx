@@ -1,14 +1,41 @@
 import SiteLayout from '@/components/layout/SiteLayout';
 import Seo from '@/components/Seo';
-import { Users, Link2, TrendingUp, Award, Copy, Check } from 'lucide-react';
+import { Users, Link2, TrendingUp, Award, Copy, Check, Gift } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
+import { useWallet } from '@/hooks/useWallet';
+
+interface ReferralRow {
+  referred_user_id: string;
+  username: string;
+  full_name: string | null;
+  level: number;
+  total_commission: number;
+  kyc_status: string;
+  joined_at: string;
+}
 
 export default function Referral() {
   const { user, isAuthenticated } = useAuth();
+  const { wallet } = useWallet();
   const [copied, setCopied] = useState(false);
+  const [refs, setRefs] = useState<ReferralRow[]>([]);
+  const [loadingRefs, setLoadingRefs] = useState(false);
+
+  useEffect(() => {
+    if (!isAuthenticated) { setRefs([]); return; }
+    setLoadingRefs(true);
+    supabase.rpc('get_my_referrals').then(({ data, error }) => {
+      if (error) console.error('Referrals fetch error:', error);
+      setRefs((data as ReferralRow[]) || []);
+      setLoadingRefs(false);
+    });
+  }, [isAuthenticated, user?.id]);
+
+  const totalEarned = wallet?.referral_earnings ?? 0;
 
   const link = isAuthenticated && user?.referralCode
     ? `${window.location.origin}/register?ref=${user.referralCode}`
@@ -78,6 +105,68 @@ export default function Referral() {
           )}
         </div>
       </section>
+
+      {isAuthenticated && (
+        <section className="container mx-auto px-4 py-6">
+          <div className="grid sm:grid-cols-2 gap-5 max-w-4xl mx-auto mb-8">
+            <div className="card-premium flex items-center gap-4">
+              <div className="h-12 w-12 rounded-xl bg-gold/10 flex items-center justify-center"><Users className="h-6 w-6 text-gold" /></div>
+              <div>
+                <p className="text-xs text-muted-foreground">Total Referrals</p>
+                <p className="font-display text-2xl font-bold">{refs.length}</p>
+              </div>
+            </div>
+            <div className="card-premium flex items-center gap-4">
+              <div className="h-12 w-12 rounded-xl bg-gold/10 flex items-center justify-center"><Gift className="h-6 w-6 text-gold" /></div>
+              <div>
+                <p className="text-xs text-muted-foreground">Total Rewards Earned</p>
+                <p className="font-display text-2xl font-bold text-gradient-gold">${Number(totalEarned).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="card-premium max-w-4xl mx-auto">
+            <h2 className="font-display text-xl font-bold mb-4">Your referrals</h2>
+            {loadingRefs ? (
+              <p className="text-sm text-muted-foreground py-6 text-center">Loading…</p>
+            ) : refs.length === 0 ? (
+              <p className="text-sm text-muted-foreground py-6 text-center">No referrals yet. Share your link to start earning rewards.</p>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="text-left text-xs text-muted-foreground border-b border-white/5">
+                      <th className="py-2 pr-4 font-medium">User</th>
+                      <th className="py-2 pr-4 font-medium">Status</th>
+                      <th className="py-2 pr-4 font-medium">Level</th>
+                      <th className="py-2 pr-4 font-medium text-right">Reward</th>
+                      <th className="py-2 font-medium text-right">Joined</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {refs.map(r => (
+                      <tr key={r.referred_user_id} className="border-b border-white/5 last:border-0">
+                        <td className="py-3 pr-4 font-medium">{r.full_name || r.username}</td>
+                        <td className="py-3 pr-4">
+                          <span className={`px-2 py-0.5 rounded-full text-xs capitalize ${
+                            r.kyc_status === 'approved' ? 'bg-success/15 text-success' :
+                            r.kyc_status === 'rejected' ? 'bg-destructive/15 text-destructive' :
+                            'bg-gold/15 text-gold'
+                          }`}>{r.kyc_status === 'approved' ? 'Verified' : r.kyc_status === 'rejected' ? 'Rejected' : 'Pending'}</span>
+                        </td>
+                        <td className="py-3 pr-4">L{r.level}</td>
+                        <td className="py-3 pr-4 text-right font-mono text-success">+${Number(r.total_commission).toFixed(2)}</td>
+                        <td className="py-3 text-right text-muted-foreground">{new Date(r.joined_at).toLocaleDateString()}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        </section>
+      )}
+
 
       <section className="container mx-auto px-4 py-12">
         <div className="grid md:grid-cols-4 gap-5 max-w-4xl mx-auto">
