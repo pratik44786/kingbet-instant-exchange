@@ -45,13 +45,14 @@ export default function MarketTicker() {
       try {
         const res = await fetch(API);
         if (!res.ok) return;
-        const data: Array<{ id: string; current_price: number; price_change_percentage_24h: number }> = await res.json();
+        const data: Array<{ id: string; current_price: number | null; price_change_percentage_24h: number | null }> = await res.json();
         const map = new Map(data.map((d) => [d.id, d]));
         const next = IDS.map(([id, s]) => {
           const d = map.get(id);
-          return d
+          const fallback = FALLBACK.find((f) => f.s === s)!;
+          return d && d.current_price != null
             ? { s, p: d.current_price, c: d.price_change_percentage_24h ?? 0 }
-            : FALLBACK.find((f) => f.s === s)!;
+            : fallback;
         });
         if (active) setCoins(next);
       } catch {
