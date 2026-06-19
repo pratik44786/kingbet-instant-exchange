@@ -12,6 +12,54 @@ export interface BlogPost {
 
 export const blogPosts: BlogPost[] = [
   {
+    slug: 'buy-usdt-with-inr-beginners-guide',
+    title: 'How to Buy USDT with INR: A Simple Step-by-Step Guide',
+    excerpt:
+      'A clear, beginner-friendly walkthrough on buying USDT with Indian Rupees (INR) using UPI and bank transfers, plus tips to keep every transaction safe.',
+    date: '2026-06-19',
+    readingTime: '7 min read',
+    category: 'Getting Started',
+    content: [
+      'USDT (Tether) is one of the most widely used stablecoins because its value stays close to one US dollar. For investors funding an account in Indian Rupees, USDT is often the easiest bridge between local money and the wider crypto market. This guide explains how to convert INR into USDT smoothly and safely.',
+      '## Why USDT is popular for INR users',
+      'USDT removes the volatility of holding coins like Bitcoin while you decide where to invest. You can move INR into USDT, keep a stable balance, and deploy it into investment plans whenever you are ready — without watching prices swing every hour.',
+      '## Funding options: UPI and bank transfer',
+      'Most users fund their balance using UPI for instant transfers or a standard bank transfer (IMPS/NEFT) for larger amounts. UPI is fast and convenient for everyday top-ups, while bank transfers are useful when moving bigger sums in a single transaction.',
+      '## Step-by-step: INR to USDT',
+      'First, complete your account verification so deposits and withdrawals stay unrestricted. Next, add funds using your preferred method, then convert the balance into USDT. Always confirm the network (such as TRC-20 or ERC-20) before sending USDT to any external wallet.',
+      '## Stay safe with every transfer',
+      'Enable two-factor authentication, double-check wallet addresses, and start with a small test transfer the first time you use a new network. These habits prevent the most common and costly mistakes.',
+    ],
+    faqs: [
+      { q: 'Can I buy USDT directly with INR?', a: 'Yes. You can fund your balance in INR using UPI or a bank transfer, then convert it into USDT in a few steps.' },
+      { q: 'Which USDT network is cheapest to send?', a: 'TRC-20 (on the Tron network) usually has very low fees, while ERC-20 (Ethereum) can cost more during busy periods. Always match the network on both ends.' },
+    ],
+  },
+  {
+    slug: 'understanding-crypto-tax-for-investors',
+    title: 'Understanding Crypto Tax for Investors: What You Should Know',
+    excerpt:
+      'A plain-English overview of how crypto gains are commonly taxed, why record-keeping matters, and how to stay organised as an investor.',
+    date: '2026-06-19',
+    readingTime: '6 min read',
+    category: 'Taxes',
+    content: [
+      'Crypto investing is exciting, but the part many people overlook is tax. Rules vary by country, yet the principles of staying compliant are surprisingly similar everywhere: know what is taxable, keep good records, and report accurately. This guide gives you a practical foundation.',
+      '## When crypto is usually taxable',
+      'In most regions, you trigger a taxable event when you sell crypto for fiat, swap one coin for another, or earn rewards and returns. Simply holding crypto in your wallet generally is not taxable until you dispose of it.',
+      '## Why record-keeping is essential',
+      'Tax reporting is only as accurate as your records. Keep a log of every deposit, conversion, payout, and withdrawal, including dates and amounts. Many investors export their transaction history regularly so nothing is missed at filing time.',
+      '## Gains, income, and the difference',
+      'Profits from selling crypto are often treated as capital gains, while rewards or returns can be treated as income. The distinction matters because they may be taxed differently, so it helps to label each transaction clearly as it happens.',
+      '## Get organised before tax season',
+      'Set a simple monthly routine: download your statements, tag each transaction, and store everything in one folder. When tax season arrives, you will have a clean trail instead of a scramble. For anything complex, a qualified tax professional in your jurisdiction is always the safest source of advice.',
+    ],
+    faqs: [
+      { q: 'Is holding crypto taxable?', a: 'In most countries, simply holding crypto is not taxable. Tax usually applies when you sell, swap, or earn returns — but rules differ by region.' },
+      { q: 'How do I keep good tax records?', a: 'Export and store your full transaction history regularly, tagging deposits, conversions, payouts, and withdrawals with dates and amounts.' },
+    ],
+  },
+  {
     slug: 'instant-crypto-withdrawals-explained',
     title: 'Instant Crypto Withdrawals Explained: How to Get Paid Faster',
     excerpt:
