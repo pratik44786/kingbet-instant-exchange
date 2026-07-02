@@ -140,6 +140,11 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Recent Payouts */}
+      <RecentPayoutsTicker />
+
+
+
       {/* Why choose us */}
       <section className="container mx-auto px-4 py-20">
         <div className="text-center max-w-2xl mx-auto mb-14">
