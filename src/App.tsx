@@ -57,6 +57,7 @@ function App() {
               <Route path="/referral" element={<Referral />} />
               <Route path="/blog" element={<Blog />} />
               <Route path="/blog/:slug" element={<BlogPost />} />
+              <Route path="/faq" element={<FAQ />} />
               <Route path="/login" element={<PublicOnly><Login /></PublicOnly>} />
               <Route path="/register" element={<PublicOnly><Register /></PublicOnly>} />
               <Route path="/forgot-password" element={<ForgotPassword />} />
