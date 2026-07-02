@@ -1,5 +1,6 @@
 import SiteLayout from '@/components/layout/SiteLayout';
 import Seo, { SITE_URL } from '@/components/Seo';
+import RecentPayoutsTicker from '@/components/RecentPayoutsTicker';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Shield, Brain, Zap, Users, TrendingUp, Lock, BarChart3, Wallet, Check, Star } from 'lucide-react';
 
