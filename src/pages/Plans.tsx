@@ -7,6 +7,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { useWallet } from '@/hooks/useWallet';
 import { toast } from 'sonner';
+import { ResponsiveContainer, AreaChart, Area, XAxis, Tooltip } from 'recharts';
 
 interface Plan {
   id: string; name: string; description: string;
@@ -21,19 +22,27 @@ export default function Plans() {
   const [plans, setPlans] = useState<Plan[]>([]);
   const [amount, setAmount] = useState(1000);
   const [months, setMonths] = useState(6);
+  const [ratePercent, setRatePercent] = useState(5);
   const [investPlan, setInvestPlan] = useState<Plan | null>(null);
   const [investAmount, setInvestAmount] = useState('');
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
     supabase.from('investment_plans').select('*').eq('is_active', true).order('sort_order').then(({ data }) => {
-      setPlans((data as Plan[]) || []);
+      const list = (data as Plan[]) || [];
+      setPlans(list);
+      if (list.length) setRatePercent(Number(list[Math.min(1, list.length - 1)].monthly_return_percent) || 5);
     });
   }, []);
 
-  const monthlyProfit = amount * 0.05;
+  const rate = ratePercent / 100;
+  const monthlyProfit = amount * rate;
   const totalProfit = monthlyProfit * months;
   const finalValue = amount + totalProfit;
+  const chartData = Array.from({ length: months + 1 }, (_, m) => ({
+    month: `M${m}`,
+    value: Math.round(amount + monthlyProfit * m),
+  }));
 
   const confirmInvest = async () => {
     if (!investPlan) return;
@@ -133,19 +142,56 @@ export default function Plans() {
                 <input type="range" min={1} max={24} step={1} value={months}
                   onChange={e => setMonths(Number(e.target.value))} className="w-full accent-[hsl(var(--gold))]" />
               </div>
+              {plans.length > 0 && (
+                <div>
+                  <label className="text-sm font-medium block mb-2">Select a plan</label>
+                  <div className="flex flex-wrap gap-2">
+                    {plans.map(p => {
+                      const pr = Number(p.monthly_return_percent);
+                      const active = Math.abs(pr - ratePercent) < 0.001;
+                      return (
+                        <button key={p.id} onClick={() => setRatePercent(pr)}
+                          className={`px-3 py-2 rounded-lg text-sm font-medium border transition-colors ${active ? 'bg-gradient-gold text-primary-foreground border-transparent' : 'glass border-white/10 hover:border-gold/40'}`}>
+                          {p.name} · {pr}%
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
             </div>
             <div className="space-y-4">
-              <div className="p-4 rounded-lg glass">
-                <p className="text-xs text-muted-foreground">Monthly profit</p>
-                <p className="font-display text-2xl font-bold text-success">${monthlyProfit.toFixed(2)}</p>
-              </div>
-              <div className="p-4 rounded-lg glass">
-                <p className="text-xs text-muted-foreground">Total profit</p>
-                <p className="font-display text-2xl font-bold text-success">${totalProfit.toFixed(2)}</p>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-4 rounded-lg glass">
+                  <p className="text-xs text-muted-foreground">Monthly profit</p>
+                  <p className="font-display text-xl font-bold text-success">${monthlyProfit.toFixed(2)}</p>
+                </div>
+                <div className="p-4 rounded-lg glass">
+                  <p className="text-xs text-muted-foreground">Total profit</p>
+                  <p className="font-display text-xl font-bold text-success">${totalProfit.toFixed(2)}</p>
+                </div>
               </div>
               <div className="p-4 rounded-lg bg-gradient-gold">
-                <p className="text-xs text-primary-foreground/80 font-medium">Final value</p>
+                <p className="text-xs text-primary-foreground/80 font-medium">Final value after {months} months</p>
                 <p className="font-display text-3xl font-extrabold text-primary-foreground">${finalValue.toFixed(2)}</p>
+              </div>
+              <div className="h-40 -ml-2">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={chartData} margin={{ top: 5, right: 5, left: 0, bottom: 0 }}>
+                    <defs>
+                      <linearGradient id="calcGold" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="hsl(var(--gold))" stopOpacity={0.5} />
+                        <stop offset="100%" stopColor="hsl(var(--gold))" stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <XAxis dataKey="month" tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} tickLine={false} axisLine={false} />
+                    <Tooltip
+                      contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: 8, fontSize: 12 }}
+                      formatter={(v: number) => [`$${v.toLocaleString()}`, 'Value']}
+                    />
+                    <Area type="monotone" dataKey="value" stroke="hsl(var(--gold))" strokeWidth={2} fill="url(#calcGold)" />
+                  </AreaChart>
+                </ResponsiveContainer>
               </div>
             </div>
           </div>

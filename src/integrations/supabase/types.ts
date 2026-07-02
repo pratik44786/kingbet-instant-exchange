@@ -595,6 +595,15 @@ export type Database = {
           username: string
         }[]
       }
+      get_recent_payouts: {
+        Args: { _limit?: number }
+        Returns: {
+          amount: number
+          crypto_symbol: string
+          masked_name: string
+          paid_at: string
+        }[]
+      }
       get_user_role: {
         Args: { uid: string }
         Returns: Database["public"]["Enums"]["app_role"]

@@ -10,6 +10,7 @@ const nav = [
   { to: '/plans', label: 'Plans' },
   { to: '/referral', label: 'Referral' },
   { to: '/blog', label: 'Blog' },
+  { to: '/faq', label: 'FAQ' },
 ];
 
 export default function Header() {

@@ -5,19 +5,52 @@ import { Link } from 'react-router-dom';
 import { Wallet, TrendingUp, ArrowDownToLine, ArrowUpFromLine, Users, Clock, ArrowRight, Activity } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 
 interface Txn { id: string; type: string; amount: number; description: string | null; created_at: string; }
+
+const CREDIT = new Set(['deposit', 'profit', 'referral', 'referral_bonus', 'investment_return', 'bonus', 'credit']);
 
 export default function Dashboard() {
   const { user } = useAuth();
   const { wallet, loading } = useWallet();
   const [txns, setTxns] = useState<Txn[]>([]);
+  const [chartData, setChartData] = useState<{ label: string; value: number }[]>([]);
+  const [growthPct, setGrowthPct] = useState(0);
   const [totals, setTotals] = useState({ deposits: 0, withdrawals: 0 });
 
   useEffect(() => {
     if (!user) return;
     supabase.from('transactions').select('id,type,amount,description,created_at').eq('user_id', user.id)
       .order('created_at', { ascending: false }).limit(8).then(({ data }) => setTxns((data as Txn[]) || []));
+
+    // Full history for the portfolio growth chart
+    supabase.from('transactions').select('type,amount,created_at').eq('user_id', user.id)
+      .order('created_at', { ascending: true }).then(({ data }) => {
+        const rows = (data as Txn[]) || [];
+        if (rows.length === 0) { setChartData([]); setGrowthPct(0); return; }
+        const monthMap = new Map<string, number>();
+        let running = 0;
+        for (const r of rows) {
+          const amt = Number(r.amount) || 0;
+          const t = (r.type || '').toLowerCase();
+          const signed = amt < 0 ? amt : (CREDIT.has(t) ? amt : -amt);
+          running += signed;
+          const d = new Date(r.created_at);
+          monthMap.set(`${d.getFullYear()}-${d.getMonth()}`, running);
+        }
+        const entries = Array.from(monthMap.entries()).slice(-6);
+        const series = entries.map(([key, value]) => {
+          const [, m] = key.split('-').map(Number);
+          const label = new Date(2000, m, 1).toLocaleString('en', { month: 'short' });
+          return { label, value: Math.max(0, Math.round(value)) };
+        });
+        setChartData(series);
+        if (series.length >= 2) {
+          const first = series[0].value || 1;
+          setGrowthPct(((series[series.length - 1].value - first) / first) * 100);
+        }
+      });
 
     Promise.all([
       supabase.from('deposits').select('amount').eq('user_id', user.id).eq('status', 'approved'),
@@ -29,6 +62,13 @@ export default function Dashboard() {
       });
     });
   }, [user]);
+
+  const demoChart = [
+    { label: 'M1', value: 1000 }, { label: 'M2', value: 1120 }, { label: 'M3', value: 1210 },
+    { label: 'M4', value: 1340 }, { label: 'M5', value: 1480 }, { label: 'M6', value: 1650 },
+  ];
+  const hasRealChart = chartData.length >= 2;
+  const displayChart = hasRealChart ? chartData : demoChart;
 
   const available = Math.max(0, (wallet?.balance ?? 0) - (wallet?.pending_withdrawal ?? 0));
 
@@ -74,16 +114,33 @@ export default function Dashboard() {
           <div className="flex items-center justify-between mb-5">
             <div>
               <h2 className="font-display text-lg font-semibold">Portfolio growth</h2>
-              <p className="text-xs text-muted-foreground">Last 6 months</p>
+              <p className="text-xs text-muted-foreground">{hasRealChart ? 'Based on your activity' : 'Sample projection — start investing to see yours'}</p>
             </div>
-            <span className="text-success text-sm font-medium">+18.4%</span>
+            {hasRealChart && (
+              <span className={`text-sm font-medium ${growthPct >= 0 ? 'text-success' : 'text-destructive'}`}>
+                {growthPct >= 0 ? '+' : ''}{growthPct.toFixed(1)}%
+              </span>
+            )}
           </div>
-          <div className="flex items-end gap-2 h-40">
-            {[35, 48, 42, 60, 55, 75, 70, 85, 90, 88, 95, 100].map((h, i) => (
-              <div key={i} className="flex-1 rounded-t-md bg-gradient-to-t from-gold/40 to-gold relative group">
-                <div className="absolute inset-x-0 bottom-0 rounded-t-md" style={{ height: `${h}%`, background: 'linear-gradient(to top, hsl(var(--gold)/0.6), hsl(var(--gold)))' }} />
-              </div>
-            ))}
+          <div className="h-52">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={displayChart} margin={{ top: 5, right: 5, left: -12, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="dashGold" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="hsl(var(--gold))" stopOpacity={0.5} />
+                    <stop offset="100%" stopColor="hsl(var(--gold))" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
+                <XAxis dataKey="label" tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} tickLine={false} axisLine={false} />
+                <YAxis tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} tickLine={false} axisLine={false} width={48} tickFormatter={(v) => `$${v}`} />
+                <Tooltip
+                  contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: 8, fontSize: 12 }}
+                  formatter={(v: number) => [`$${v.toLocaleString()}`, 'Portfolio']}
+                />
+                <Area type="monotone" dataKey="value" stroke="hsl(var(--gold))" strokeWidth={2} fill="url(#dashGold)" />
+              </AreaChart>
+            </ResponsiveContainer>
           </div>
         </div>
 
