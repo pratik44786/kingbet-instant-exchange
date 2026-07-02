@@ -24,6 +24,34 @@ export default function Dashboard() {
     supabase.from('transactions').select('id,type,amount,description,created_at').eq('user_id', user.id)
       .order('created_at', { ascending: false }).limit(8).then(({ data }) => setTxns((data as Txn[]) || []));
 
+    // Full history for the portfolio growth chart
+    supabase.from('transactions').select('type,amount,created_at').eq('user_id', user.id)
+      .order('created_at', { ascending: true }).then(({ data }) => {
+        const rows = (data as Txn[]) || [];
+        if (rows.length === 0) { setChartData([]); setGrowthPct(0); return; }
+        const monthMap = new Map<string, number>();
+        let running = 0;
+        for (const r of rows) {
+          const amt = Number(r.amount) || 0;
+          const t = (r.type || '').toLowerCase();
+          const signed = amt < 0 ? amt : (CREDIT.has(t) ? amt : -amt);
+          running += signed;
+          const d = new Date(r.created_at);
+          monthMap.set(`${d.getFullYear()}-${d.getMonth()}`, running);
+        }
+        const entries = Array.from(monthMap.entries()).slice(-6);
+        const series = entries.map(([key, value]) => {
+          const [, m] = key.split('-').map(Number);
+          const label = new Date(2000, m, 1).toLocaleString('en', { month: 'short' });
+          return { label, value: Math.max(0, Math.round(value)) };
+        });
+        setChartData(series);
+        if (series.length >= 2) {
+          const first = series[0].value || 1;
+          setGrowthPct(((series[series.length - 1].value - first) / first) * 100);
+        }
+      });
+
     Promise.all([
       supabase.from('deposits').select('amount').eq('user_id', user.id).eq('status', 'approved'),
       supabase.from('withdrawals').select('amount').eq('user_id', user.id).eq('status', 'approved'),
@@ -34,6 +62,13 @@ export default function Dashboard() {
       });
     });
   }, [user]);
+
+  const demoChart = [
+    { label: 'M1', value: 1000 }, { label: 'M2', value: 1120 }, { label: 'M3', value: 1210 },
+    { label: 'M4', value: 1340 }, { label: 'M5', value: 1480 }, { label: 'M6', value: 1650 },
+  ];
+  const hasRealChart = chartData.length >= 2;
+  const displayChart = hasRealChart ? chartData : demoChart;
 
   const available = Math.max(0, (wallet?.balance ?? 0) - (wallet?.pending_withdrawal ?? 0));
 
