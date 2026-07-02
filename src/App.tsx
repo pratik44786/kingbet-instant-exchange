@@ -21,6 +21,7 @@ const Security = lazy(() => import('./pages/Security'));
 const Profile = lazy(() => import('./pages/Profile'));
 const Admin = lazy(() => import('./pages/Admin'));
 const Legal = lazy(() => import('./pages/Legal'));
+const FAQ = lazy(() => import('./pages/FAQ'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 
 const Loader = () => (
