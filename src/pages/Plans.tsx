@@ -21,19 +21,27 @@ export default function Plans() {
   const [plans, setPlans] = useState<Plan[]>([]);
   const [amount, setAmount] = useState(1000);
   const [months, setMonths] = useState(6);
+  const [ratePercent, setRatePercent] = useState(5);
   const [investPlan, setInvestPlan] = useState<Plan | null>(null);
   const [investAmount, setInvestAmount] = useState('');
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
     supabase.from('investment_plans').select('*').eq('is_active', true).order('sort_order').then(({ data }) => {
-      setPlans((data as Plan[]) || []);
+      const list = (data as Plan[]) || [];
+      setPlans(list);
+      if (list.length) setRatePercent(Number(list[Math.min(1, list.length - 1)].monthly_return_percent) || 5);
     });
   }, []);
 
-  const monthlyProfit = amount * 0.05;
+  const rate = ratePercent / 100;
+  const monthlyProfit = amount * rate;
   const totalProfit = monthlyProfit * months;
   const finalValue = amount + totalProfit;
+  const chartData = Array.from({ length: months + 1 }, (_, m) => ({
+    month: `M${m}`,
+    value: Math.round(amount + monthlyProfit * m),
+  }));
 
   const confirmInvest = async () => {
     if (!investPlan) return;
