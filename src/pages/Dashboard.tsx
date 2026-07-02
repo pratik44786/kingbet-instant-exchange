@@ -114,16 +114,33 @@ export default function Dashboard() {
           <div className="flex items-center justify-between mb-5">
             <div>
               <h2 className="font-display text-lg font-semibold">Portfolio growth</h2>
-              <p className="text-xs text-muted-foreground">Last 6 months</p>
+              <p className="text-xs text-muted-foreground">{hasRealChart ? 'Based on your activity' : 'Sample projection — start investing to see yours'}</p>
             </div>
-            <span className="text-success text-sm font-medium">+18.4%</span>
+            {hasRealChart && (
+              <span className={`text-sm font-medium ${growthPct >= 0 ? 'text-success' : 'text-destructive'}`}>
+                {growthPct >= 0 ? '+' : ''}{growthPct.toFixed(1)}%
+              </span>
+            )}
           </div>
-          <div className="flex items-end gap-2 h-40">
-            {[35, 48, 42, 60, 55, 75, 70, 85, 90, 88, 95, 100].map((h, i) => (
-              <div key={i} className="flex-1 rounded-t-md bg-gradient-to-t from-gold/40 to-gold relative group">
-                <div className="absolute inset-x-0 bottom-0 rounded-t-md" style={{ height: `${h}%`, background: 'linear-gradient(to top, hsl(var(--gold)/0.6), hsl(var(--gold)))' }} />
-              </div>
-            ))}
+          <div className="h-52">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={displayChart} margin={{ top: 5, right: 5, left: -12, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="dashGold" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="hsl(var(--gold))" stopOpacity={0.5} />
+                    <stop offset="100%" stopColor="hsl(var(--gold))" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
+                <XAxis dataKey="label" tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} tickLine={false} axisLine={false} />
+                <YAxis tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} tickLine={false} axisLine={false} width={48} tickFormatter={(v) => `$${v}`} />
+                <Tooltip
+                  contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: 8, fontSize: 12 }}
+                  formatter={(v: number) => [`$${v.toLocaleString()}`, 'Portfolio']}
+                />
+                <Area type="monotone" dataKey="value" stroke="hsl(var(--gold))" strokeWidth={2} fill="url(#dashGold)" />
+              </AreaChart>
+            </ResponsiveContainer>
           </div>
         </div>
 
