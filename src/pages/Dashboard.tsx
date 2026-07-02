@@ -5,13 +5,18 @@ import { Link } from 'react-router-dom';
 import { Wallet, TrendingUp, ArrowDownToLine, ArrowUpFromLine, Users, Clock, ArrowRight, Activity } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 
 interface Txn { id: string; type: string; amount: number; description: string | null; created_at: string; }
+
+const CREDIT = new Set(['deposit', 'profit', 'referral', 'referral_bonus', 'investment_return', 'bonus', 'credit']);
 
 export default function Dashboard() {
   const { user } = useAuth();
   const { wallet, loading } = useWallet();
   const [txns, setTxns] = useState<Txn[]>([]);
+  const [chartData, setChartData] = useState<{ label: string; value: number }[]>([]);
+  const [growthPct, setGrowthPct] = useState(0);
   const [totals, setTotals] = useState({ deposits: 0, withdrawals: 0 });
 
   useEffect(() => {
