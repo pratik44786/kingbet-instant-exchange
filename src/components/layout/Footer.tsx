@@ -40,7 +40,7 @@ export default function Footer() {
           <div>
             <h4 className="font-display font-semibold mb-4 text-foreground">Quick Links</h4>
             <ul className="space-y-2 text-sm">
-              {[['Home','/'],['About','/about'],['Plans','/plans'],['Referral','/referral']].map(([l,p]) => (
+              {[['Home','/'],['About','/about'],['Plans','/plans'],['FAQ','/faq'],['Blog','/blog']].map(([l,p]) => (
                 <li key={p}><Link to={p} className="text-muted-foreground hover:text-gold transition-colors">{l}</Link></li>
               ))}
             </ul>
