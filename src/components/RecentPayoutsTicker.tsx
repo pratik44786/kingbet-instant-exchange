@@ -56,7 +56,7 @@ export default function RecentPayoutsTicker() {
         </div>
       </div>
       <div className="relative overflow-hidden rounded-xl border border-white/5 bg-card/30 backdrop-blur-xl py-4 [mask-image:linear-gradient(to_right,transparent,black_6%,black_94%,transparent)]">
-        <div className="flex gap-3 w-max animate-marquee hover:[animation-play-state:paused]">
+        <div className="flex gap-3 w-max animate-ticker hover:[animation-play-state:paused]">
           {loop.map((p, i) => (
             <div key={i} className="flex items-center gap-3 px-4 py-2.5 rounded-lg glass shrink-0">
               <div className="h-8 w-8 rounded-full bg-gradient-gold flex items-center justify-center text-primary-foreground">
