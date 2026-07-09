@@ -5,6 +5,7 @@ import { toast } from 'sonner';
 import { ArrowLeft, Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import Logo from '@/components/layout/Logo';
 import Seo from '@/components/Seo';
+import GoogleSignInButton from '@/components/GoogleSignInButton';
 
 export default function Login() {
   const { login, error } = useAuth();
