@@ -6,6 +6,7 @@ import { ArrowLeft, Mail, Lock, User, Phone, Tag, Eye, EyeOff } from 'lucide-rea
 import Logo from '@/components/layout/Logo';
 import { z } from 'zod';
 import Seo from '@/components/Seo';
+import GoogleSignInButton from '@/components/GoogleSignInButton';
 
 const schema = z.object({
   fullName: z.string().trim().min(2, 'Name is too short').max(80),
