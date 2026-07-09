@@ -5,6 +5,7 @@ import { toast } from 'sonner';
 import { ArrowLeft, Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import Logo from '@/components/layout/Logo';
 import Seo from '@/components/Seo';
+import GoogleSignInButton from '@/components/GoogleSignInButton';
 
 export default function Login() {
   const { login, error } = useAuth();
@@ -74,6 +75,14 @@ export default function Login() {
               {loading ? 'Signing in...' : 'Sign in'}
             </button>
           </form>
+
+          <div className="flex items-center gap-3 my-5">
+            <div className="h-px flex-1 bg-border" />
+            <span className="text-xs text-muted-foreground">OR</span>
+            <div className="h-px flex-1 bg-border" />
+          </div>
+
+          <GoogleSignInButton label="Sign in with Google" />
 
           <p className="text-center text-sm text-muted-foreground mt-6">
             Don't have an account? <Link to="/register" className="text-gold hover:underline font-medium">Create one</Link>
