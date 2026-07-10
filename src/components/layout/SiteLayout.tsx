@@ -2,6 +2,7 @@ import { ReactNode } from 'react';
 import Header from './Header';
 import Footer from './Footer';
 import MarketTicker from './MarketTicker';
+import ExitIntentModal from '@/components/ExitIntentModal';
 
 export default function SiteLayout({ children, ticker = true }: { children: ReactNode; ticker?: boolean }) {
   return (
@@ -10,6 +11,7 @@ export default function SiteLayout({ children, ticker = true }: { children: Reac
       {ticker && <MarketTicker />}
       <main className="flex-1">{children}</main>
       <Footer />
+      <ExitIntentModal />
     </div>
   );
 }
