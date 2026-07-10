@@ -310,6 +310,27 @@ export type Database = {
         }
         Relationships: []
       }
+      leads: {
+        Row: {
+          contact: string
+          created_at: string
+          id: string
+          source: string | null
+        }
+        Insert: {
+          contact: string
+          created_at?: string
+          id?: string
+          source?: string | null
+        }
+        Update: {
+          contact?: string
+          created_at?: string
+          id?: string
+          source?: string | null
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           body: string | null
