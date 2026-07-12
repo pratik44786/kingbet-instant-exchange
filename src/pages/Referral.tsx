@@ -76,7 +76,7 @@ export default function Referral() {
           ].map(s => (
             <div key={s.t} className="card-premium text-center">
               <s.icon className="h-10 w-10 text-gold mx-auto mb-4" />
-              <h3 className="font-display text-lg font-semibold">{s.t}</h3>
+              <h2 className="font-display text-lg font-semibold">{s.t}</h2>
               <p className="mt-2 text-sm text-muted-foreground">{s.d}</p>
             </div>
           ))}
