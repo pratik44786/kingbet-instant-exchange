@@ -104,7 +104,7 @@ export default function Deposit() {
                 <h3 className="font-medium text-sm mb-3">2. Scan QR or copy address</h3>
                 <div className="rounded-lg overflow-hidden bg-white p-4 mb-3 max-w-[220px] mx-auto flex items-center justify-center">
                   {selected.qr_image_url ? (
-                    <img src={selected.qr_image_url} alt="QR" className="w-full h-auto" />
+                    <img src={selected.qr_image_url} alt={`${selected.crypto_symbol} deposit wallet address QR code`} className="w-full h-auto" />
                   ) : (
                     <QRCodeSVG value={selected.wallet_address} size={180} level="M" includeMargin className="w-full h-auto" />
                   )}
@@ -112,7 +112,7 @@ export default function Deposit() {
                 <div className="flex gap-2">
                   <input readOnly value={selected.wallet_address}
                     className="flex-1 px-3 py-2 rounded-lg bg-input border border-border font-mono text-xs" />
-                  <button onClick={copy} className="btn-outline-gold !py-2 !px-3">
+                  <button onClick={copy} aria-label="Copy wallet address" className="btn-outline-gold !py-2 !px-3">
                     {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                   </button>
                 </div>

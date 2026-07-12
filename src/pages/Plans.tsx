@@ -89,7 +89,7 @@ export default function Plans() {
                   MOST POPULAR
                 </div>
               )}
-              <h3 className="font-display text-2xl font-bold">{p.name}</h3>
+              <h2 className="font-display text-2xl font-bold">{p.name}</h2>
               <p className="text-sm text-muted-foreground mt-1">{p.description}</p>
               <div className="mt-6">
                 <p className="font-display text-5xl font-extrabold text-gradient-gold">{p.monthly_return_percent}%</p>
