@@ -12,6 +12,46 @@ export interface BlogPost {
 
 export const blogPosts: BlogPost[] = [
   {
+    slug: 'turn-100-usdt-into-passive-crypto-income-2026',
+    title: 'How to Turn $100 USDT Into Passive Crypto Income in 2026 (Step-by-Step)',
+    excerpt:
+      'A simple, no-hype walkthrough for starting with just $100 USDT — deposit, pick a plan, receive fortnightly payouts, and compound safely on KingBet Exchange.',
+    date: '2026-07-20',
+    readingTime: '7 min read',
+    category: 'Getting Started',
+    content: [
+      'You do not need thousands of dollars to start earning passive income from crypto. With as little as $100 USDT, you can open a KingBet Exchange account, activate an investment plan, and begin receiving fortnightly payouts of up to 5% monthly — without trading, chart-watching, or guessing the market.',
+      'This guide walks you through the exact steps: create your account, deposit safely, activate your plan, and compound your returns. It takes under 10 minutes end-to-end.',
+      '## Step 1: Create your free KingBet account',
+      'Head to the sign-up page and register with your email or Google account. You will get an instant dashboard, a personal referral link, and a secure wallet for deposits and withdrawals. No credit card, no upfront fees — creating the account is free.',
+      '## Step 2: Deposit $100 USDT (cheapest network wins)',
+      'From the Deposit page, choose USDT and pick the network with the lowest fees — TRC-20 (Tron) is usually cents, while ERC-20 (Ethereum) can be several dollars. Scan the QR code from your wallet or exchange, send the exact amount, and your balance updates once the network confirms.',
+      'Tip: Always match the network on the sending side and the receiving side. TRC-20 to TRC-20. This alone prevents the most common (and most painful) mistake in crypto.',
+      '## Step 3: Activate an investment plan',
+      'Open the Plans page and pick a tier that matches your deposit — the Starter plan begins at $100 and pays a competitive fortnightly return. One click activates the plan, deducts $100 from your available balance, and locks it into the payout schedule. Your dashboard will show your projected earnings immediately.',
+      '## Step 4: Watch fortnightly payouts land automatically',
+      'Every 15 days, profit is auto-credited to your wallet by a scheduled edge function — no manual claim needed. You will see the transaction in your history and receive a real-time notification. Payouts are yours to withdraw or reinvest.',
+      '## Step 5: Compound (optional but powerful)',
+      'Instead of withdrawing every payout, reinvest a portion into a higher plan tier. Over 6–12 months, compounding fortnightly returns dramatically increases your ending balance versus taking payouts flat. The Investment Calculator on the Plans page shows exactly how much difference this makes for your amount.',
+      '## Why start with $100 (and not more)',
+      'Starting small lets you learn the platform — deposit flow, KYC, withdrawal timing, notifications — without risking money you cannot afford. Once you have received one or two payouts and made a successful test withdrawal, you can scale up confidently. Every serious investor we see follows this pattern.',
+      '## Bonus: earn lifetime referral commissions',
+      'Every account gets a unique referral link. When someone signs up through your link and invests, you earn a lifetime commission on their deposits — paid straight into your wallet. Sharing your link with 3–5 friends can easily double your first-month earnings.',
+      '## Ready to start?',
+      'Create your free KingBet Exchange account, deposit your first $100 USDT on TRC-20, and activate the Starter plan. Your first fortnightly payout will arrive in 15 days — automatically. There is no better time than now, and the process is genuinely built to be beginner-friendly.',
+      '## Hindi summary (हिंदी सारांश)',
+      'Sirf $100 USDT se KingBet Exchange par passive crypto income shuru kar sakte ho. Free account banao, TRC-20 network par USDT deposit karo (fees kam), Starter plan activate karo, aur har 15 din me automatic payout milega — 5% monthly tak. Chahiye to payouts withdraw karo ya reinvest karke compound karo. Referral link se lifetime commission bhi milti hai. Chhote se shuru karo, ek-do payout ke baad confidence aane par amount badhao.',
+    ],
+    faqs: [
+      { q: 'Is $100 really enough to start?', a: 'Yes. The Starter plan is designed for exactly this entry point. It lets you experience the full deposit → payout → withdrawal cycle before scaling up.' },
+      { q: 'How fast will I see my first payout?', a: 'Payouts run on a fortnightly cycle. Your first payout is auto-credited 15 days after your plan is activated — no action required from you.' },
+      { q: 'Can I withdraw my $100 back anytime?', a: 'Withdrawals are processed instantly after KYC approval. Funds go to any external wallet on TRC-20, ERC-20, BEP-20, or Solana.' },
+      { q: 'What is the safest network for a first deposit?', a: 'TRC-20 (USDT on Tron) is the cheapest and fastest for beginners. Always confirm the network matches on both sending and receiving sides.' },
+      { q: 'Do I need KYC before depositing?', a: 'No — you can deposit and invest without KYC. KYC is only required before your first withdrawal, and it is a quick one-time process.' },
+    ],
+  },
+
+  {
     slug: 'kingbet-vs-wazirx-comparison-2026',
     title: 'KingBet Exchange vs WazirX: Which Platform Is Better for Indian Investors in 2026?',
     excerpt:
