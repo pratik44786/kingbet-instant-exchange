@@ -349,6 +349,39 @@ export const blogPosts: BlogPost[] = [
       { q: 'Should I reinvest every payout?', a: 'Not always. Many users split payouts between reinvestment and withdrawals to balance growth with realised profit.' },
     ],
   },
+  {
+    slug: 'crypto-news-roundup-july-21-2026',
+    title: 'Crypto News Roundup — 21 July 2026: Bitcoin Above $66K, Ethereum Leads Rally, Clarity Act Momentum',
+    excerpt:
+      'Today\'s biggest crypto stories — Bitcoin reclaims $66,000, Ethereum outperforms BTC, Russia passes a new crypto market law, and the US Clarity Act fuels renewed institutional optimism.',
+    date: '2026-07-21',
+    readingTime: '6 min read',
+    category: 'Market News',
+    content: [
+      'The crypto market opened the week on a strong note. Bitcoin has climbed back above $66,000, Ethereum is outperforming BTC on a weekly basis, and regulatory momentum in the US and Russia is shaping fresh sentiment. Here is a quick, no-hype roundup of what actually moved markets today — and what it means for long-term investors.',
+      '## Bitcoin reclaims $66,000',
+      'Bitcoin is trading near $66,000 on July 21, 2026, with an intraday range between roughly $64,100 and $66,300. The move follows five consecutive sessions of net ETF inflows and a broader risk-on rebound in Asian equities, particularly chip stocks. Analysts are watching the $65,000 zone as a critical short-term support — a decisive hold there would strengthen the case that the recent correction has run its course.',
+      'For long-term holders, the takeaway is simple: price is once again above the psychologically important $65K level, and demand from spot ETFs remains steady. That combination has historically preceded stronger multi-week rallies, though nothing is guaranteed in crypto.',
+      '## Ethereum is outperforming Bitcoin',
+      'Ethereum is leading the recovery, gaining faster than BTC on both a daily and weekly basis. The ETH/BTC ratio ticking higher usually signals that traders are rotating into higher-beta assets — a classic sign of returning risk appetite. Continued strength in Ethereum often spills into layer-2 tokens and the broader altcoin market, so the next few sessions are worth watching closely.',
+      '## US Clarity Act keeps fuelling optimism',
+      'Progress on the US Clarity Act — legislation designed to draw clear lines between the SEC and CFTC over crypto oversight — is being cited as a key driver of today\'s move. Clearer rules reduce the biggest overhang for institutional allocators: legal uncertainty. Even incremental progress tends to bring in fresh capital from funds that were previously sidelined.',
+      '## Russia passes a crypto market law with a retail cap',
+      'Russia\'s parliament passed a new crypto market law that lets companies use digital tokens to bypass sanctions in cross-border settlements, while capping annual retail investor exposure at roughly $3,800. Retail citizens still cannot buy everyday goods with Bitcoin, but the corporate use-case is now formally legal. This is another data point in a global trend: governments are moving from outright bans to structured, monitored adoption.',
+      '## What it means for KingBet Exchange investors',
+      'Short-term price swings do not change the KingBet playbook. Your fortnightly payouts on the Starter, Growth, and Premium plans are paid from platform yield, not from BTC price movements — so today\'s rally does not increase or decrease your scheduled returns. What it does change is sentiment: when markets recover, more first-time investors enter the space, referral activity picks up, and this is often the best window to grow your account with a fresh deposit or a plan upgrade.',
+      '## Quick action checklist for today',
+      'Log in and confirm your KYC is approved so you can withdraw the moment a payout lands. Double-check that your default withdrawal address matches the network you plan to use (TRC-20 is cheapest for USDT). If you have been sitting on idle balance, consider activating a plan today — plan returns run from activation date, so every extra day matters over a 30-day window.',
+      '## Hindi summary (हिंदी सारांश)',
+      'Aaj crypto market strong hai — Bitcoin $66,000 ke upar wapas aa gaya hai, Ethereum BTC se tez bhaag raha hai, aur US ke Clarity Act aur Russia ke naye crypto law ki wajah se sentiment positive hai. KingBet Exchange par tumhare fortnightly payouts BTC price se link nahi hain, isliye returns wahi rahenge — lekin market recovery ke waqt naye deposits aur plan upgrades ka sabse acha time hota hai. Aaj hi KYC verify karo, withdrawal address confirm karo, aur agar balance idle pada hai to plan activate karke agla payout cycle shuru karo.',
+    ],
+    faqs: [
+      { q: 'Does today\'s BTC rally increase my KingBet payout?', a: 'No. KingBet payouts are paid from platform yield on a fixed fortnightly schedule and are not tied to Bitcoin\'s spot price. Your returns stay the same whether BTC moves up or down.' },
+      { q: 'Is this a good time to deposit more USDT?', a: 'Market recoveries usually bring more first-time investors and stronger referral activity, so many users choose to top up during these windows. As always, only invest what you can afford to leave for the plan duration.' },
+      { q: 'Where can I check live crypto prices on KingBet?', a: 'The live market ticker at the top of every page pulls real-time prices for 10 major coins from CoinGecko and refreshes every 60 seconds.' },
+    ],
+  },
 ];
+
 
 export const getPost = (slug: string) => blogPosts.find((p) => p.slug === slug);
