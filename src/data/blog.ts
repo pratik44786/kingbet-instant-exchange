@@ -12,6 +12,36 @@ export interface BlogPost {
 
 export const blogPosts: BlogPost[] = [
   {
+    slug: 'crypto-market-update-july-22-2026',
+    title: 'Crypto Market Update — 22 July 2026: BTC Holds $65K, ETH Leads Altcoins',
+    excerpt:
+      'Today\'s crypto market snapshot — Bitcoin steady near $65,930, Ethereum outperforms with gains, Solana and XRP recover, plus what it means for passive investors.',
+    date: '2026-07-22',
+    readingTime: '5 min read',
+    category: 'Market Update',
+    content: [
+      'The crypto market is stabilising after last week\'s volatility. Bitcoin is trading around $65,930, Ethereum has bounced back to $1,941, and altcoins like Solana ($78.49) and XRP ($1.15) are showing quiet recovery. Here\'s what today\'s numbers mean for long-term investors and anyone earning passive income through structured plans.',
+      '## Bitcoin: consolidation near $66K',
+      'BTC is down about 1% in the last 24 hours but holding a strong support band between $64K and $66K. On-chain data shows accumulation by long-term holders continues, and exchange balances are near multi-year lows — a bullish signal historically. Analysts expect a decisive breakout above $70K if the US spot ETF inflows continue through August.',
+      '## Ethereum: quiet outperformer',
+      'ETH is up ~0.7% today at $1,941 and continues to outperform BTC on a weekly basis. The upcoming Pectra upgrade and rising staking yields are attracting institutional capital. For passive investors, ETH exposure via a diversified plan remains one of the cleanest ways to benefit from the ecosystem without active trading.',
+      '## Solana & XRP: altcoin rotation begins',
+      'Solana has reclaimed $78, driven by strong DEX volumes and new memecoin activity. XRP crossed $1.15 as legal clarity in the US improves. Both suggest capital is slowly rotating out of BTC into higher-beta altcoins — a classic mid-cycle pattern.',
+      '## What this means for KingBet investors',
+      'Short-term price swings do not affect your fortnightly USDT payouts — returns are structured, not market-linked. But a stable-to-bullish market means better reinvestment opportunities and stronger long-term compounding. If you have been waiting to activate a plan, current conditions favour patient capital.',
+      '## Action steps for today',
+      'If you already have an active plan, consider reinvesting your next payout into a higher tier to lock in compounding at current rates. New investors can start with $100 USDT on TRC-20 (lowest fees) and activate the Starter plan in under 5 minutes. Either way, avoid emotional decisions based on daily price moves — the fortnightly payout model is designed to smooth out exactly this kind of noise.',
+      '## Hindi summary (हिंदी सारांश)',
+      'Aaj Bitcoin $65,930 ke aas-paas stable hai, Ethereum $1,941 par thoda upar, aur Solana ($78) aur XRP ($1.15) me halki recovery hai. Market consolidation phase me hai — long-term ke liye accha signal. KingBet ke fortnightly USDT payouts market moves se affect nahi hote, isliye passive investors ke liye ye achha time hai plan activate karne ya reinvest karne ka. TRC-20 network par $100 se shuru karo aur compounding start karo.',
+    ],
+    faqs: [
+      { q: 'Does today\'s BTC price affect my KingBet payouts?', a: 'No. KingBet payouts are structured fortnightly returns in USDT and do not depend on daily BTC or ETH price movements.' },
+      { q: 'Is this a good time to start investing?', a: 'Market consolidation phases are historically favourable entry points for long-term passive strategies. The Starter plan lets you begin with just $100 USDT.' },
+      { q: 'Should I withdraw or reinvest my next payout?', a: 'If your goal is long-term growth, reinvesting compounds your returns significantly over 6–12 months. Use the calculator on the Plans page to see the exact difference for your amount.' },
+    ],
+  },
+
+  {
     slug: 'turn-100-usdt-into-passive-crypto-income-2026',
     title: 'How to Turn $100 USDT Into Passive Crypto Income in 2026 (Step-by-Step)',
     excerpt:
