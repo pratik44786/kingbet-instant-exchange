@@ -12,6 +12,44 @@ export interface BlogPost {
 
 export const blogPosts: BlogPost[] = [
   {
+    slug: 'india-crypto-investing-10-usdt-start-guide-2026',
+    title: 'How Indian Investors Can Start Earning Passive Crypto Income with Just $10 USDT',
+    excerpt:
+      'A practical India-focused guide to start crypto investing with only $10 USDT, use UPI to buy USDT, and earn fortnightly payouts on KingBet Exchange with a 3-month plan.',
+    date: '2026-08-04',
+    readingTime: '8 min read',
+    category: 'India Guide',
+    content: [
+      'You do not need a large salary or a trading background to start building crypto wealth from India. With just $10 USDT — roughly ₹830 at current rates — you can open a KingBet Exchange account, activate a Starter plan, and begin receiving structured fortnightly payouts. This guide is written specifically for Indian residents who want a simple, regulated-friendly way to put idle capital to work without learning charts or timing the market.',
+      '## Why $10 USDT makes sense for first-time Indian investors',
+      'Most Indians are comfortable starting small. A $10 entry removes the fear of losing meaningful capital while you learn how deposits, plans, payouts, and withdrawals work. It also lets you complete the full cycle — UPI to USDT, USDT to KingBet, plan activation, payout, and withdrawal — before deciding to scale up. Every experienced investor on our platform began with a test amount first.',
+      '## Step 1: Buy $10 USDT with UPI',
+      'The easiest route for Indian users is a major global exchange that supports INR P2P trading. Open the P2P section, filter sellers accepting UPI, and buy exactly $10 worth of USDT. Choose TRC-20 (Tron network) when withdrawing to KingBet because it has the lowest fees and fastest confirmation. Keep the transaction receipt and the withdrawal TX hash for your records.',
+      '## Step 2: Deposit to KingBet Exchange',
+      'Inside your KingBet dashboard, go to Deposit, select USDT, and pick TRC-20. Copy the wallet address or scan the QR code from your exchange withdrawal screen. Send the exact $10 amount. Deposits are reviewed and credited after network confirmation, usually within minutes. Always match the network — TRC-20 to TRC-20 — to avoid lost funds.',
+      '## Step 3: Activate the $10 Starter plan',
+      'Open the Plans page and choose the Starter plan. The minimum is now only $10 and the plan runs for 3 months. One click locks your capital into the payout schedule. Your dashboard will immediately show your projected fortnightly earnings and the plan end date. There are no hidden activation fees.',
+      '## Step 4: Receive fortnightly payouts automatically',
+      'Every 15 days, profit is credited to your wallet by a scheduled backend process. You do not need to claim manually. Each payout appears in your transaction history and triggers a real-time notification. You can reinvest the payout or withdraw it to your external wallet once KYC is approved.',
+      '## Step 5: Scale up after your first successful cycle',
+      'Once you have received two or three payouts and completed a test withdrawal, you can confidently add more capital. Many Indian users start with $10–$50, then move to Premium or Elite tiers for higher monthly returns. The key is to prove the process to yourself before committing larger amounts.',
+      '## Tax and compliance notes for Indian residents',
+      'Crypto income is taxable in India. Keep records of your USDT purchase price in INR, deposit dates, payout amounts, and withdrawal values. Consult a chartered accountant to understand how virtual digital asset rules apply to your specific situation. KingBet provides a downloadable transaction history from your dashboard to make tax reporting easier.',
+      '## Security tips every Indian beginner should follow',
+      'Enable two-factor authentication immediately. Use a unique password and a password manager. Withdraw only to wallets you control. Never share your seed phrase or OTP. If a seller on P2P asks for payment outside the platform, cancel the trade. These habits protect you far more than any platform feature.',
+      '## Final thoughts',
+      'Starting with $10 USDT removes the psychological barrier to entry. It lets Indian investors experience passive crypto income with real money but minimal risk. The 3-month lock-in keeps the plan disciplined, while fortnightly payouts give you regular feedback. If you have been waiting for the right moment to start, this is it.',
+    ],
+    faqs: [
+      { q: 'Can I really start with only $10 USDT from India?', a: 'Yes. The KingBet Exchange Starter plan now has a $10 minimum, which is roughly ₹830. You can buy USDT with UPI on any major exchange and deposit it on TRC-20.' },
+      { q: 'Is the 3-month Starter plan locked for the full period?', a: 'Yes. The Starter plan has a 90-day lock-in. After maturity, you can withdraw the principal and reinvest into any available plan.' },
+      { q: 'Do I need KYC before depositing $10?', a: 'No. You can deposit and invest without KYC. KYC is only required before your first withdrawal, and it is a quick one-time process.' },
+      { q: 'Which network is cheapest for Indian users?', a: 'TRC-20 (Tron) is the cheapest and fastest for USDT transfers. Always match the network on both the sending and receiving sides.' },
+      { q: 'How are payouts taxed in India?', a: 'Crypto earnings are generally treated as virtual digital asset income. Keep your transaction history and consult a local tax professional for exact reporting.' },
+    ],
+  },
+
+  {
     slug: 'crypto-market-update-july-22-2026',
     title: 'Crypto Market Update — 22 July 2026: BTC Holds $65K, ETH Leads Altcoins',
     excerpt:

@@ -31,7 +31,7 @@ const testimonials = [
 const faqs = [
   { q: 'How does KINGBET EXCHANGE generate 5% monthly returns?', a: 'Our AI engine spreads capital across staking, market making, and arbitrage strategies on top-tier exchanges to deliver consistent fortnightly profit distributions.' },
   { q: 'Is my crypto safe?', a: 'Yes. 95% of user funds are kept in cold multi-signature wallets, with the remainder in insured hot wallets for liquidity.' },
-  { q: 'What is the minimum investment?', a: 'The Starter plan begins at $100. You can upgrade to Premium or Elite anytime from your dashboard.' },
+  { q: 'What is the minimum investment?', a: 'The Starter plan begins at just $10 USDT with a 3-month lock-in. You can upgrade to Premium or Elite anytime from your dashboard.' },
   { q: 'When are profits paid out?', a: 'Profits are credited to your wallet fortnightly. You can reinvest or withdraw at any time.' },
   { q: 'How does the referral program work?', a: 'Share your unique referral link — earn a percentage of every investment your invitees make, for life.' },
 ];
