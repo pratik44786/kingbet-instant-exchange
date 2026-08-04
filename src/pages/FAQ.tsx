@@ -9,7 +9,7 @@ const categories: { title: string; items: { q: string; a: string }[] }[] = [
     items: [
       { q: 'What is KingBet Exchange?', a: 'KingBet Exchange is a modern crypto investment platform that lets you grow your holdings through managed investment plans with consistent returns, fortnightly payouts, and instant withdrawals.' },
       { q: 'How do I create an account?', a: 'Click "Get Started", enter your details, and confirm your account. Once registered, you can deposit crypto, choose a plan, and start earning.' },
-      { q: 'What is the minimum investment?', a: 'Our Starter plan begins at just $100. You can upgrade to Premium or Elite plans anytime from your dashboard.' },
+      { q: 'What is the minimum investment?', a: 'Our Starter plan begins at just $10 USDT with a 3-month lock-in. You can upgrade to Premium or Elite plans anytime from your dashboard.' },
     ],
   },
   {

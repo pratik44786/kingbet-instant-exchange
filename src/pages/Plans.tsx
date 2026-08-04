@@ -20,7 +20,7 @@ export default function Plans() {
   const { wallet, refresh } = useWallet();
   const navigate = useNavigate();
   const [plans, setPlans] = useState<Plan[]>([]);
-  const [amount, setAmount] = useState(1000);
+  const [amount, setAmount] = useState(10);
   const [months, setMonths] = useState(6);
   const [ratePercent, setRatePercent] = useState(5);
   const [investPlan, setInvestPlan] = useState<Plan | null>(null);
@@ -68,7 +68,7 @@ export default function Plans() {
     <SiteLayout>
       <Seo
         title="Investment Plans — Starter, Premium & Elite | KingBet Exchange"
-        description="Compare KingBet Exchange investment plans. Start from $100 and earn up to 5% monthly returns with fortnightly payouts and instant withdrawals."
+        description="Compare KingBet Exchange investment plans. Start from just $10 USDT with a 3-month Starter plan and earn up to 5% monthly returns with fortnightly payouts."
         path="/plans"
       />
       <section className="container mx-auto px-4 pt-16 pb-10 text-center">
@@ -76,7 +76,7 @@ export default function Plans() {
           Choose your <span className="text-gradient-gold">investment plan</span>
         </h1>
         <p className="mt-5 text-lg text-muted-foreground max-w-2xl mx-auto">
-          Fixed <span className="text-gold font-semibold">5% monthly returns</span>, fortnightly payouts, full flexibility. Pick the plan that matches your investment size.
+          Fixed <span className="text-gold font-semibold">5% monthly returns</span>, fortnightly payouts, and plans starting at just <span className="text-gold font-semibold">$10 USDT</span>. Pick the plan that matches your investment size.
         </p>
       </section>
 
@@ -134,7 +134,7 @@ export default function Plans() {
                 <label className="text-sm font-medium block mb-2">Investment amount (USD)</label>
                 <input type="number" value={amount} onChange={e => setAmount(Math.max(0, Number(e.target.value)))}
                   className="w-full px-4 py-3 rounded-lg bg-input border border-border focus:border-gold focus:outline-none text-lg font-semibold" />
-                <input type="range" min={100} max={50000} step={100} value={amount}
+                <input type="range" min={10} max={50000} step={10} value={amount}
                   onChange={e => setAmount(Number(e.target.value))} className="w-full mt-3 accent-[hsl(var(--gold))]" />
               </div>
               <div>
