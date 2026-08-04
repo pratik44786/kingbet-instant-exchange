@@ -79,9 +79,13 @@ export default function Home() {
                 Smart, secure, AI-driven crypto investing. Earn up to <span className="text-gold font-semibold">5% monthly returns</span> with fortnightly payouts, instant withdrawals, and lifetime referral commissions.
               </p>
               <div className="flex flex-wrap gap-4">
-                <Link to="/register" className="btn-gold">Start Investing <ArrowRight className="h-4 w-4" /></Link>
+                <Link to="/register" className="btn-gold">Create free account <ArrowRight className="h-4 w-4" /></Link>
                 <Link to="/plans" className="btn-outline-gold">View Plans</Link>
               </div>
+              <p className="text-xs text-muted-foreground -mt-4">
+                Start from just $10 USDT · No joining fee · Takes 30 seconds
+              </p>
+
               <div className="flex items-center gap-6 pt-4">
                 <div className="flex -space-x-2">
                   {[1,2,3,4].map(i => <div key={i} className="h-8 w-8 rounded-full bg-gradient-gold border-2 border-background" />)}
