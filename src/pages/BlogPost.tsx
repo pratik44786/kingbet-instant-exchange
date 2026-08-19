@@ -111,6 +111,30 @@ export default function BlogPost() {
           <p className="text-muted-foreground mt-2">Join 150,000+ investors growing their crypto wealth with KingBet Exchange.</p>
           <Link to="/register" className="btn-gold mt-6 inline-flex">Get Started</Link>
         </div>
+
+        {related.length ? (
+          <div className="mt-14">
+            <h2 className="font-display text-2xl font-bold mb-6">Keep reading</h2>
+            <div className="grid gap-4 sm:grid-cols-3">
+              {related.map((p) => (
+                <Link
+                  key={p.slug}
+                  to={`/blog/${p.slug}`}
+                  className="glass rounded-xl p-5 border border-white/5 hover:border-gold/30 transition-colors group flex flex-col"
+                >
+                  <span className="text-[11px] font-semibold text-gold uppercase tracking-wide">{p.category}</span>
+                  <h3 className="font-semibold mt-2 leading-snug group-hover:text-gold transition-colors">{p.title}</h3>
+                  <span className="inline-flex items-center gap-1 text-xs text-muted-foreground mt-3 mt-auto pt-3">
+                    <Clock className="h-3.5 w-3.5" /> {p.readingTime}
+                  </span>
+                </Link>
+              ))}
+            </div>
+            <Link to="/blog" className="inline-flex items-center gap-1 text-sm text-gold mt-6 hover:underline">
+              View all articles <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+        ) : null}
       </article>
     </SiteLayout>
   );
