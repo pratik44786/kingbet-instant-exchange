@@ -2,13 +2,19 @@ import SiteLayout from '@/components/layout/SiteLayout';
 import Seo, { SITE_URL } from '@/components/Seo';
 import { Link, useParams, Navigate } from 'react-router-dom';
 import { ArrowLeft, Calendar, Clock } from 'lucide-react';
-import { getPost } from '@/data/blog';
+import { getPost, blogPosts } from '@/data/blog';
 
 export default function BlogPost() {
   const { slug } = useParams<{ slug: string }>();
   const post = slug ? getPost(slug) : undefined;
 
   if (!post) return <Navigate to="/blog" replace />;
+
+  const others = blogPosts.filter((p) => p.slug !== post.slug);
+  const related = [
+    ...others.filter((p) => p.category === post.category),
+    ...others.filter((p) => p.category !== post.category),
+  ].slice(0, 3);
 
   const articleSchema = {
     '@context': 'https://schema.org',
