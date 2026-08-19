@@ -1,7 +1,7 @@
 import SiteLayout from '@/components/layout/SiteLayout';
 import Seo, { SITE_URL } from '@/components/Seo';
 import { Link, useParams, Navigate } from 'react-router-dom';
-import { ArrowLeft, Calendar, Clock } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Calendar, Clock } from 'lucide-react';
 import { getPost, blogPosts } from '@/data/blog';
 
 export default function BlogPost() {
