@@ -12,6 +12,42 @@ export interface BlogPost {
 
 export const blogPosts: BlogPost[] = [
   {
+    slug: 'start-earning-crypto-passive-income-today-10-usdt',
+    title: 'Start Earning Crypto Passive Income Today: Sign Up & Deposit in 5 Minutes',
+    excerpt:
+      'A quick, beginner-friendly guide to opening your KingBet Exchange account, depositing your first $10 USDT, and activating your first passive-income plan.',
+    date: '2026-08-19',
+    readingTime: '6 min read',
+    category: 'Getting Started',
+    content: [
+      'Most people think earning from crypto requires trading charts, constant price checks, and risky bets. The truth is simpler: with the right structured plan, you can deposit once, sit back, and collect automatic payouts every two weeks. This guide shows you exactly how to create your KingBet Exchange account, fund it with $10 USDT, and start your first passive-income plan in under five minutes.',
+      '## Step 1: Create your free account in 30 seconds',
+      'Click the sign-up button and register with your email or Google account. There is no joining fee, no credit card, and no identity check needed just to open the account. Once you confirm your email, your dashboard is live and you get a personal wallet address plus a referral link you can share immediately.',
+      '## Step 2: Deposit $10 USDT on the cheapest network',
+      'Go to the Deposit page, choose USDT, and select TRC-20 (Tron). It is the fastest and cheapest option — often costing less than a cent. Scan the QR code from your exchange or wallet, paste the wallet address, and send exactly $10. Always double-check that the network on the sending side matches TRC-20. Mismatched networks are the main reason deposits get delayed or lost.',
+      '## Step 3: Activate your Starter plan',
+      'Once your deposit is confirmed, your available balance shows $10. Open the Plans page, choose the Starter plan, and activate it. The minimum is only $10, the duration is 3 months, and your first projected payout appears instantly on the dashboard. One click turns your deposit into an active passive-income position.',
+      '## Step 4: Receive automatic payouts every 15 days',
+      'You do not need to log in every day. The KingBet payout engine credits profit to your wallet every two weeks automatically. You will receive a real-time notification and see each payout in your transaction history. You can reinvest it or withdraw it after a quick KYC approval.',
+      '## Why starting with $10 works',
+      'A $10 first deposit removes the fear of losing serious money while you learn the full flow — deposit, plan, payout, and withdrawal. It is enough to feel real results, but small enough to treat as a learning test. Once you see two or three payouts land on time, you can scale up with confidence.',
+      '## Referral bonus: earn while you learn',
+      'Every new account gets a unique referral link. Share it with friends, family, or followers. When someone signs up and invests, you earn a lifetime commission on their deposits. For many users, referral commissions end up matching or even exceeding their plan payouts in the first few months.',
+      '## Safety checklist before you start',
+      'Use a strong, unique password and enable two-factor authentication. Only withdraw to wallets you control. Save your deposit TX hash and keep your transaction history. Never share your password or OTP with anyone, even if they claim to be from support.',
+      '## Ready to start?',
+      'Create your free account, deposit $10 USDT on TRC-20, and activate the Starter plan. Your first payout will arrive in 15 days, automatically. Sign up today and turn your first $10 into a working passive-income position.',
+    ],
+    faqs: [
+      { q: 'Is it really free to sign up?', a: 'Yes. Creating a KingBet Exchange account is free. There are no joining or monthly fees.' },
+      { q: 'Can I start with only $10?', a: 'Yes. The Starter plan minimum is $10 USDT, making it easy for beginners to test the platform.' },
+      { q: 'Do I need to verify identity before signing up?', a: 'No. KYC is only required before your first withdrawal. You can sign up, deposit, and invest without it.' },
+      { q: 'Which network should I use for my first deposit?', a: 'TRC-20 (Tron) is the cheapest and fastest. Always match the network on both sides.' },
+      { q: 'How often do payouts arrive?', a: 'Payouts are credited every 15 days automatically. No manual claim is needed.' },
+    ],
+  },
+
+  {
     slug: 'crypto-market-update-august-6-2026',
     title: 'Crypto Market Update — 6 August 2026: BTC Nears $68K, Layer-2 Tokens Rally',
     excerpt:
