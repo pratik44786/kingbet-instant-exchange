@@ -49,6 +49,7 @@ export const blogPosts: BlogPost[] = [
 
   {
     slug: 'crypto-market-update-august-6-2026',
+    title: 'Crypto Market Update — 6 August 2026: BTC Nears $68K, Layer-2 Tokens Rally',
     excerpt:
       'Today\'s crypto snapshot — Bitcoin approaches $68,000, Ethereum layer-2 tokens gain traction, and global inflows hit a 3-month high. What it means for passive investors.',
     date: '2026-08-06',
