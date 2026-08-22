@@ -15,18 +15,31 @@ const schema = z.object({
 });
 
 export default function Register() {
-  const { register, error } = useAuth();
+  const { register, error, isAuthenticated } = useAuth();
   const [params] = useSearchParams();
   const [form, setForm] = useState({ email: '', password: '', referralCode: params.get('ref') || '' });
   const [showRef, setShowRef] = useState(!!params.get('ref'));
   const [show, setShow] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [sent, setSent] = useState(false);
+  const [friendly, setFriendly] = useState<string | null>(null);
   const [errs, setErrs] = useState<Record<string, string>>({});
   const navigate = useNavigate();
+
+  const strength = (() => {
+    const p = form.password;
+    let s = 0;
+    if (p.length >= 8) s++;
+    if (/[A-Z]/.test(p)) s++;
+    if (/[0-9]/.test(p)) s++;
+    if (/[^A-Za-z0-9]/.test(p)) s++;
+    return s;
+  })();
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrs({});
+    setFriendly(null);
     const parsed = schema.safeParse(form);
     if (!parsed.success) {
       const m: Record<string, string> = {};
@@ -42,13 +55,47 @@ export default function Register() {
         fullName: form.email.split('@')[0],
         referralCode: form.referralCode,
       });
-      toast.success('Account created! Check your email to verify.');
-      navigate('/login');
-    } catch { /* surfaced via error */ }
+      if (isAuthenticated) {
+        toast.success('Account created!');
+        navigate('/dashboard');
+      } else {
+        setSent(true);
+        toast.success('Account created! Confirm your email to sign in.');
+      }
+    } catch (e) {
+      const msg = e instanceof Error ? e.message.toLowerCase() : '';
+      if (msg.includes('already')) setFriendly('This email is already registered. Please sign in instead.');
+      else if (msg.includes('rate') || msg.includes('limit')) setFriendly('Too many attempts. Please wait a minute and try again.');
+      else if (msg.includes('password')) setFriendly('Password too weak. Use 8+ characters with a number.');
+      else setFriendly('Could not create the account. Please check your details and try again.');
+    }
     finally { setLoading(false); }
   };
 
   const upd = (k: string, v: string) => setForm({ ...form, [k]: v });
+
+  if (sent) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Seo title="Confirm your email | KingBet Exchange" description="Confirm your email to activate your KingBet Exchange account." path="/register" noindex />
+        <div className="flex-1 flex items-center justify-center px-4 py-10">
+          <div className="w-full max-w-md card-premium text-center">
+            <Logo className="h-12 w-12 mx-auto mb-4" />
+            <h1 className="font-display text-2xl font-bold">Check your inbox</h1>
+            <p className="text-sm text-muted-foreground mt-2">
+              We sent a confirmation link to <span className="text-foreground font-medium">{form.email}</span>.
+              Click it to activate your account, then sign in.
+            </p>
+            <Link to="/login" className="btn-gold w-full justify-center mt-6">Go to sign in</Link>
+            <p className="text-[11px] text-muted-foreground mt-4">
+              Can’t find it? Check spam or promotions folder.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -110,6 +157,18 @@ export default function Register() {
                   {show ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
+              {form.password.length > 0 && (
+                <div className="mt-2">
+                  <div className="flex gap-1">
+                    {[0, 1, 2, 3].map(i => (
+                      <span key={i} className={`h-1 flex-1 rounded-full ${i < strength ? (strength <= 1 ? 'bg-destructive' : strength === 2 ? 'bg-amber-500' : 'bg-emerald-500') : 'bg-border'}`} />
+                    ))}
+                  </div>
+                  <p className="text-[11px] text-muted-foreground mt-1">
+                    {strength <= 1 ? 'Weak password' : strength === 2 ? 'Okay — add a number or symbol' : 'Strong password'}
+                  </p>
+                </div>
+              )}
               {errs.password && <p className="text-xs text-destructive mt-1">{errs.password}</p>}
             </div>
 
@@ -128,7 +187,14 @@ export default function Register() {
               </button>
             )}
 
-            {error && <p className="text-sm text-destructive">{error}</p>}
+            {(friendly || error) && (
+              <div className="rounded-lg border border-destructive/40 bg-destructive/10 px-3 py-2.5">
+                <p className="text-sm text-destructive">{friendly || error}</p>
+                {friendly?.includes('already registered') && (
+                  <Link to="/login" className="text-xs text-gold hover:underline font-medium">Sign in to your account →</Link>
+                )}
+              </div>
+            )}
 
             <button type="submit" disabled={loading} className="btn-gold w-full justify-center">
               {loading ? 'Creating account...' : 'Create free account'}
