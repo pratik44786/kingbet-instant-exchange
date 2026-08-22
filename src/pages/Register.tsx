@@ -157,6 +157,18 @@ export default function Register() {
                   {show ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
+              {form.password.length > 0 && (
+                <div className="mt-2">
+                  <div className="flex gap-1">
+                    {[0, 1, 2, 3].map(i => (
+                      <span key={i} className={`h-1 flex-1 rounded-full ${i < strength ? (strength <= 1 ? 'bg-destructive' : strength === 2 ? 'bg-amber-500' : 'bg-emerald-500') : 'bg-border'}`} />
+                    ))}
+                  </div>
+                  <p className="text-[11px] text-muted-foreground mt-1">
+                    {strength <= 1 ? 'Weak password' : strength === 2 ? 'Okay — add a number or symbol' : 'Strong password'}
+                  </p>
+                </div>
+              )}
               {errs.password && <p className="text-xs text-destructive mt-1">{errs.password}</p>}
             </div>
 
