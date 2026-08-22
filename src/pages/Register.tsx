@@ -15,7 +15,7 @@ const schema = z.object({
 });
 
 export default function Register() {
-  const { register, error, isAuthenticated } = useAuth();
+  const { register, error } = useAuth();
   const [params] = useSearchParams();
   const [form, setForm] = useState({ email: '', password: '', referralCode: params.get('ref') || '' });
   const [showRef, setShowRef] = useState(!!params.get('ref'));
@@ -49,13 +49,13 @@ export default function Register() {
     }
     setLoading(true);
     try {
-      await register({
+      const signedIn = await register({
         email: form.email,
         password: form.password,
         fullName: form.email.split('@')[0],
         referralCode: form.referralCode,
       });
-      if (isAuthenticated) {
+      if (signedIn) {
         toast.success('Account created!');
         navigate('/dashboard');
       } else {
