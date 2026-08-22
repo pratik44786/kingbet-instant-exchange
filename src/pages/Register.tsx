@@ -49,13 +49,13 @@ export default function Register() {
     }
     setLoading(true);
     try {
-      await register({
+      const signedIn = await register({
         email: form.email,
         password: form.password,
         fullName: form.email.split('@')[0],
         referralCode: form.referralCode,
       });
-      if (isAuthenticated) {
+      if (signedIn) {
         toast.success('Account created!');
         navigate('/dashboard');
       } else {
