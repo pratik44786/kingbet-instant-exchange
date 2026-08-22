@@ -29,7 +29,7 @@ interface AuthContextType {
   isLoading: boolean;
   error: string | null;
   login: (email: string, password: string) => Promise<void>;
-  register: (payload: RegisterPayload) => Promise<void>;
+  register: (payload: RegisterPayload) => Promise<boolean>;
   logout: () => Promise<void>;
   clearError: () => void;
   refreshProfile: () => Promise<void>;
