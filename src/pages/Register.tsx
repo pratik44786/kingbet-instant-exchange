@@ -187,7 +187,14 @@ export default function Register() {
               </button>
             )}
 
-            {error && <p className="text-sm text-destructive">{error}</p>}
+            {(friendly || error) && (
+              <div className="rounded-lg border border-destructive/40 bg-destructive/10 px-3 py-2.5">
+                <p className="text-sm text-destructive">{friendly || error}</p>
+                {friendly?.includes('already registered') && (
+                  <Link to="/login" className="text-xs text-gold hover:underline font-medium">Sign in to your account →</Link>
+                )}
+              </div>
+            )}
 
             <button type="submit" disabled={loading} className="btn-gold w-full justify-center">
               {loading ? 'Creating account...' : 'Create free account'}
