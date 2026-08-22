@@ -7,7 +7,7 @@ import { writeFileSync } from 'fs';
 import { resolve } from 'path';
 import { blogPosts } from '../src/data/blog';
 
-const BASE_URL = 'https://kingbetexchange.live';
+const BASE_URL = 'https://kingbetexchange.click';
 const INDEXNOW_KEY = '71d0bcb0753df22bbdb6b363e13965b4';
 
 function escapeXml(s: string) {
@@ -64,7 +64,7 @@ async function pingIndexNow() {
   urlList.unshift(`${BASE_URL}/blog`, `${BASE_URL}/sitemap.xml`);
 
   const body = {
-    host: 'kingbetexchange.live',
+    host: 'kingbetexchange.click',
     key: INDEXNOW_KEY,
     keyLocation: `${BASE_URL}/${INDEXNOW_KEY}.txt`,
     urlList,

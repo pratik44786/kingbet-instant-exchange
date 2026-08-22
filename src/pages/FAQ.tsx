@@ -34,7 +34,7 @@ const categories: { title: string; items: { q: string; a: string }[] }[] = [
     items: [
       { q: 'Is my crypto safe?', a: 'The majority of user funds are held in cold multi-signature wallets, with the remainder in insured hot wallets for liquidity. We also offer 2FA to protect your account.' },
       { q: 'How do I enable two-factor authentication?', a: 'Go to Security in your dashboard and enable TOTP-based 2FA using any authenticator app for an extra layer of protection.' },
-      { q: 'How do I contact support?', a: 'Email support@kingbetexchange.live any time. Our team offers 24/7 assistance for all account and transaction queries.' },
+      { q: 'How do I contact support?', a: 'Email support@kingbetexchange.click any time. Our team offers 24/7 assistance for all account and transaction queries.' },
     ],
   },
 ];

@@ -11,7 +11,7 @@ const META: Record<string, { title: string; description: string; path: string }>
 const SECTIONS = {
   terms: {
     title: 'Terms of Service',
-    updated: 'May 2026',
+    updated: 'August 2026',
     body: [
       ['Acceptance', 'By accessing or using KINGBET EXCHANGE you agree to be bound by these terms. If you do not agree, do not use the platform.'],
       ['Eligibility', 'You must be at least 18 years old and not a resident of a restricted jurisdiction. You are responsible for ensuring your use complies with local laws.'],
@@ -23,7 +23,7 @@ const SECTIONS = {
   },
   privacy: {
     title: 'Privacy Policy',
-    updated: 'May 2026',
+    updated: 'August 2026',
     body: [
       ['Data we collect', 'Account information (email, name, phone), KYC documents, device/usage data, and on-chain transaction references.'],
       ['How we use data', 'To operate the platform, verify identity, prevent fraud, comply with law and improve the service.'],
@@ -34,7 +34,7 @@ const SECTIONS = {
   },
   aml: {
     title: 'AML / KYC Policy',
-    updated: 'May 2026',
+    updated: 'August 2026',
     body: [
       ['Identity verification', 'All users must complete identity verification before withdrawing. We collect government-issued ID and a selfie.'],
       ['Transaction monitoring', 'Deposits and withdrawals are monitored for suspicious patterns. Accounts flagged for review may be suspended pending investigation.'],
@@ -45,7 +45,7 @@ const SECTIONS = {
   },
   risk: {
     title: 'Risk Disclosure',
-    updated: 'May 2026',
+    updated: 'August 2026',
     body: [
       ['Market risk', 'Crypto-asset values fluctuate significantly. Investment products may underperform projections.'],
       ['Liquidity risk', 'Withdrawals may take longer during periods of network congestion or operational review.'],

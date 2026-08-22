@@ -1,6 +1,6 @@
 import { Helmet } from 'react-helmet-async';
 
-const SITE_URL = 'https://kingbetexchange.live';
+const SITE_URL = 'https://kingbetexchange.click';
 const DEFAULT_OG = `${SITE_URL}/og-image.jpg`;
 
 type JsonLd = Record<string, unknown>;

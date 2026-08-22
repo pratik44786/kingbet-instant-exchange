@@ -211,7 +211,7 @@ export default function Home() {
         <div className="grid lg:grid-cols-[1fr_2fr] gap-12">
           <div>
             <h2 className="section-heading">Frequently asked questions</h2>
-            <p className="mt-4 text-muted-foreground">Got more? Email <span className="text-gold">support@kingbetexchange.live</span></p>
+            <p className="mt-4 text-muted-foreground">Got more? Email <span className="text-gold">support@kingbetexchange.click</span></p>
           </div>
           <div className="space-y-3">
             {faqs.map(f => (
