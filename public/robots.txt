@@ -13,4 +13,4 @@ Allow: /
 User-agent: *
 Allow: /
 
-Sitemap: https://kingbetexchange.live/sitemap.xml
+Sitemap: https://kingbetexchange.click/sitemap.xml

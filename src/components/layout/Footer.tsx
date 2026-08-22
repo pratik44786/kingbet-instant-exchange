@@ -58,7 +58,7 @@ export default function Footer() {
           <div>
             <h4 className="font-display font-semibold mb-4 text-foreground">Contact</h4>
             <ul className="space-y-3 text-sm text-muted-foreground">
-              <li className="flex items-start gap-2"><Mail className="h-4 w-4 mt-0.5 text-gold" /> {settings?.support_email || 'support@kingbetexchange.live'}</li>
+              <li className="flex items-start gap-2"><Mail className="h-4 w-4 mt-0.5 text-gold" /> {settings?.support_email || 'support@kingbetexchange.click'}</li>
               {settings?.support_phone && <li className="flex items-start gap-2"><Phone className="h-4 w-4 mt-0.5 text-gold" /> {settings.support_phone}</li>}
               {settings?.office_address && <li className="flex items-start gap-2"><MapPin className="h-4 w-4 mt-0.5 text-gold" /> {settings.office_address}</li>}
               <li className="flex items-start gap-2"><Shield className="h-4 w-4 mt-0.5 text-gold" /> 24/7 Secured Support</li>

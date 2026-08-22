@@ -46,7 +46,7 @@ export default function About() {
               <div className="h-12 w-12 rounded-xl bg-gradient-gold flex items-center justify-center mb-4 shadow-gold">
                 <v.icon className="h-6 w-6 text-primary-foreground" />
               </div>
-              <h3 className="font-display text-xl font-semibold mb-2">{v.title}</h3>
+              <h2 className="font-display text-xl font-semibold mb-2">{v.title}</h2>
               <p className="text-sm text-muted-foreground leading-relaxed">{v.text}</p>
             </div>
           ))}
