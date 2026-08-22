@@ -103,7 +103,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const register = useCallback(async ({ email, password, fullName, phone, referralCode }: RegisterPayload) => {
     setError(null);
-    const { error: err } = await supabase.auth.signUp({
+    const { data, error: err } = await supabase.auth.signUp({
       email: email.trim().toLowerCase(),
       password,
       options: {
@@ -117,7 +117,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       },
     });
     if (err) { setError(err.message); throw err; }
+    return !!data.session;
   }, []);
+
 
   const logout = useCallback(async () => {
     await supabase.auth.signOut();
