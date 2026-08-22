@@ -15,7 +15,7 @@ const schema = z.object({
 });
 
 export default function Register() {
-  const { register, error, isAuthenticated } = useAuth();
+  const { register, error } = useAuth();
   const [params] = useSearchParams();
   const [form, setForm] = useState({ email: '', password: '', referralCode: params.get('ref') || '' });
   const [showRef, setShowRef] = useState(!!params.get('ref'));
