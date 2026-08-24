@@ -1,206 +1,139 @@
-# KINGBET Exchange - Points-Based Betting Platform
+# KINGBET EXCHANGE — Crypto Investment Platform
 
-A modern, feature-rich betting exchange and casino platform built with React, TypeScript, and Vite. This application uses a points-based system (no real money) for educational and entertainment purposes.
+A premium, dark-luxury crypto investment platform built with React, TypeScript, Vite and Lovable Cloud (Supabase). Users deposit USDT/USDC, activate investment plans, earn fortnightly profit payouts, and grow earnings through referrals.
+
+Live: https://kingbetexchange.click
+
+---
 
 ## Features
 
-### Exchange Platform
-- Real-time odds for 1000+ markets across Cricket, Football, and Tennis
-- Back and Lay betting system
-- Cricket-specific fancy odds and session betting
-- Live market updates
-- Bet slip with instant stake calculation
-- Comprehensive bet history
+### Investor Experience
+- Landing page with plan highlights, live market ticker (CoinGecko) and recent payouts ticker
+- Investment plans starting at **$10 USDT** with a 90-day lock-in
+- Built-in investment calculator with projected growth chart
+- Dashboard: active investments, portfolio growth chart, earnings and transaction history
+- Crypto deposits with QR codes, per-network addresses and network-mismatch warnings
+- Withdrawals gated by KYC, processed through secure server-side functions
+- Referral program with downline table, join dates and commission tracking
+- Profile management, avatar upload, real-time notifications
 
-### Casino Games
-- **Aviator**: Multiplier crash game with real-time gameplay
-- **Plinko**: Ball drop game with multiplier slots
-- **Crash**: Exponential curve betting game
-- **Dice**: Roll-under probability game
-- **Mines**: Grid-based gem discovery game
+### Compliance & Security
+- KYC submission flow with document storage
+- 2FA / MFA via Lovable Cloud auth
+- Legal pages: Terms, Privacy, AML, Risk Disclosure
+- Role-based access: user, admin, superadmin (roles stored in a dedicated table)
+- Row Level Security on every table; all financial writes go through Edge Functions
+- Atomic approval functions with row locking to prevent duplicate deposit/withdrawal credits
 
-### User Management
-- Role-based access control (User, Admin, Super Admin)
-- Hierarchical user structure
-- Points management system
-- Transaction history
-- Secure authentication with mock backend
+### Admin Console
+- Deposit and withdrawal approvals
+- Investment plan management
+- Deposit wallet address management
+- KYC review and user management
+- Company/branding settings (names, contacts, footer content)
 
-### Admin Features
-- User creation and management
-- Points top-up/deduction
-- Downline user tracking
-- Comprehensive admin dashboard
-- Super Admin hierarchy view
+### Growth & SEO
+- Per-page metadata, canonical URLs and JSON-LD via a shared `Seo` component
+- Blog with related-post internal linking
+- Auto-generated `sitemap.xml` and `rss.xml`, plus IndexNow pings on build
+- Google Search Console verification, `llms.txt`, exit-intent lead capture
+- PWA manifest and icons; Capacitor setup for Android APK export
+
+---
 
 ## Tech Stack
 
-- **Frontend**: React 18.2 + TypeScript
-- **Build Tool**: Vite 5.x
+- **Frontend**: React 18 + TypeScript 5
+- **Build**: Vite 5
+- **Styling**: Tailwind CSS 3 + shadcn/ui (Radix primitives)
 - **Routing**: React Router v6
-- **Styling**: Tailwind CSS + shadcn/ui components
-- **State Management**: React Context API
-- **Icons**: Lucide React
-- **Form Handling**: React Hook Form + Zod
-- **UI Components**: Radix UI primitives
+- **Charts**: Recharts
+- **Backend**: Lovable Cloud — Postgres, Auth, Storage, Edge Functions
+- **SEO**: react-helmet-async
+- **Mobile**: Capacitor 8 (Android)
+
+---
 
 ## Getting Started
 
-### Prerequisites
-- Node.js 16+ and npm (or use [nvm](https://github.com/nvm-sh/nvm))
-
-### Installation
-
 ```bash
-# Clone the repository
-git clone <YOUR_GIT_URL>
-cd kingbet-instant-exchange
-
-# Install dependencies
 npm install
-
-# Start development server
 npm run dev
 ```
 
-The application will be available at `http://localhost:8080`
+App runs at `http://localhost:8080`.
 
-### Build for Production
+### Build
 
 ```bash
-# Type check
 npm run type-check
-
-# Build optimized bundle
 npm run build
-
-# Preview production build
 npm run preview
 ```
+
+## Scripts
+
+| Script | Purpose |
+| --- | --- |
+| `npm run dev` | Start dev server (regenerates RSS first) |
+| `npm run build` | Production build + RSS/IndexNow ping |
+| `npm run build:dev` | Development-mode build |
+| `npm run lint` / `lint:fix` | ESLint |
+| `npm run format` / `format:check` | Prettier |
+| `npm run type-check` | TypeScript check |
+
+---
 
 ## Project Structure
 
 ```
 src/
-├── components/        # Reusable UI components
-│   ├── ui/           # shadcn/ui components
-│   ├── Layout.tsx
-│   ├── Header.tsx
-│   └── ErrorBoundary.tsx
-├── context/          # React Context providers
-│   ├── AuthContext.tsx
-│   └── AppContext.tsx
-├── pages/            # Route pages
-│   ├── LoginPage.tsx
-│   ├── ExchangePage.tsx
-│   ├── CasinoPage.tsx
-│   └── ...
-├── hooks/            # Custom React hooks
-├── services/         # API and business logic
-├── types/            # TypeScript type definitions
-├── data/             # Mock data
-├── utils/            # Utility functions
-├── constants/        # Application constants
-└── config/           # Configuration files
+├── components/
+│   ├── ui/                 # shadcn/ui primitives
+│   ├── layout/             # Header, Footer, Logo, MarketTicker, SiteLayout
+│   ├── Seo.tsx
+│   ├── ExitIntentModal.tsx
+│   ├── RecentPayoutsTicker.tsx
+│   └── StickySignupCta.tsx
+├── context/AuthContext.tsx
+├── hooks/                  # useWallet, useNotifications, useCompanySettings
+├── integrations/supabase/  # auto-generated client & types
+├── data/blog.ts            # blog source of truth
+├── pages/                  # Home, Plans, Dashboard, Deposit, Withdraw,
+│                           # Referral, KYC, Security, Profile, Admin,
+│                           # Blog, BlogPost, FAQ, About, Legal, Auth pages
+└── utils/validation.ts
+
+supabase/functions/         # create-investment, create-withdrawal,
+                            # profit-payout, admin-actions
+scripts/generate-rss.ts     # RSS generation + IndexNow ping
+public/                     # sitemap.xml, robots.txt, rss.xml, icons, manifest
 ```
-
-## Available Scripts
-
-```bash
-npm run dev          # Start development server
-npm run build        # Build for production
-npm run preview      # Preview production build
-npm run lint         # Run ESLint
-npm run lint:fix     # Fix ESLint errors
-npm run format       # Format code with Prettier
-npm run format:check # Check code formatting
-npm run type-check   # Run TypeScript type checking
-```
-
-## Default Users (Mock Data)
-
-### Super Admin
-- **Username**: superadmin
-- **Password**: super123
-- **Balance**: 1,000,000 points
-
-### Admin
-- **Username**: admin1 or admin2
-- **Password**: admin123
-
-### Regular Users
-- **Username**: player1, player2, player3, player4
-- **Password**: user123
-
-## Environment Variables
-
-Copy `.env.example` to `.env` and configure:
-
-```env
-VITE_APP_NAME=KINGBET Exchange
-VITE_APP_VERSION=1.0.0
-VITE_ENABLE_CASINO=true
-VITE_ENABLE_EXCHANGE=true
-```
-
-## Security Features
-
-- Error boundary for graceful error handling
-- Input validation and sanitization
-- XSS protection
-- Role-based access control
-- Secure authentication flow
-- LocalStorage encryption considerations
-
-## Code Quality
-
-- TypeScript for type safety
-- ESLint for code linting
-- Prettier for code formatting
-- Comprehensive error handling
-- React best practices
-- Modular architecture
-
-## Browser Support
-
-- Chrome (latest)
-- Firefox (latest)
-- Safari (latest)
-- Edge (latest)
-
-## Performance Optimizations
-
-- Code splitting with React lazy loading
-- Optimized build with Vite
-- Memoized components and callbacks
-- Efficient state management
-- Minimal re-renders
-
-## Future Enhancements
-
-- Backend API integration
-- Supabase database integration
-- Real-time WebSocket updates
-- Advanced analytics dashboard
-- Mobile app (React Native)
-- Payment gateway integration (educational)
-
-## License
-
-This project is for educational purposes only. No real money gambling is supported.
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit changes (`git commit -m 'Add amazing feature'`)
-4. Push to branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-## Support
-
-For issues and questions, please open a GitHub issue.
 
 ---
 
-**Note**: This is a points-based platform for educational purposes. No real money transactions are supported.
+## Backend Overview
+
+Core tables: `profiles`, `user_roles`, `wallets`, `investment_plans`, `investments`, `deposits`, `withdrawals`, `transactions`, `referrals`, `kyc_submissions`, `notifications`, `deposit_addresses`, `company_settings`, `leads`.
+
+Edge Functions:
+- `create-investment` — validates plan limits and locks funds
+- `create-withdrawal` — KYC + balance checks, creates a pending request
+- `admin-actions` — approvals with atomic DB functions and notifications
+- `profit-payout` — scheduled fortnightly profit distribution
+
+All balance and status changes happen server-side; the client never writes to financial tables directly.
+
+---
+
+## Publishing
+
+Frontend changes go live after clicking **Publish** in Lovable. Backend changes (migrations, Edge Functions) deploy immediately. Custom domains are managed in Project Settings → Domains.
+
+---
+
+## Notes
+
+- Deposits and withdrawals use real crypto networks — always confirm the network before sending funds.
+- Investment returns are not guaranteed; see the Risk Disclosure page.
