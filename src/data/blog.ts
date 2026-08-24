@@ -81,7 +81,9 @@ export const blogPosts: BlogPost[] = [
     ],
   },
 
+  {
     slug: 'start-earning-crypto-passive-income-today-10-usdt',
+
     title: 'Start Earning Crypto Passive Income Today: Sign Up & Deposit in 5 Minutes',
     excerpt:
       'A quick, beginner-friendly guide to opening your KingBet Exchange account, depositing your first $10 USDT, and activating your first passive-income plan.',
